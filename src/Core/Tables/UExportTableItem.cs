@@ -105,10 +105,7 @@ namespace UELib
             }
 
             SerialSize = stream.ReadIndex();
-            if( SerialSize > 0 || stream.Version >= VSerialSizeConditionless )
-            {
-                SerialOffset = stream.ReadIndex();
-            }
+            SerialOffset = (int)stream.ReadInt64();
 #if BIOSHOCK
             if( stream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock && stream.Version >= 130 )
             {
