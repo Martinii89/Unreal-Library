@@ -176,10 +176,7 @@ namespace UELib
 
             byte[] strBytes;
             int unfixedSize; var size = (unfixedSize =
-#if BIOSHOCK
-                // In Bioshock packages always give a positive Size despite being Unicode, so we reverse this.
-                _UnrealStream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock ? -ReadIndex() :
-#endif
+
                 ReadIndex()) < 0 ? -unfixedSize : unfixedSize;
             System.Diagnostics.Debug.Assert( size < 1000000, "Dangerous string size detected! IT'S OVER 9000 THOUSAND!" );
             if( unfixedSize > 0 ) // ANSI

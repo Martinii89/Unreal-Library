@@ -59,12 +59,6 @@ namespace UELib.Core
             // 64b ProbeMask
             // 64b IgnoreMask
 
-#if TRANSFORMERS
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Transformers )
-            {
-                goto noMasks;
-            }
-#endif
 
             // UE3
             if( Package.Version >= 220 )
@@ -99,27 +93,12 @@ namespace UELib.Core
 
             if( Package.Version >= VStateFlags )
             {
-                #if BORDERLANDS2 || TRANSFORMERS
-                    // FIXME:Temp fix
-                    if( Package.Build == UnrealPackage.GameBuild.BuildName.Borderlands2 || Package.Build == UnrealPackage.GameBuild.BuildName.Transformers )
-                    {
-                        _StateFlags = _Buffer.ReadUShort();
-                        goto skipStateFlags;
-                    }
-                #endif
 
                 _StateFlags = _Buffer.ReadUInt32();
                 skipStateFlags:
                 Record( "StateFlags", (StateFlags)_StateFlags );
             }
 
-#if TRANSFORMERS
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Transformers )
-            {
-                _Buffer.Skip( 4 );
-                return;
-            }
-#endif
 
             if( Package.Version >= 220 )
             {

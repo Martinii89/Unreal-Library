@@ -36,14 +36,6 @@ namespace UELib.Core
             private set;
         }
 
-#if XCOM2
-        public UName    ConfigName
-        {
-            get;
-            private set;
-        }
-#endif
-
         public int 		CategoryIndex
         {
             get;
@@ -94,15 +86,6 @@ namespace UELib.Core
         {
             base.Deserialize();
 
-#if XIII
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.XIII )
-            {
-                ArrayDim = _Buffer.ReadUShort();
-                Record( "ArrayDim", ArrayDim );
-                goto skipInfo;
-            }
-#endif
-
             var info = _Buffer.ReadUInt32();
             ArrayDim = (ushort)(info & 0x0000FFFFU);
             Record( "ArrayDim", ArrayDim );
@@ -113,13 +96,6 @@ namespace UELib.Core
             PropertyFlags = Package.Version >= 220 ? _Buffer.ReadUInt64() : _Buffer.ReadUInt32();
             Record( "PropertyFlags", PropertyFlags );
 
-#if XCOM2
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.XCOM2WotC )
-            {
-                ConfigName = _Buffer.ReadNameReference();
-                Record( "ConfigName", ConfigName );
-            }
-#endif
             if( !Package.IsConsoleCooked() )
             {
                 CategoryIndex = _Buffer.ReadNameIndex();
@@ -144,14 +120,6 @@ namespace UELib.Core
                 string unknown = _Buffer.ReadText();
                 Console.WriteLine( "Found a property flagged with New:" + unknown );
             }
-
-#if SWAT4
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Swat4 )
-            {
-                // Contains meta data such as a ToolTip.
-                _Buffer.Skip( 3 );
-            }
-#endif
         }
 
         protected override bool CanDisposeBuffer()

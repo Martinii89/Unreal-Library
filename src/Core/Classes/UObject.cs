@@ -196,11 +196,7 @@ namespace UELib.Core
             Record( "ExportSize", ExportTable.SerialSize );
 #endif
             // TODO: Corrigate version
-            if( Package.Version >= 322 
-#if MKKE
-                && Package.Build != UnrealPackage.GameBuild.BuildName.MKKE
-#endif
-                )
+            if( Package.Version >= 322)
             {
                 // TODO: Corrigate version. Fix component detection!
                 //if( _Buffer.Version > 400
@@ -228,66 +224,13 @@ namespace UELib.Core
                         _Buffer.ReadIndex();    // Offset
                     }
                 }
-#if SWAT4
-                if( Package.Build == UnrealPackage.GameBuild.BuildName.Swat4 )
-                {
-                    // 8 bytes: Value: 3
-                    // 4 bytes: Value: 1
-                    _Buffer.Skip( 12 );
-                }
-#endif
-
-#if BIOSHOCK
-                if( Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock )
-                {
-                    _Buffer.Skip( 8 );
-                }
-#endif
-
-#if DEUSEXINVISIBLEWAR
-                if( Package.Build == UnrealPackage.GameBuild.BuildName.DeusEx_IW )
-                {
-                    // var native private const int ObjectInternalPropertyHash[1]
-                    _Buffer.Skip( 4 );
-                }
-#endif
-
-#if THIEFDEADLYSHADOWS
-                if( Package.Build == UnrealPackage.GameBuild.BuildName.Thief_DS )
-                {
-                    // var native private const int ObjectInternalPropertyHash[1]
-                    _Buffer.Skip( 4 );
-                }
-#endif
-
             }
 
             if( !IsClassType( "Class" ) )
             {
-#if SWAT4
-                if( Package.Build != UnrealPackage.GameBuild.BuildName.Swat4 )
-                {
-#endif
                     // REMINDER:Ends with a NameIndex referencing to "None"; 1/4/8 bytes
                     DeserializeProperties();
-#if SWAT4
-                }
-                else
-                {
-                    _Buffer.Skip( 1 );
-                }
-#endif
             }
-#if UNREAL2
-            else if( Package.Build == UnrealPackage.GameBuild.BuildName.Unreal2 )
-            {
-                int count = _Buffer.ReadIndex();
-                for( int i = 0; i < count; ++ i )
-                {
-                    _Buffer.ReadObjectIndex();
-                }
-            }
-#endif
         }
 
         /// <summary>
@@ -658,12 +601,6 @@ namespace UELib.Core
         protected int ReadCount()
         {
             int count;
-#if VANGUARD
-            if( Package.Build.Name == UnrealPackage.GameBuild.BuildName.Vanguard )
-            {
-                return _Buffer.ReadInt32();
-            }
-#endif
             return _Buffer.ReadIndex();
         }
 

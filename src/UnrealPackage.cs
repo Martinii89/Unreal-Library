@@ -606,22 +606,11 @@ namespace UELib
 
             public void Deserialize( IUnrealStream stream )
             {
-#if HAWKEN
-                if( stream.Package.Build == GameBuild.BuildName.Hawken )
-                {
-                    stream.Skip( 4 );
-                }
-#endif
                 NamesCount = stream.ReadUInt32();
                 NamesOffset = stream.ReadUInt32();
                 ExportsCount = stream.ReadUInt32();
                 ExportsOffset = stream.ReadUInt32();
-#if APB
-                if( stream.Package.Build == GameBuild.BuildName.APB )
-                {
-                    stream.Skip( 24 );
-                }
-#endif
+
                 ImportsCount = stream.ReadUInt32();
                 ImportsOffset = stream.ReadUInt32();
 
@@ -634,21 +623,10 @@ namespace UELib
                     return;
 
                 DependsOffset = stream.ReadUInt32();
-                if( stream.Version >= 584 
-#if TRANSFORMERS
-                    || (stream.Package.Build == GameBuild.BuildName.Transformers && stream.Version >= 535)
-#endif
-                    )
+                if( stream.Version >= 584 )
                 {
                     // Additional tables, like thumbnail, and guid data.
-                    if( stream.Version >= 623
-#if BIOSHOCK
-                        && stream.Package.Build != GameBuild.BuildName.Bioshock_Infinite
-#endif
-#if TRANSFORMERS
-                        && stream.Package.Build != GameBuild.BuildName.Transformers // FIXME: This is not skipped Gildor's UModel game support odd?
-#endif
-                        )
+                    if( stream.Version >= 623 )
                     {
                         stream.Skip( 12 );
                     }
@@ -908,28 +886,6 @@ namespace UELib
 
             if( Version >= VHeaderSize )
             {
-#if BIOSHOCK
-                if( Build == GameBuild.BuildName.Bioshock_Infinite )
-                {
-                    var unk = stream.ReadInt32();
-                }
-#endif
-#if MKKE
-                if( Build == GameBuild.BuildName.MKKE )
-                {
-                    stream.Skip( 8 );
-                }
-#endif
-#if TRANSFORMERS
-                if( Build == GameBuild.BuildName.Transformers && LicenseeVersion >= 55 )
-                {
-                    if( LicenseeVersion >= 181 )
-                    {
-                        stream.Skip( 16 );
-                    }
-                    stream.Skip( 4 );
-                }
-#endif
                 // Offset to the first class(not object) in the package.
                 HeaderSize = stream.ReadUInt32();
                 Console.WriteLine( "\tHeader Size: " + HeaderSize );
@@ -961,58 +917,15 @@ namespace UELib
             }
             else
             {
-#if DEUSEXINVISIBLEWAR
-                if( Build == GameBuild.BuildName.DeusEx_IW )
-                {
-                    //stream.Skip( 4 );
-                    int unknown = stream.ReadInt32();
-                    Console.WriteLine( "\tUnknown:" + unknown );
-                }
-#endif
-#if THIEFDEADLYSHADOWS
-                if( Build == GameBuild.BuildName.Thief_DS )
-                {
-                    //stream.Skip( 4 );
-                    int unknown = stream.ReadInt32();
-                    Console.WriteLine( "\tUnknown:" + unknown );
-                }
-#endif
-#if BORDERLANDS
-                if( Build == GameBuild.BuildName.Borderlands )
-                {
-                    stream.Skip( 4 );
-                }
-#endif
-#if MKKE
-                if( Build == GameBuild.BuildName.MKKE )
-                {
-                    stream.Skip( 4 );
-                }
-#endif
                 GUID = stream.ReadGuid();
                 Console.Write( "\r\n\tGUID:" + GUID + "\r\n" );
-#if TERA
-                if( Build == GameBuild.BuildName.Tera )
-                {
-                    stream.Position -= 4;
-                }
-#endif
-#if MKKE
-                if( Build != GameBuild.BuildName.MKKE )
-                {
-#endif
+
+
                 int generationCount = stream.ReadInt32();
                 Generations = new UArray<UGenerationTableItem>( stream, generationCount );
                 Console.WriteLine( "Deserialized {0} generations", Generations.Count );
-#if MKKE
-                }
-#endif
-#if TERA
-                if( Build == GameBuild.BuildName.Tera )
-                {
-                    _TablesData.NamesCount = (uint)Generations.Last().NamesCount;
-                }
-#endif
+
+
                 if( Version >= VEngineVersion )
                 {
                     // The Engine Version this package was created with

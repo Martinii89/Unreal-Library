@@ -94,11 +94,7 @@ namespace UELib.Core
 
             if( Package.Version >= VStructFlags )
             {
-                if( Package.Version >= VCppText && !Package.IsConsoleCooked()
-#if VANGUARD
-                    && Package.Build.Name != UnrealPackage.GameBuild.BuildName.Vanguard
-#endif
-                    )
+                if( Package.Version >= VCppText && !Package.IsConsoleCooked())
                 {
                     CppText = _Buffer.ReadObject() as UTextBuffer;
                     Record( "CppText", CppText );
@@ -109,21 +105,9 @@ namespace UELib.Core
                     StructFlags = _Buffer.ReadUInt32();
                     Record( "StructFlags", (StructFlags)StructFlags );
 
-                    // Note: Bioshock inherits from the SWAT4's UE2 build.
-#if BIOSHOCK
-                    if( Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock )
-                    {
-                        // TODO: Unknown data, might be related to the above Swat4 data.
-                        var unknown = _Buffer.ReadObjectIndex();
-                        Record( "???", TryGetIndexObject( unknown ) );
-                    }
-#endif
+
                     // This is high likely to be only for "Irrational Games" builds.
-                    if( Package.Version >= VProcessedText
-#if VANGUARD
-                        && Package.Build.Name != UnrealPackage.GameBuild.BuildName.Vanguard
-#endif
-                        )
+                    if( Package.Version >= VProcessedText)
                     {
                         ProcessedText = _Buffer.ReadObject() as UTextBuffer;
                         Record( "ProcessedText", ProcessedText );
@@ -139,22 +123,10 @@ namespace UELib.Core
                 Record( "TextPos", TextPos );
             }
 
-#if TRANSFORMERS
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Transformers )
-            {
-                // The line where the struct's code body ends.
-                _Buffer.Skip( 4 );
-            }
-#endif
-
             ByteScriptSize = _Buffer.ReadInt32();
             Record( "ByteScriptSize", ByteScriptSize );
             const int vDataScriptSize = 639;
-            var hasFixedScriptSize = Package.Version >= vDataScriptSize
-                #if TRANSFORMERS
-                    && Package.Build != UnrealPackage.GameBuild.BuildName.Transformers 
-                #endif
-            ;
+            var hasFixedScriptSize = Package.Version >= vDataScriptSize;
             if( hasFixedScriptSize )
             {
                 DataScriptSize = _Buffer.ReadInt32();

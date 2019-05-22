@@ -401,18 +401,9 @@ namespace UELib.Core
                 }
                 else if( (PropertyFlags & (ulong)Flags.PropertyFlagsLO.Config) != 0 )
                 {
-#if XCOM2
-                    if ( ConfigName != null && !ConfigName.IsNone() )
-                    {
-                        output += "config(" + ConfigName.ToString() + ") ";
-                    }
-                    else
-                    {
-#endif
-                        output += "config ";
-#if XCOM2
-                    }
-#endif
+
+                    output += "config ";
+
                     copyFlags &= ~(ulong)Flags.PropertyFlagsLO.Config;
                 }
 

@@ -81,11 +81,7 @@ namespace UELib.Core
                 }
 
                 const short vObjectSizeTo8 = 587;
-                if( Buffer.Version >= vObjectSizeTo8
-#if TERA
-                    && Package.Build != UnrealPackage.GameBuild.BuildName.Tera
-#endif
-                    )
+                if( Buffer.Version >= vObjectSizeTo8)
                 {
                     _ObjectMemorySize = 8;
                 }
@@ -127,36 +123,6 @@ namespace UELib.Core
                 {
                     ++ tokenCode;
                 }
-
-                #if APB
-                if( _Container.Package.Build == UnrealPackage.GameBuild.BuildName.APB && _Container.Package.LicenseeVersion >= 32 )
-                {
-                    if( tokenCode == (byte)ExprToken.Return )
-                    {
-                        tokenCode = (byte)ExprToken.LocalVariable;
-                    }
-                    else if( tokenCode == (byte)ExprToken.LocalVariable )
-                    {
-                        tokenCode = (byte)ExprToken.Return;
-                    }
-                    else if( tokenCode == (byte)ExprToken.Jump )
-                    {
-                        tokenCode = (byte)ExprToken.JumpIfNot;
-                    }
-                    else if( tokenCode == (byte)ExprToken.JumpIfNot )
-                    {
-                        tokenCode = (byte)ExprToken.Jump;
-                    }
-                    else if( tokenCode == (byte)ExprToken.Case )
-                    {
-                        tokenCode = (byte)ExprToken.Nothing;
-                    }
-                    else if( tokenCode == (byte)ExprToken.Nothing )
-                    {
-                        tokenCode = (byte)ExprToken.Case;
-                    }
-                }
-                #endif
 
                 return tokenCode;
             }
@@ -481,13 +447,6 @@ namespace UELib.Core
 
                     // Referenced variables that are default
                     case (byte)ExprToken.UndefinedVariable:
-                        #if BORDERLANDS2
-                            if( _Container.Package.Build == UnrealPackage.GameBuild.BuildName.Borderlands2 )
-                            {
-                                tokenItem = new DynamicVariableToken();
-                                break;
-                            }
-                        #endif
                         tokenItem = new UndefinedVariableToken();
                         break;
 

@@ -45,14 +45,7 @@ namespace UELib.Engine
             // Format
             SoundFormat = Package.GetIndexName( _Buffer.ReadNameIndex() );
             Record( "SoundFormat", SoundFormat );
-#if UT
-            if( (Package.Build == UnrealPackage.GameBuild.BuildName.UT2004
-                || Package.Build == UnrealPackage.GameBuild.BuildName.UT2003) /*&& Package.LicenseeVersion >= 2*/ )
-            {
-                var unknownFloat = _Buffer.ReadFloat();
-                Record( "???", unknownFloat );
-            }
-#endif
+
             if( Package.Version >= 63 )
             {
                 // OffsetNext

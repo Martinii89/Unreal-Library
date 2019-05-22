@@ -61,14 +61,6 @@ namespace UELib.Core
         #region Constructors
         protected override void Deserialize()
         {
-#if BORDERLANDS2
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Borderlands2 )
-            {
-                var size = _Buffer.ReadUShort();
-                Record( "??size_BL2", size );
-                _Buffer.Skip( size * 2 );
-            }
-#endif
 
             base.Deserialize();
 
@@ -82,13 +74,9 @@ namespace UELib.Core
                 _Buffer.Skip( 5 );
             }
 
-#if TRANSFORMERS
-            FunctionFlags = Package.Build == UnrealPackage.GameBuild.BuildName.Transformers 
-                ? _Buffer.ReadUInt64() 
-                : _Buffer.ReadUInt32();
-#else
+
             FunctionFlags = _Buffer.ReadUInt32();
-#endif
+
             Record( "FunctionFlags", (FunctionFlags)FunctionFlags );
             if( HasFunctionFlag( Flags.FunctionFlags.Net ) )
             {
@@ -96,19 +84,9 @@ namespace UELib.Core
                 Record( "RepOffset", RepOffset );
             }
 
-#if TRANSFORMERS
-            if( Package.Build == UnrealPackage.GameBuild.BuildName.Transformers )
-            {
-                FriendlyName = Table.ObjectName;
-                return;
-            }
-#endif
 
-            if( (Package.Version >= VFriendlyName && !Package.IsConsoleCooked())
-#if MKKE
-                || Package.Build == UnrealPackage.GameBuild.BuildName.MKKE
-#endif
-                )
+
+            if(Package.Version >= VFriendlyName && !Package.IsConsoleCooked())
             {
                 FriendlyName = _Buffer.ReadNameReference();
                 Record( "FriendlyName", FriendlyName );

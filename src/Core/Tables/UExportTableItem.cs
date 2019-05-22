@@ -80,12 +80,7 @@ namespace UELib
             ClassIndex      = stream.ReadObjectIndex();
             SuperIndex      = stream.ReadObjectIndex();
             OuterIndex      = stream.ReadInt32(); // ObjectIndex, though always written as 32bits regardless of build.
-#if BIOSHOCK
-            if( stream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock && stream.Version >= 132 )
-            {
-                stream.Skip( sizeof(int) );
-            }
-#endif
+
             ObjectName  = stream.ReadNameReference();
 
             if( stream.Version >= VArchetype )
@@ -95,34 +90,19 @@ namespace UELib
 
             _ObjectFlagsOffset = stream.Position;
             ObjectFlags = stream.ReadUInt32();
-            if( stream.Version >= VObjectFlagsToULONG
-#if BIOSHOCK
-                || (stream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock && stream.Package.LicenseeVersion >= 40)
-#endif
-                )
+            if( stream.Version >= VObjectFlagsToULONG )
             {
                 ObjectFlags = (ObjectFlags << 32) | stream.ReadUInt32();
             }
 
             SerialSize = stream.ReadIndex();
             SerialOffset = (int)stream.ReadInt64();
-#if BIOSHOCK
-            if( stream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock && stream.Version >= 130 )
-            {
-                stream.Skip( sizeof(int) );
-            }
-#endif
+
+
             if( stream.Version < 220 )
                 return;
 
-            if( stream.Version < 543
-#if ALPHAPROTOCOL
-                && stream.Package.Build != UnrealPackage.GameBuild.BuildName.AlphaProtcol
-#endif
-#if TRANSFORMERS
-                && (stream.Package.Build != UnrealPackage.GameBuild.BuildName.Transformers || stream.Package.LicenseeVersion < 37)
-#endif
-                )
+            if( stream.Version < 543)
             {
                 int componentMapCount = stream.ReadInt32();
                 stream.Skip( componentMapCount * 12 );
@@ -142,39 +122,9 @@ namespace UELib
             ExportFlags = stream.ReadUInt32();
             if( stream.Version < 322 )
                 return;
-#if TRANSFORMERS
-            if( stream.Package.Build == UnrealPackage.GameBuild.BuildName.Transformers && stream.Package.LicenseeVersion >= 116 )
-            {
-                var flag = stream.ReadByte();
-                if( flag == 0 )
-                {
-                    return;
-                }
-            }
-#endif
-#if BIOSHOCK
-            if( stream.Package.Build == UnrealPackage.GameBuild.BuildName.Bioshock_Infinite )
-            {
-                var unk = stream.ReadUInt32();
-                if( unk == 1 )
-                {
-                    var flags = stream.ReadUInt32();
-                    if( (flags & 1) != 0x0 )
-                    {
-                        stream.ReadUInt32();
-                    }
-                    stream.Skip( 16 );  // guid
-                    stream.ReadUInt32();    // 01000020
-                }
-                return;
-            }
-#endif
-#if MKKE
-            if( stream.Package.Build != UnrealPackage.GameBuild.BuildName.MKKE )
-            {            
-#endif
-                int netObjectCount = stream.ReadInt32();
-                stream.Skip( netObjectCount * 4 );
+
+            int netObjectCount = stream.ReadInt32();
+            stream.Skip( netObjectCount * 4 );
                 //if( netObjectCount > 0 )
                 //{
                 //    NetObjects = new List<int>( netObjectCount );
@@ -183,9 +133,7 @@ namespace UELib
                 //        NetObjects.Add( stream.ReadObjectIndex() );
                 //    }
                 //}
-#if MKKE
-            }
-#endif
+
             stream.Skip( 16 );  // Package guid
             if( stream.Version > 486 )  // 475?  486(> Stargate Worlds)
             {

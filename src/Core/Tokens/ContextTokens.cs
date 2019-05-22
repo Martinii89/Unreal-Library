@@ -12,14 +12,7 @@
 
                 public override void Deserialize( IUnrealStream stream )
                 {
-                    var propertyAdded = stream.Version >= VSizeByteMoved
-#if TERA
-                        && stream.Package.Build != UnrealPackage.GameBuild.BuildName.Tera
-#endif
-#if TRANSFORMERS
-                        && stream.Package.Build != UnrealPackage.GameBuild.BuildName.Transformers
-#endif
-                        ; 
+                    var propertyAdded = stream.Version >= VSizeByteMoved; 
 
                     // A.?
                     DeserializeNext();
@@ -97,15 +90,10 @@
                         // Struct index
                         stream.ReadObjectIndex();
                         Decompiler.AlignObjectSize();
-#if MKKE
-                        if( Package.Build != UnrealPackage.GameBuild.BuildName.MKKE )
-                        {
-#endif
-                            stream.Position ++;
-                            Decompiler.AlignSize( sizeof(byte) );
-#if MKKE
-                        }
-#endif
+
+                        stream.Position ++;
+                        Decompiler.AlignSize( sizeof(byte) );
+
 
                         // TODO: Corrigate version. Definitely didn't exist in MKKE(472), first seen in SWG(486).
                         if( stream.Version > 472 )

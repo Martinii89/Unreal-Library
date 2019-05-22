@@ -29,17 +29,6 @@ namespace UELib
         {
             Name = stream.ReadText();
             Flags = stream.Version >= QWORDVersion ? stream.ReadUInt64() : stream.ReadUInt32();
-#if DEOBFUSCATE
-    // De-obfuscate names that contain unprintable characters!
-            foreach( char c in Name )
-            {
-                if( !char.IsLetterOrDigit( c ) )
-                {
-                    Name = "N" + TableIndex + "_OBF";
-                    break;
-                }
-            }
-#endif
         }
 
         public void Serialize( IUnrealStream stream )
