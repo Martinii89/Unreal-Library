@@ -109,27 +109,9 @@ namespace UELib.Core
                 Record( "oldClassRecordSize", oldClassRecordSize );
             }
 
-            ClassFlags = _Buffer.ReadUInt32();
+            ClassFlags = _Buffer.ReadUInt64();
             Record( "ClassFlags", (ClassFlags)ClassFlags );
 
-            // Both were deprecated since then
-            // TODO: Corrigate Version
-            if( Package.Version < 140 )
-            {
-                ClassGuid = _Buffer.ReadGuid();
-                Record( "ClassGuid", ClassGuid );
-
-                // Use ReadCount because Vanguard does no longer uses indexes but an int32 for arrays.
-                var depSize = ReadCount();
-                Record( "DepSize", depSize );
-                if( depSize > 0 )
-                {
-                    ClassDependencies = new UArray<Dependency>( _Buffer, depSize );
-                    Record( "ClassDependencies", ClassDependencies );
-                }
-
-                PackageImports = DeserializeGroup( "PackageImports" );
-            }
 
             if( Package.Version >= 62 )
             {
