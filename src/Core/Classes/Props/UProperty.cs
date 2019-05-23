@@ -101,25 +101,20 @@ namespace UELib.Core
                 CategoryIndex = _Buffer.ReadNameIndex();
                 Record( "CategoryIndex", CategoryIndex );
 
-                if( Package.Version > 400 )
-                {
-                    ArrayEnum = GetIndexObject( _Buffer.ReadObjectIndex() ) as UEnum;
-                    Record( "ArrayEnum", ArrayEnum );
-                }
+                ArrayEnum = GetIndexObject( _Buffer.ReadObjectIndex() ) as UEnum;
+                Record( "ArrayEnum", ArrayEnum );
             }
             else CategoryIndex = -1;
 
             if( HasPropertyFlag( Flags.PropertyFlagsLO.Net ) )
             {
+                Console.WriteLine("HasPropertyFlag( Flags.PropertyFlagsLO.Net ) ");
                 RepOffset = _Buffer.ReadUShort();
                 Record( "RepOffset", RepOffset );
             }
+            //Kinda pointless that the name is here as a Fstring, we already have the name from UObject?
+            var _name = _Buffer.ReadText();
 
-            if( HasPropertyFlag( Flags.PropertyFlagsLO.New ) && Package.Version <= 128 )
-            {
-                string unknown = _Buffer.ReadText();
-                Console.WriteLine( "Found a property flagged with New:" + unknown );
-            }
         }
 
         protected override bool CanDisposeBuffer()

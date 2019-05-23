@@ -168,11 +168,6 @@ namespace UELib
 #if DEBUG || BINARYMETADATA
             var lastPosition = _UnrealStream.Position;
 #endif
-            // Very old packages use a simple Ansi encoding.
-            if( _Version < UnrealPackage.VSIZEPREFIXDEPRECATED )
-            {
-                return ReadAnsi();
-            }
 
             byte[] strBytes;
             int unfixedSize; var size = (unfixedSize =
@@ -181,15 +176,6 @@ namespace UELib
             System.Diagnostics.Debug.Assert( size < 1000000, "Dangerous string size detected! IT'S OVER 9000 THOUSAND!" );
             if( unfixedSize > 0 ) // ANSI
             {
-#if TRANSFORMERS
-                // No null-termination in Transformer games.
-                if( _UnrealStream.Package.Build == UnrealPackage.GameBuild.BuildName.Transformers && _UnrealStream.Package.LicenseeVersion >= 181 )
-                {
-                    strBytes = new byte[size];
-                    Read( strBytes, 0, size);
-                    goto reverse;
-                }
-#endif
                 strBytes = new byte[size - 1];
                 Read( strBytes, 0, size - 1 );
                 ++ BaseStream.Position; // null
