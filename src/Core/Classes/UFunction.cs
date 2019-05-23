@@ -75,7 +75,7 @@ namespace UELib.Core
             }
 
 
-            FunctionFlags = _Buffer.ReadUInt32();
+            FunctionFlags = _Buffer.ReadUInt64();
 
             Record( "FunctionFlags", (FunctionFlags)FunctionFlags );
             if( HasFunctionFlag( Flags.FunctionFlags.Net ) )
