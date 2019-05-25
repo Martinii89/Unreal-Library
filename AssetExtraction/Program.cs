@@ -5,28 +5,33 @@ using UELib.Core;
 
 namespace AssetExtraction
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            if (args.Length > 2)
+            string pathToPackage;
+            if (args.Length < 2)
             {
                 Console.WriteLine("Usage: -p \"Path to package\"");
+                return;
             }
-            var pathToPackage = args[1];
+            else
+            {
+                pathToPackage = args[1];
+            }
             var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
 
-            var staticMeshActors = new List<UObject>();
+            var staticMeshComponents = new List<UObject>();
 
             foreach (UObject obj in package.Objects)
             {
-                if (obj.IsClassType("StaticMeshActor") )
+                if (obj.IsClassType("StaticMeshComponent") || obj.IsClassType("StaticMeshActor"))
                 {
-                    staticMeshActors.Add(obj);
+                    staticMeshComponents.Add(obj);
                 }
             }
 
-            foreach (var actor in staticMeshActors)
+            foreach (var actor in staticMeshComponents)
             {
                 Console.WriteLine(actor.Decompile());
             }

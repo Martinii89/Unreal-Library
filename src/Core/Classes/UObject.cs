@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -136,7 +136,8 @@ namespace UELib.Core
                 Console.WriteLine( e.Source + ":" + Name + ":" + e.GetType().Name + " occurred while deserializing;"
                     + "\r\n" + e.StackTrace
                     + "\r\n" + e.Message
-                );
+                    + "\r\n" + $"Error occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}  "
+                );;
             }
             finally
             {
