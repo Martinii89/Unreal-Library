@@ -14,6 +14,7 @@ namespace UELib.Core
             }
 
             AddTextNode( _ParentNode, "Script Size:" + DataScriptSize );
+            AddTextNode(_ParentNode, "Script offset:" + ScriptOffset);
             base.InitNodes( _ParentNode );
         }
 
