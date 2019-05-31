@@ -5,10 +5,19 @@ using UELib;
 namespace UELibTest
 {
     [TestClass]
-    public class UnitTest1
+    public class LoadPackageUnitTest
     {
         [TestMethod]
-        public void TestLoadFullPackage()
+        public void LoadEncryptedPackage()
+        {
+            //Just testing for no unhandled exceptions
+            string testPackage = "TestData\\AkAudio.upk";
+            var package = UnrealLoader.LoadFullPackage(testPackage, System.IO.FileAccess.Read);
+
+        }
+
+        [TestMethod]
+        public void LoadDecryptedPackage()
         {
             //Just testing for no unhandled exceptions
             string testPackage = "TestData\\AkAudio_decrypted.upk";

@@ -313,6 +313,10 @@ namespace UELib.Core
                         propertyValue = _Buffer.ReadInt32().ToString( CultureInfo.InvariantCulture );
                         break;
 
+                    case PropertyType.QWordProperty:
+                        propertyValue = _Buffer.ReadInt64().ToString(CultureInfo.InvariantCulture);
+                        break;
+
                     case PropertyType.FloatProperty:
                         propertyValue = _Buffer.ReadFloat().ToUFloat();
                         break;

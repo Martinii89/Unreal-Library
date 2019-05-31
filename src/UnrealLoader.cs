@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using UELib.Decoding;
 
@@ -22,7 +22,18 @@ namespace UELib
         /// </summary>
         public static UnrealPackage LoadPackage( string packagePath, FileAccess fileAccess = FileAccess.Read )
         {
-            var stream = new UPackageStream( packagePath, FileMode.Open, fileAccess );
+            var packageName = Path.GetFileNameWithoutExtension(packagePath);
+            UPackageStream stream;
+            if (packageName.EndsWith("_decrypted"))
+            {
+                stream = new UPackageStream(packagePath, FileMode.Open, fileAccess);
+                System.Console.WriteLine("Loading decrypted RL package");
+            }
+            else
+            {
+                stream = new RLPackageStream(packagePath);
+                System.Console.WriteLine("Loading encrypted RL package");
+            }
             var package = new UnrealPackage( stream );
             package.Deserialize( stream );
             return package;

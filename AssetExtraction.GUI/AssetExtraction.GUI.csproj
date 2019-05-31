@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{66DB2C69-6F69-4796-B9C0-D7CD185C0273}</ProjectGuid>
+    <ProjectGuid>{5A12DD63-B82E-4D14-9DE8-3D5FDD192466}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>AssetExtraction</RootNamespace>
-    <AssemblyName>AssetExtraction</AssemblyName>
+    <RootNamespace>AssetExtraction.GUI</RootNamespace>
+    <AssemblyName>AssetExtraction.GUI</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -33,28 +33,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssetExtractor.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Eliot.UELib.csproj">
-      <Project>{7E45273F-434F-42FA-8269-0E760AEB41E1}</Project>
-      <Name>Eliot.UELib</Name>
-    </ProjectReference>
+    <Folder Include="Logic\" />
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

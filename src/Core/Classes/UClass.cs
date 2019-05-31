@@ -224,7 +224,11 @@ namespace UELib.Core
             // TODO: Corrigate Version
             if( Package.Version >= 322 )
             {
-                Default = _Buffer.ReadObject();
+                Default = _Buffer.ParseObject(ExportTable.Index + 2);
+                if (Default.Name != "Default__" + Name)
+                {
+                    Default = null;
+                }
                 Record( "Default", Default );
             }
             else

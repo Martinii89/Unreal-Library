@@ -19,15 +19,15 @@ namespace UELib.Core
         /// <returns></returns>
         public override string Decompile()
         {
-            string code;
-            try
-            {
-                code = FormatCode();
-            }
-            catch( Exception e )
-            {
-                code = e.Message;
-            }
+            string code = "//Function decompiling is disabled";
+            //try
+            //{
+            //    code = FormatCode();
+            //}
+            //catch( Exception e )
+            //{
+            //    code = e.Message;
+            //}
             return FormatHeader() + (String.IsNullOrEmpty( code ) ? ";" : code);
         }
 

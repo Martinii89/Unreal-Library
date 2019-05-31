@@ -22,8 +22,9 @@
         MapProperty			= 14,
         FixedArrayProperty	= 15,	// Fixed Array
 
+
+        QWordProperty,              // (UE3, Bioshock Infinite)
 #if BIOSHOCK
-        QwordProperty,              // (UE3, Bioshock Infinite)
         XWeakReferenceProperty,
 #endif
 

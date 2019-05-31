@@ -1,4 +1,4 @@
-﻿// WARNING: You might get a brain stroke from reading the code below :O
+// WARNING: You might get a brain stroke from reading the code below :O
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -150,9 +150,9 @@ namespace UELib
             get{ return _UnrealStream.Version; }
         }
 
-        public UnrealReader( Stream stream ) : base( stream )
+        public UnrealReader(IUnrealStream unrealStream, Stream stream ) : base( stream )
         {
-            _UnrealStream = stream as IUnrealStream;
+            _UnrealStream = unrealStream;
         }
 
         /// <summary>
@@ -403,7 +403,7 @@ namespace UELib
         }
     }
 
-    public class UPackageStream : FileStream, IUnrealStream
+    public class UPackageStream : IUnrealStream
     {
         public UnrealPackage Package{ get; private set; }
 
@@ -413,31 +413,44 @@ namespace UELib
             get{ return Package != null ? Package.Version : 0; }
         }
 
-        public UnrealReader UR{ get; private set; }
-        public UnrealWriter UW{ get; private set; }
+        public UnrealReader UR{ get; protected set; }
+        public UnrealWriter UW{ get; protected set; }
 
         public long LastPosition{ get; set; }
 
         public bool BigEndianCode{ get; private set; }
         public bool IsChunked{ get{ return Package.CompressedChunks != null && Package.CompressedChunks.Any(); } }
 
-        public UPackageStream( string path, FileMode mode, FileAccess access ) : base( path, mode, access, FileShare.ReadWrite )
+        public string Name { get; private set; }
+
+        public long Length => _stream.Length;
+
+        public long Position { get { return _stream.Position; } set { _stream.Position = value; } }
+
+        protected Stream _stream;
+
+        public UPackageStream( string path, FileMode mode, FileAccess access )
         {
+            _stream = File.Open(path, mode, access);
+            Name = Path.GetFileNameWithoutExtension(path);
+
             UR = null;
             UW = null;
             InitBuffer();
         }
 
+        public UPackageStream() { }
+
         private void InitBuffer()
         {
-            if( CanRead && UR == null )
+            if(_stream.CanRead && UR == null )
             {
-                UR = new UnrealReader( this );
+                UR = new UnrealReader(this, _stream);
             }
 
-            if( CanWrite && UW == null )
+            if(_stream.CanWrite && UW == null )
             {
-                UW = new UnrealWriter( this );
+                UW = new UnrealWriter(_stream);
             }
         }
 
@@ -445,7 +458,7 @@ namespace UELib
         {
             Package = package;
 
-            if( !CanRead )
+            if( !_stream.CanRead)
                 return;
 
             if( package.Decoder != null )
@@ -466,9 +479,9 @@ namespace UELib
                 && readSignature != UnrealPackage.Signature
                 && readSignature != UnrealPackage.Signature_BigEndian )
             {
-                throw new FileLoadException( package.PackageName + " isn't an UnrealPackage!" );
+                throw new FileLoadException($"{package.PackageName} isn't an UnrealPackage! with signature {readSignature}" );
             }
-            Position = 4;
+            _stream.Position = 4;
         }
 
         /// <summary>
@@ -483,12 +496,12 @@ namespace UELib
             }
         }
 
-        public override int Read( byte[] array, int offset, int count )
+        public int Read( byte[] array, int offset, int count )
         {
 #if DEBUG || BINARYMETADATA
             LastPosition = Position;
 #endif
-            var r = base.Read( array, offset, count );
+            var r = _stream.Read( array, offset, count );
             if( BigEndianCode && r > 1 )
             {
                 Array.Reverse( array, 0, r );
@@ -699,16 +712,26 @@ namespace UELib
         /// </summary>
         public void Skip( int bytes )
         {
-            Position += bytes;
+            _stream.Position += bytes;
         }
 
-        protected override void Dispose( bool disposing )
+        protected void Dispose( bool disposing )
         {
             if( !disposing )
                 return;
 
             UR = null;
             UW = null;
+        }
+
+        public long Seek(long offset, SeekOrigin origin)
+        {
+            return _stream.Seek(offset, origin);
+        }
+
+        public virtual void Dispose()
+        {
+            _stream.Dispose();
         }
     }
 
@@ -753,7 +776,7 @@ namespace UELib
         {
             if( CanRead && UR == null )
             {
-                UR = new UnrealReader( this );
+                UR = new UnrealReader( this, this );
             }
 
             if( CanWrite && UW == null )
