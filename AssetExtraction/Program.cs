@@ -32,8 +32,10 @@ namespace AssetExtraction
             PreloadBasicPackages();
             
             var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
-            assetExtractor = new AssetExtractor(package);
             var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
+            //Init the asset extractor
+            assetExtractor = new AssetExtractor(package);
+
             ExtractClasses(packageName);
             ExtractStaticMeshes(packageName);
             ExtractFXActors(packageName);

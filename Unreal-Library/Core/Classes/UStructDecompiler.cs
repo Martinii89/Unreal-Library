@@ -298,6 +298,10 @@ namespace UELib.Core
             {
                 UDecompilingState.RemoveTabs( 1 );
             }
+            if (Name.StartsWith("Seq"))
+            {
+                innerOutput += $"\tObjCategory=\"{Package.FullPackageName}\"\r\n";
+            }
             return output + innerOutput + UDecompilingState.Tabs + "}";
         }
 

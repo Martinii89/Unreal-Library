@@ -16,6 +16,7 @@ namespace UELib
         public RLPackageStream(string path)
         {
             upkFile = new UPKFile(path);
+            Name = Path.GetFileNameWithoutExtension(path);
             decryptedStream = new MemoryStream();
             upkFile.Decrypt(new RLDecryptor().GetCryptoTransform(), decryptedStream);
             _stream = decryptedStream;

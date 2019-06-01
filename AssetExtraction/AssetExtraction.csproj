@@ -51,8 +51,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\Eliot.UELib.csproj">
-      <Project>{7E45273F-434F-42FA-8269-0E760AEB41E1}</Project>
+    <ProjectReference Include="..\Unreal-Library\Eliot.UELib.csproj">
+      <Project>{7e45273f-434f-42fa-8269-0e760aeb41e1}</Project>
       <Name>Eliot.UELib</Name>
     </ProjectReference>
   </ItemGroup>

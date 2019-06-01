@@ -422,7 +422,7 @@ namespace UELib
         public bool BigEndianCode{ get; private set; }
         public bool IsChunked{ get{ return Package.CompressedChunks != null && Package.CompressedChunks.Any(); } }
 
-        public string Name { get; private set; }
+        public string Name { get; protected set; }
 
         public long Length => _stream.Length;
 
