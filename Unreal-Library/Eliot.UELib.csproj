@@ -258,7 +258,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RLUPKT\Core\RLUPKT.Core.csproj">
-      <Project>{0adb689b-d9e1-4b19-b41f-b6bbe67b27a3}</Project>
+      <Project>{e8017df7-bfae-41bf-892b-38295c538524}</Project>
       <Name>RLUPKT.Core</Name>
     </ProjectReference>
   </ItemGroup>
