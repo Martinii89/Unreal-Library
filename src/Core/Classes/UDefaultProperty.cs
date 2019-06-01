@@ -786,7 +786,7 @@ namespace UELib.Core
             UProperty property = null;
             outer = _Outer ?? _Container.Class as UStruct;
             outer = GetRealObject(outer);
-            for( var structField = outer; structField != null; structField = structField.Super as UStruct )
+            for( var structField = outer; structField != null; structField = GetRealObject(structField).Super as UStruct )
             {
                 if( structField.Variables == null || !structField.Variables.Any() )
                     continue;

@@ -27,13 +27,29 @@ namespace AssetExtraction
             {
                 pathToPackage = args[1];
             }
-            UnrealLoader.LoadFullPackage("Engine.upk", System.IO.FileAccess.Read);
+            PreloadBasicPackages();
+            
             var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
             assetExtractor = new AssetExtractor(package);
             var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
             ExtractClasses(packageName);
             ExtractStaticMeshes(packageName);
             ExtractFXActors(packageName);
+        }
+
+        private static void PreloadBasicPackages()
+        {
+            var basicPackageNames = new List<string>()
+            {
+                "Core.upk",
+                "Engine.upk",
+                "ProjectX.upk",
+                "TAGame.upk"
+            };
+            foreach (var packageName in basicPackageNames)
+            {
+                UnrealLoader.LoadFullPackage(packageName, System.IO.FileAccess.Read);
+            }
         }
 
         private static void ConfigArrayTypes()
