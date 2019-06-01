@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using UELib.Logging;
 
 namespace UELib.Core
 {
@@ -133,10 +134,10 @@ namespace UELib.Core
                 ExceptionPosition = _Buffer != null ? _Buffer.Position : -1;
                 DeserializationState |= ObjectState.Errorlized;
 
-                Console.WriteLine( e.Source + ":" + Name + ":" + e.GetType().Name + " occurred while deserializing;"
-                    + "\r\n" + e.StackTrace
-                    + "\r\n" + e.Message
-                    + "\r\n" + $"Error occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}  "
+                Log.WriteLine( $"{e.Source}:{Name}:{e.GetType().Name} occurred while deserializing;"
+                    + $"\r\n{e.StackTrace}"
+                    + $"\r\n{e.Message}"
+                    + $"\r\nError occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}  "
                 );;
             }
             finally
@@ -148,7 +149,7 @@ namespace UELib.Core
 
         private void InitBuffer()
         {
-            //Console.WriteLine( "Init buffer for {0}", (string)this );
+            //Log.WriteLine( "Init buffer for {0}", (string)this );
             var buff = new byte[ExportTable.SerialSize];
             Package.Stream.Seek( ExportTable.SerialOffset, SeekOrigin.Begin );
             Package.Stream.Read( buff, 0, ExportTable.SerialSize );
@@ -161,13 +162,13 @@ namespace UELib.Core
 
         internal void EnsureBuffer()
         {
-            //Console.WriteLine( "Ensure buffer for {0}", (string)this );
+            //Log.WriteLine( "Ensure buffer for {0}", (string)this );
             InitBuffer();
         }
 
         internal void MaybeDisposeBuffer()
         {
-            //Console.WriteLine( "Disposing buffer for {0}", (string)this );
+            //Log.WriteLine( "Disposing buffer for {0}", (string)this );
 
             // Do not dispose while deserializing!
             // For example DecompileDefaultProperties or DecompileScript, may dispose the buffer in certain situations!
@@ -176,7 +177,7 @@ namespace UELib.Core
 
             _Buffer.DisposeBuffer();
             _Buffer = null;
-            //Console.WriteLine( "Disposed" );
+            //Log.WriteLine( "Disposed" );
         }
 
         protected virtual bool CanDisposeBuffer()
@@ -191,7 +192,7 @@ namespace UELib.Core
         {
 #if DEBUG
             #if LOG_RECORDS
-                Console.WriteLine( "" );
+                Log.WriteLine( "" );
             #endif
             Record( Name, this );
             Record( "ExportSize", ExportTable.SerialSize );
@@ -575,12 +576,12 @@ namespace UELib.Core
 #if LOG_RECORDS
             if( varObject == null )
             {
-                Console.WriteLine( varName );
+                Log.WriteLine( varName );
                 return;
             }
 
             var propertyType = varObject.GetType();
-            Console.WriteLine(
+            Log.WriteLine(
                 "0x" + _Buffer.LastPosition.ToString("x8").ToUpper()
                 + " : ".PadLeft( 2, ' ' )
                 + varName.PadRight( 32, ' ' ) + ":" + propertyType.Name.PadRight( 32, ' ' )

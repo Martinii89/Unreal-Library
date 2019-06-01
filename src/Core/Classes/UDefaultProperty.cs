@@ -771,8 +771,21 @@ namespace UELib.Core
         #region Methods
         private UProperty FindProperty( out UStruct outer )
         {
+            //If the object is from the import table. Try to find the export object in the package it originates from.
+            UStruct GetRealObject(UObject _object)
+            {
+                if (_object.ExportTable == null) 
+                {
+                    var realClass = UnrealLoader.FindClassInPackage(_object.Outer.Name, _object.Name);
+                    return realClass;
+                }
+                return _object as UStruct;
+
+            }
+
             UProperty property = null;
             outer = _Outer ?? _Container.Class as UStruct;
+            outer = GetRealObject(outer);
             for( var structField = outer; structField != null; structField = structField.Super as UStruct )
             {
                 if( structField.Variables == null || !structField.Variables.Any() )

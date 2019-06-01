@@ -108,7 +108,6 @@ namespace UELib.Core
 
             if( HasPropertyFlag( Flags.PropertyFlagsLO.Net ) )
             {
-                Console.WriteLine("HasPropertyFlag( Flags.PropertyFlagsLO.Net ) ");
                 RepOffset = _Buffer.ReadUShort();
                 Record( "RepOffset", RepOffset );
             }

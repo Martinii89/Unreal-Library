@@ -8,6 +8,7 @@ using UELib.Tokens;
 namespace UELib.Core
 {
     using System.Text;
+    using UELib.Logging;
 
     public partial class UStruct
     {
@@ -154,7 +155,7 @@ namespace UELib.Core
 
                             if( CodePosition < codeSize )
                             {
-                                Console.WriteLine( "End of script detected, but the loop condition is still true." );
+                                Log.WriteLine( "End of script detected, but the loop condition is still true." );
                             }
                             break;
                         }
@@ -162,13 +163,13 @@ namespace UELib.Core
                         {
                             if( e is System.IO.EndOfStreamException )
                             {
-                                Console.WriteLine( "Couldn't backup from this error! Decompiling aborted!" );
+                                Log.WriteLine( "Couldn't backup from this error! Decompiling aborted!" );
                                 return;
                             }
-                            Console.WriteLine( "Object:" + _Container.Name );
-                            Console.WriteLine( "Failed to deserialize token at position:" + CodePosition );
-                            Console.WriteLine( "Exception:" + e.Message );
-                            Console.WriteLine( "Stack:" + e.StackTrace );
+                            Log.WriteLine($"Object:{_Container.Name}");
+                            Log.WriteLine($"Failed to deserialize token at position:{CodePosition}");
+                            Log.WriteLine($"Exception:{e.Message}");
+                            Log.WriteLine($"Stack:{e.StackTrace}");
                         }
                     }
                 }

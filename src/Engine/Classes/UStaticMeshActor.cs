@@ -1,23 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UELib.Core;
+﻿using UELib.Core;
 
 namespace UELib.Engine.Classes
 {
     [UnrealRegisterClass]
     public class UStaticMeshActor : UObject
     {
-
-        static UStaticMeshActor()
-        {
-            if (UnrealConfig.VariableTypes == null)
-            {
-                UnrealConfig.VariableTypes = new Dictionary<string, Tuple<string, Types.PropertyType>>();
-            }
-            UnrealConfig.VariableTypes.Add("Materials", new Tuple<string, Types.PropertyType>("material", Types.PropertyType.ObjectProperty));
-        }
         public UStaticMeshActor()
         {
             ShouldDeserializeOnDemand = true;

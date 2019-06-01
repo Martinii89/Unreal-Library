@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using UELib.Core;
 using UELib.Decoding;
+using UELib.Logging;
 
 namespace UELib
 {
@@ -15,7 +18,48 @@ namespace UELib
         /// In any other case the list needs to be cleared manually.
         /// </summary>
         private static readonly List<UnrealPackage> _CachedPackages = new List<UnrealPackage>();
+        private static readonly Dictionary<string, UnrealPackage> _LoadedPackages = new Dictionary<string, UnrealPackage>();
 
+
+        private static UnrealPackage GetPreloadedPackage(string packageName)
+        {
+            if (_LoadedPackages.ContainsKey(packageName))
+            {
+                return _LoadedPackages[packageName];
+            }
+            return null;
+        }
+
+        private static Dictionary<Tuple<String, String>, UStruct> FindClassInPackageCache = new Dictionary<Tuple<string, string>, UStruct>();
+
+        /// <summary>
+        /// Tries to find the given class in a preloaded package
+        /// Caches the results for some better performance
+        /// </summary>
+        public static UStruct FindClassInPackage(string packageName, string className)
+        {
+            #region memoization
+            var argTuple = Tuple.Create<string, string>(packageName, className);
+            UStruct cachedResults;
+            FindClassInPackageCache.TryGetValue(argTuple, out cachedResults);
+            if (cachedResults != null)
+            {
+                Log.WriteLine($"Used cached result for {packageName}:{className}");
+                return cachedResults;
+            }
+            #endregion
+            var package = GetPreloadedPackage(packageName);
+            if (package == null) return null;
+
+            var foundClass = package.Objects.Find(o => String.Compare(o.Name, className, StringComparison.OrdinalIgnoreCase) == 0) as UStruct;
+            #region memoization
+            if (foundClass != null)
+            {
+                FindClassInPackageCache.Add(argTuple, foundClass);
+            }
+            #endregion
+            return foundClass as UStruct;
+        } 
         /// <summary>
         /// Loads the given file specified by PackagePath and
         /// returns the serialized UnrealPackage.
@@ -27,15 +71,16 @@ namespace UELib
             if (packageName.EndsWith("_decrypted"))
             {
                 stream = new UPackageStream(packagePath, FileMode.Open, fileAccess);
-                System.Console.WriteLine("Loading decrypted RL package");
+                Log.WriteLine("Loading decrypted RL package");
             }
             else
             {
                 stream = new RLPackageStream(packagePath);
-                System.Console.WriteLine("Loading encrypted RL package");
+                Log.WriteLine("Loading encrypted RL package");
             }
             var package = new UnrealPackage( stream );
             package.Deserialize( stream );
+            _LoadedPackages.Add(packageName, package);
             return package;
         }
 
@@ -48,6 +93,8 @@ namespace UELib
             var stream = new UPackageStream( packagePath, FileMode.Open, fileAccess );
             var package = new UnrealPackage( stream ) {Decoder = decoder};
             package.Deserialize( stream );
+            var packageName = Path.GetFileNameWithoutExtension(packagePath);
+            _LoadedPackages.Add(packageName, package);
             return package;
         }
 

@@ -12,6 +12,7 @@ namespace UELib
 {
     using Core;
     using Decoding;
+    using UELib.Logging;
 
     /// <summary>
     /// Represents the method that will handle the UELib.UnrealPackage.NotifyObjectAdded
@@ -614,7 +615,7 @@ namespace UELib
                 ImportsCount = stream.ReadUInt32();
                 ImportsOffset = stream.ReadUInt32();
 
-                Console.WriteLine( "\tNames Count:" + NamesCount + "\tNames Offset:" + NamesOffset
+                Log.WriteLine( "\tNames Count:" + NamesCount + "\tNames Offset:" + NamesOffset
                     + "\r\n\tExports Count:" + ExportsCount + "\tExports Offset:" + ExportsOffset
                     + "\r\n\tImports Count:" + ImportsCount + "\tImports Offset:" + ImportsOffset
                 );
@@ -850,19 +851,19 @@ namespace UELib
             // Write tables
 
             // names
-            Console.WriteLine( "Writing names at position " + stream.Position );
+            Log.WriteLine( "Writing names at position " + stream.Position );
             _TablesData.NamesOffset = (uint)stream.Position;
             var namesBytes = namesBuffer.GetBuffer();
             stream.Write( namesBytes, 0, (int)namesBuffer.Length );
 
             // imports
-            Console.WriteLine( "Writing imports at position " + stream.Position );
+            Log.WriteLine( "Writing imports at position " + stream.Position );
             _TablesData.ImportsOffset = (uint)stream.Position;
             var importsBytes = importsBuffer.GetBuffer();
             stream.Write( importsBytes, 0, (int)importsBuffer.Length );
 
             // exports
-            Console.WriteLine( "Writing exports at position " + stream.Position );
+            Log.WriteLine( "Writing exports at position " + stream.Position );
 
             // Serialize tables data again now that offsets are known.
             var currentPosition = stream.Position;
@@ -877,10 +878,10 @@ namespace UELib
             Version = stream.ReadUInt32();
             LicenseeVersion = (ushort)(Version >> 16);
             Version = (Version & 0xFFFFU);
-            Console.WriteLine( "\tPackage Version:" + Version + "/" + LicenseeVersion );
+            Log.WriteLine("\tPackage Version:" + Version + "/" + LicenseeVersion);
 
             Build = new GameBuild( this );
-            Console.WriteLine( "\tBuild:" + Build.Name );
+            Log.WriteLine( "\tBuild:" + Build.Name );
 
             stream.BuildDetected( Build );
 
@@ -888,7 +889,7 @@ namespace UELib
             {
                 // Offset to the first class(not object) in the package.
                 HeaderSize = stream.ReadUInt32();
-                Console.WriteLine( "\tHeader Size: " + HeaderSize );
+                Log.WriteLine( "\tHeader Size: " + HeaderSize );
                 if( Version >= VGroup )
                 {
                     // UPK content category e.g. Weapons, Sounds or Meshes.
@@ -898,7 +899,7 @@ namespace UELib
 
             // Bitflags such as AllowDownload.
             PackageFlags = stream.ReadUInt32();
-            Console.WriteLine( "\tPackage Flags:" + PackageFlags );
+            Log.WriteLine( "\tPackage Flags:" + PackageFlags );
 
             // Summary data such as ObjectCount.
             _TablesData = new TablesData();
@@ -923,19 +924,19 @@ namespace UELib
 
                 int generationCount = stream.ReadInt32();
                 Generations = new UArray<UGenerationTableItem>( stream, generationCount );
-                Console.WriteLine( "Deserialized {0} generations", Generations.Count );
+                Log.WriteLine( $"Deserialized {Generations.Count} generations");
 
 
                 if( Version >= VEngineVersion )
                 {
                     // The Engine Version this package was created with
                     EngineVersion = stream.ReadInt32();
-                    Console.WriteLine( "\tEngineVersion:" + EngineVersion );
+                    Log.WriteLine( "\tEngineVersion:" + EngineVersion );
                     if( Version >= VCOOKEDPACKAGES )
                     {
                         // The Cooker Version this package was cooked with
                         CookerVersion = stream.ReadInt32();
-                        Console.WriteLine( "\tCookerVersion:" + CookerVersion );
+                        Log.WriteLine( "\tCookerVersion:" + CookerVersion );
 
                         // Read compressed info?
                         if( Version >= VCompression )
@@ -943,7 +944,7 @@ namespace UELib
                             if( IsCooked() )
                             {
                                 CompressionFlags = stream.ReadUInt32();
-                                Console.WriteLine( "\tCompressionFlags:" + CompressionFlags );
+                                Log.WriteLine( "\tCompressionFlags:" + CompressionFlags );
                                 CompressedChunks = new UArray<CompressedChunk>{Capacity = stream.ReadInt32()};
                                 //long uncookedSize = stream.Position;
                                 if( CompressedChunks.Capacity > 0 )
@@ -985,7 +986,7 @@ namespace UELib
             // Read the name table
             if( _TablesData.NamesCount > 0 )
             {
-                Console.WriteLine( "P: " + stream.Position + " NP: " + _TablesData.NamesOffset );
+                Log.WriteLine( "P: " + stream.Position + " NP: " + _TablesData.NamesOffset );
 
                 stream.Seek( _TablesData.NamesOffset, SeekOrigin.Begin );
                 Names = new List<UNameTableItem>( (int)_TablesData.NamesCount );
@@ -996,13 +997,13 @@ namespace UELib
                     nameEntry.Size = (int)(stream.Position - nameEntry.Offset);
                     Names.Add( nameEntry );
                 }
-                Console.WriteLine( "Deserialized {0} names", Names.Count );
+                Log.WriteLine($"Deserialized {Names.Count} names");
             }
 
             // Read Import Table
             if( _TablesData.ImportsCount > 0 )
             {
-                Console.WriteLine( "P: " + stream.Position + " IP: " + _TablesData.ImportsOffset );
+                Log.WriteLine( "P: " + stream.Position + " IP: " + _TablesData.ImportsOffset );
 
                 stream.Seek( _TablesData.ImportsOffset, SeekOrigin.Begin );
                 Imports = new List<UImportTableItem>( (int)_TablesData.ImportsCount );
@@ -1013,13 +1014,13 @@ namespace UELib
                     imp.Size = (int)(stream.Position - imp.Offset);
                     Imports.Add( imp );
                 }
-                Console.WriteLine( "Deserialized {0} imports", Imports.Count );
+                Log.WriteLine($"Deserialized { Imports.Count } imports");
             }
 
             // Read Export Table
             if( _TablesData.ExportsCount > 0 )
             {
-                Console.WriteLine( "P: " + stream.Position + " EP: " + _TablesData.ExportsOffset );
+                Log.WriteLine( "P: " + stream.Position + " EP: " + _TablesData.ExportsOffset );
 
                 stream.Seek( _TablesData.ExportsOffset, SeekOrigin.Begin );
                 Exports = new List<UExportTableItem>( (int)_TablesData.ExportsCount );
@@ -1033,7 +1034,7 @@ namespace UELib
                     }
                     catch
                     {
-                        Console.WriteLine( "Failed to deserialize export object at index:" + i );
+                        Log.WriteLine( "Failed to deserialize export object at index:" + i );
                         break;
                     }
                     finally
@@ -1042,7 +1043,7 @@ namespace UELib
                         Exports.Add( exp );
                     }
                 }
-                Console.WriteLine( "Deserialized {0} exports", Exports.Count );
+                Log.WriteLine($"Deserialized {Exports.Count } exports");
             }
 
             /*if( pkg.Data.DependsOffset > 0 )
@@ -1056,7 +1057,7 @@ namespace UELib
                     dep.TableSize = (int)(stream.Position - dep.TableOffset);
                     pkg.DependsTableList.Add( dep );
                 }
-                Console.WriteLine( "Deserialized {0} dependencies", pkg.DependsTableList.Count );
+                Log.WriteLine( "Deserialized {0} dependencies", pkg.DependsTableList.Count );
             }*/
 
             HeaderSize = stream.Position;
@@ -1282,7 +1283,7 @@ namespace UELib
             {
                 if( !(exp.Object is UnknownObject || exp.Object.ShouldDeserializeOnDemand) )
                 {
-                    //Console.WriteLine( "Deserializing object:" + exp.ObjectName );
+                    //Log.WriteLine( "Deserializing object:" + exp.ObjectName );
                     exp.Object.BeginDeserializing();
                 }
                 OnNotifyPackageEvent( new PackageEventArgs( PackageEventArgs.Id.Object ) );
@@ -1326,7 +1327,7 @@ namespace UELib
                 }
                 catch( InvalidCastException )
                 {
-                    Console.WriteLine( "InvalidCastException occurred on object: " + exp.Object );
+                    Log.WriteLine( "InvalidCastException occurred on object: " + exp.Object );
                 }
             }
         }
@@ -1640,7 +1641,7 @@ namespace UELib
         /// <inheritdoc/>
         public void Dispose()
         {
-            Console.WriteLine( "Disposing {0}", PackageName );
+            Log.WriteLine($"Disposing {PackageName }");
 
             DisposeStream();
             if( Objects != null && Objects.Any() )
@@ -1659,7 +1660,7 @@ namespace UELib
             if( Stream == null )
                 return;
 
-            Console.WriteLine( "Disposing package stream" );
+            Log.WriteLine( "Disposing package stream" );
             Stream.Dispose();
         }
         #endregion

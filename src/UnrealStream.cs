@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UELib.Core;
+using UELib.Logging;
 
 namespace UELib
 {
@@ -471,7 +472,7 @@ namespace UELib
             var readSignature = BitConverter.ToUInt32( bytes, 0 );
             if( readSignature == UnrealPackage.Signature_BigEndian )
             {
-                Console.WriteLine( "Encoding:BigEndian" );
+                Log.WriteLine( "Encoding:BigEndian" );
                 BigEndianCode = true;
             }
 

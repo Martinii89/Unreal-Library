@@ -25,6 +25,7 @@ namespace AssetExtraction
             {
                 pathToPackage = args[1];
             }
+            UnrealLoader.LoadFullPackage("Engine.upk", System.IO.FileAccess.Read);
             var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
             assetExtractor = new AssetExtractor(package);
             var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
@@ -51,7 +52,7 @@ namespace AssetExtraction
                 ("Controls",  PropertyType.ObjectProperty),
                 ("Expressions",  PropertyType.ObjectProperty),
                 ("Emitters",  PropertyType.ObjectProperty),
-                ("Attachments", PropertyType.StructProperty)
+                //("Attachments", PropertyType.StructProperty)
               };
             foreach(var (propName, propType) in tupleList)
             {

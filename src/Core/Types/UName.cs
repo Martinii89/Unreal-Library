@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using UELib.Logging;
 
 namespace UELib
 {
@@ -60,7 +61,7 @@ namespace UELib
             stream.WriteIndex( _Index );
             if( stream.Version >= VNameNumbered )
             {
-                Console.WriteLine( _Number + " " + _Text );
+                Log.WriteLine( _Number + " " + _Text );
                 stream.Write( (uint)_Number + 1 );
             }
         }

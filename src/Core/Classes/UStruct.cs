@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UELib.Flags;
+using UELib.Logging;
 
 namespace UELib.Core
 {
@@ -186,7 +187,7 @@ namespace UELib.Core
             }
             catch( InvalidCastException ice )
             {
-                Console.WriteLine( ice.Message );
+                Log.WriteLine( ice.Message );
             }
         }
 
