@@ -56,11 +56,11 @@ namespace UELib.Logging
     {
 
         private static ILogger logger;
-        static bool IsDebugEnabled { get; set; }
-        static bool IsInfoEnabled { get; set; }
-        static bool IsWarnEnabled { get; set; }
-        static bool IsErrorEnabled { get; set; }
-        static bool IsFatalEnabled { get; set; }
+        public static bool IsDebugEnabled { get; set; }
+        public static bool IsInfoEnabled { get; set; }
+        public static bool IsWarnEnabled { get; set; }
+        public static bool IsErrorEnabled { get; set; }
+        public static bool IsFatalEnabled { get; set; }
 
         public static void SetLogger(ILogger logger)
         {

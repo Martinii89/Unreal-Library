@@ -49,16 +49,23 @@ namespace UELib
             }
             #endregion
             var package = GetPreloadedPackage(packageName);
-            if (package == null) return null;
-
-            var foundClass = package.Objects.Find(o => String.Compare(o.Name, className, StringComparison.OrdinalIgnoreCase) == 0) as UStruct;
-            #region memoization
-            if (foundClass != null)
+            if (package == null)
             {
-                FindClassInPackageCache.Add(argTuple, foundClass);
+                Log.Error($"Package: {packageName} not preloaded. Finding the real class of {className} failed");
+                return null;
+            }
+            var foundClass = package.Objects.Find(o => String.Compare(o.Name, className, StringComparison.OrdinalIgnoreCase) == 0 && o.Class == null);
+            var foundStruct = foundClass as UStruct;
+            #region memoization
+            if (foundStruct != null)
+            {
+                FindClassInPackageCache.Add(argTuple, foundStruct);
+            }else
+            {
+                Log.Debug($"Did not find {className} in {packageName}");
             }
             #endregion
-            return foundClass as UStruct;
+            return foundStruct;
         } 
         /// <summary>
         /// Loads the given file specified by PackagePath and

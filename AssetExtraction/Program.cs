@@ -16,6 +16,7 @@ namespace AssetExtraction
         private static void Main(string[] args)
         {
             Log.SetLogger(new FileLogger());
+            Log.IsDebugEnabled = true;
             ConfigArrayTypes();
             string pathToPackage;
             if (args.Length < 2)

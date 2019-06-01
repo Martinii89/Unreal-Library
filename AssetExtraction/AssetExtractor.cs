@@ -23,7 +23,7 @@ namespace AssetExtraction
         public int Extract(IList<string> types, string outputPath)
         {
             var objects = FindObjectsOfType(types);
-            Console.WriteLine($"Found {objects.Count} objects to extract");
+            Console.WriteLine($"Extracting {objects.Count} objects of type(s): {String.Join(", ", types)}");
             foreach (var obj in objects)
             {
                 var outputFile = Path.Combine(outputPath, obj.Name + ".uc");
