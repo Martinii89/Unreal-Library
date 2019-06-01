@@ -17,7 +17,8 @@ namespace AssetExtraction
         {
             Log.SetLogger(new FileLogger());
             Log.IsDebugEnabled = true;
-            ConfigArrayTypes();
+            //Preloading packages works better and more reliable
+            //ConfigArrayTypes();
             string pathToPackage;
             if (args.Length < 2)
             {
@@ -53,31 +54,31 @@ namespace AssetExtraction
             }
         }
 
-        private static void ConfigArrayTypes()
-        {
-            if (UnrealConfig.VariableTypes == null)
-            {
-                UnrealConfig.VariableTypes = new Dictionary<string, Tuple<string, PropertyType>>();
-            }
-            var tupleList = new List<(string propName, PropertyType propType)>
-              {
-                ("Skins",  PropertyType.ObjectProperty),
-                ("Components",  PropertyType.ObjectProperty),
-                ("AnimSets",  PropertyType.ObjectProperty),
-                ("InputLinks",  PropertyType.StructProperty),
-                ("OutputLinks",  PropertyType.StructProperty),
-                ("VariableLinks",  PropertyType.StructProperty),
-                ("Targets",  PropertyType.ObjectProperty),
-                ("Controls",  PropertyType.ObjectProperty),
-                ("Expressions",  PropertyType.ObjectProperty),
-                ("Emitters",  PropertyType.ObjectProperty),
-                //("Attachments", PropertyType.StructProperty)
-              };
-            foreach(var (propName, propType) in tupleList)
-            {
-                UnrealConfig.VariableTypes.Add(propName, new Tuple<string, PropertyType>(propName, propType));
-            }
-        }
+        //private static void ConfigArrayTypes()
+        //{
+        //    if (UnrealConfig.VariableTypes == null)
+        //    {
+        //        UnrealConfig.VariableTypes = new Dictionary<string, Tuple<string, PropertyType>>();
+        //    }
+        //    var tupleList = new List<(string propName, PropertyType propType)>
+        //      {
+        //        ("Skins",  PropertyType.ObjectProperty),
+        //        ("Components",  PropertyType.ObjectProperty),
+        //        ("AnimSets",  PropertyType.ObjectProperty),
+        //        ("InputLinks",  PropertyType.StructProperty),
+        //        ("OutputLinks",  PropertyType.StructProperty),
+        //        ("VariableLinks",  PropertyType.StructProperty),
+        //        ("Targets",  PropertyType.ObjectProperty),
+        //        ("Controls",  PropertyType.ObjectProperty),
+        //        ("Expressions",  PropertyType.ObjectProperty),
+        //        ("Emitters",  PropertyType.ObjectProperty),
+        //        //("Attachments", PropertyType.StructProperty)
+        //      };
+        //    foreach(var (propName, propType) in tupleList)
+        //    {
+        //        UnrealConfig.VariableTypes.Add(propName, new Tuple<string, PropertyType>(propName, propType));
+        //    }
+        //}
 
         private static void ExtractClasses(string packageName)
         {
