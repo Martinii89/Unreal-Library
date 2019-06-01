@@ -187,7 +187,7 @@ namespace UELib.Core
             }
             catch( InvalidCastException ice )
             {
-                Log.WriteLine( ice.Message );
+                Log.Error( ice.Message );
             }
         }
 

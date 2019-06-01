@@ -44,7 +44,7 @@ namespace UELib
             FindClassInPackageCache.TryGetValue(argTuple, out cachedResults);
             if (cachedResults != null)
             {
-                Log.WriteLine($"Used cached result for {packageName}:{className}");
+                Log.Info($"Used cached result for {packageName}:{className}");
                 return cachedResults;
             }
             #endregion
@@ -71,12 +71,12 @@ namespace UELib
             if (packageName.EndsWith("_decrypted"))
             {
                 stream = new UPackageStream(packagePath, FileMode.Open, fileAccess);
-                Log.WriteLine("Loading decrypted RL package");
+                Log.Info("Loading decrypted RL package");
             }
             else
             {
                 stream = new RLPackageStream(packagePath);
-                Log.WriteLine("Loading encrypted RL package");
+                Log.Info("Loading encrypted RL package");
             }
             var package = new UnrealPackage( stream );
             package.Deserialize( stream );

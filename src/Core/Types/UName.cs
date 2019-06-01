@@ -61,7 +61,7 @@ namespace UELib
             stream.WriteIndex( _Index );
             if( stream.Version >= VNameNumbered )
             {
-                Log.WriteLine( _Number + " " + _Text );
+                Log.Info( _Number + " " + _Text );
                 stream.Write( (uint)_Number + 1 );
             }
         }

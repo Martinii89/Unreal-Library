@@ -134,7 +134,7 @@ namespace UELib.Core
                 ExceptionPosition = _Buffer != null ? _Buffer.Position : -1;
                 DeserializationState |= ObjectState.Errorlized;
 
-                Log.WriteLine( $"{e.Source}:{Name}:{e.GetType().Name} occurred while deserializing;"
+                Log.Error( $"{e.Source}:{Name}:{e.GetType().Name} occurred while deserializing;"
                     + $"\r\n{e.StackTrace}"
                     + $"\r\n{e.Message}"
                     + $"\r\nError occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}  "
@@ -149,7 +149,6 @@ namespace UELib.Core
 
         private void InitBuffer()
         {
-            //Log.WriteLine( "Init buffer for {0}", (string)this );
             var buff = new byte[ExportTable.SerialSize];
             Package.Stream.Seek( ExportTable.SerialOffset, SeekOrigin.Begin );
             Package.Stream.Read( buff, 0, ExportTable.SerialSize );
@@ -162,14 +161,11 @@ namespace UELib.Core
 
         internal void EnsureBuffer()
         {
-            //Log.WriteLine( "Ensure buffer for {0}", (string)this );
             InitBuffer();
         }
 
         internal void MaybeDisposeBuffer()
         {
-            //Log.WriteLine( "Disposing buffer for {0}", (string)this );
-
             // Do not dispose while deserializing!
             // For example DecompileDefaultProperties or DecompileScript, may dispose the buffer in certain situations!
             if( _Buffer == null || (DeserializationState & ObjectState.Deserializing) != 0 )
@@ -177,7 +173,6 @@ namespace UELib.Core
 
             _Buffer.DisposeBuffer();
             _Buffer = null;
-            //Log.WriteLine( "Disposed" );
         }
 
         protected virtual bool CanDisposeBuffer()
@@ -201,9 +196,9 @@ namespace UELib.Core
             if( Package.Version >= 322)
             {
                 // TODO: Corrigate version. Fix component detection!
-                //if( _Buffer.Version > 400
-                //    && HasObjectFlag( Flags.ObjectFlagsHO.PropertiesObject )
-                //    && HasObjectFlag( Flags.ObjectFlagsHO.ArchetypeObject ) )
+                //if (_Buffer.Version > 400
+                //    && HasObjectFlag(Flags.ObjectFlagsHO.PropertiesObject)
+                //    && HasObjectFlag(Flags.ObjectFlagsHO.ArchetypeObject))
                 //{
                 //    var componentClass = _Buffer.ReadObjectIndex();
                 //    var componentName = _Buffer.ReadNameIndex();

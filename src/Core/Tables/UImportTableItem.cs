@@ -18,7 +18,7 @@ namespace UELib
 
         public void Serialize( IUnrealStream stream )
         {
-            Log.WriteLine( $"Writing import {ObjectName} at {stream.Position}");
+            Log.Info( $"Writing import {ObjectName} at {stream.Position}");
             stream.Write( PackageName );
             stream.Write( _ClassName );
             stream.Write( OuterTable != null ? (int)OuterTable.Object : 0 ); // Always an ordinary integer
@@ -27,7 +27,7 @@ namespace UELib
 
         public void Deserialize( IUnrealStream stream )
         {
-            Log.WriteLine($"Reading import {Index} at {stream.Position}");
+            Log.Info($"Reading import {Index} at {stream.Position}");
             PackageName         = stream.ReadNameReference();
             _ClassName          = stream.ReadNameReference();
             ClassIndex         = (int)_ClassName;

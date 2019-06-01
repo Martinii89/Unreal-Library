@@ -155,7 +155,7 @@ namespace UELib.Core
 
                             if( CodePosition < codeSize )
                             {
-                                Log.WriteLine( "End of script detected, but the loop condition is still true." );
+                                Log.Debug( "End of script detected, but the loop condition is still true." );
                             }
                             break;
                         }
@@ -163,13 +163,13 @@ namespace UELib.Core
                         {
                             if( e is System.IO.EndOfStreamException )
                             {
-                                Log.WriteLine( "Couldn't backup from this error! Decompiling aborted!" );
+                                Log.Error( "Couldn't backup from this error! Decompiling aborted!" );
                                 return;
                             }
-                            Log.WriteLine($"Object:{_Container.Name}");
-                            Log.WriteLine($"Failed to deserialize token at position:{CodePosition}");
-                            Log.WriteLine($"Exception:{e.Message}");
-                            Log.WriteLine($"Stack:{e.StackTrace}");
+                            Log.Error($"Object:{_Container.Name}");
+                            Log.Error($"Failed to deserialize token at position:{CodePosition}");
+                            Log.Error($"Exception:{e.Message}");
+                            Log.Error($"Stack:{e.StackTrace}");
                         }
                     }
                 }

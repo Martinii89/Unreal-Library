@@ -4,6 +4,7 @@ using System.IO;
 using UELib;
 using UELib.Types;
 using UELib.Core;
+using UELib.Logging;
 
 namespace AssetExtraction
 {
@@ -14,6 +15,7 @@ namespace AssetExtraction
 
         private static void Main(string[] args)
         {
+            Log.SetLogger(new FileLogger());
             ConfigArrayTypes();
             string pathToPackage;
             if (args.Length < 2)
