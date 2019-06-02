@@ -48,11 +48,21 @@ namespace AssetExtraction
                 "Core.upk",
                 "Engine.upk",
                 "ProjectX.upk",
+                "AkAudio.upk",
                 "TAGame.upk"
             };
             foreach (var packageName in basicPackageNames)
             {
-                UnrealLoader.LoadFullPackage(packageName, System.IO.FileAccess.Read);
+                try
+                {
+                    UnrealLoader.LoadFullPackage(packageName, System.IO.FileAccess.Read);
+                }catch (FileNotFoundException e)
+                {
+                    Console.WriteLine(
+                        $"Did not find {packageName} in the current directory."
+                        +"This is optional, but recommended. "
+                        +"Preloading this package improves type recognition.");
+                }
             }
         }
 
