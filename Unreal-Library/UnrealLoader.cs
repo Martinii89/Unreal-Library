@@ -74,6 +74,13 @@ namespace UELib
         public static UnrealPackage LoadPackage( string packagePath, FileAccess fileAccess = FileAccess.Read )
         {
             var packageName = Path.GetFileNameWithoutExtension(packagePath);
+            UnrealPackage preloadedPackage;
+            _LoadedPackages.TryGetValue(packageName, out preloadedPackage);
+            if (preloadedPackage != null)
+            {
+                return preloadedPackage;
+            }
+
             UPackageStream stream;
             if (packageName.EndsWith("_decrypted"))
             {

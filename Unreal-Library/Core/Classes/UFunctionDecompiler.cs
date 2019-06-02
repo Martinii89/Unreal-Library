@@ -97,17 +97,17 @@ namespace UELib.Core
 
             if( HasFunctionFlag( Flags.FunctionFlags.K2Call ) )
             {
-                output += "k2call ";
+                //output += "k2call ";
             }
 
             if( HasFunctionFlag( Flags.FunctionFlags.K2Override ) )
             {
-                output += "k2override ";
+                //output += "k2override ";
             }
 
             if( HasFunctionFlag( Flags.FunctionFlags.K2Pure ) )
             {
-                output += "k2pure ";
+                //output += "k2pure ";
             }
 
             if( HasFunctionFlag( Flags.FunctionFlags.Invariant ) )

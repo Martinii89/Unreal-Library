@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "UELib" )]
-[assembly: AssemblyDescription( "A library for parsing Unreal Engine packages." )]
+[assembly: AssemblyTitle( "RLLib" )]
+[assembly: AssemblyDescription( "A library for parsing Rocket League packages." )]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany( "EliotVU" )]
-[assembly: AssemblyProduct( "UELib" )]
-[assembly: AssemblyCopyright( "© 2009-2015 Eliot van Uytfanghe. All rights reserved." )]
+[assembly: AssemblyCompany( "MVN" )]
+[assembly: AssemblyProduct("RLLib")]
+[assembly: AssemblyCopyright( "© 2019 Martin VN. All rights reserved." )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
