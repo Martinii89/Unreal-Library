@@ -134,11 +134,14 @@ namespace UELib.Core
                 ExceptionPosition = _Buffer != null ? _Buffer.Position : -1;
                 DeserializationState |= ObjectState.Errorlized;
 
-                Log.Error( $"{e.Source}:{Name}:{e.GetType().Name} occurred while deserializing;"
-                    + $"\r\n{e.StackTrace}"
-                    + $"\r\n{e.Message}"
-                    + $"\r\nError occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}  "
-                );;
+                Log.Error( 
+                    $"Deserialization error!:"
+                    +$"\r\n{Package}:{Name}:{e.GetType().Name} with object index:{ExportTable.Index}"
+                    +$"\r\nError occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}"
+                    +$"\r\n{e.StackTrace}"
+                    +$"\r\n{e.Message}" +
+                    $"\r\n"
+                );
             }
             finally
             {

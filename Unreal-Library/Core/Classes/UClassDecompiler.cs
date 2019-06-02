@@ -75,7 +75,8 @@ namespace UELib.Core
                 "* {0} {1}\r\n" +
                 "* All rights belong to their respective owners.\r\n" +
                 "*******************************************************************************/\r\n",
-                assembly.GetName().Name,
+                assembly.GetCustomAttribute<AssemblyTitleAttribute>().Title,
+                //assembly.GetName().Name,
                 ((AssemblyCopyrightAttribute)assembly.GetCustomAttributes( typeof(AssemblyCopyrightAttribute), false )[0]).Copyright,
                 System.Windows.Forms.Application.ProductName,
                 GetOuterGroup()
