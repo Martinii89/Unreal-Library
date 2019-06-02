@@ -19,6 +19,7 @@ namespace UELib
         /// </summary>
         private static readonly List<UnrealPackage> _CachedPackages = new List<UnrealPackage>();
         private static readonly Dictionary<string, UnrealPackage> _LoadedPackages = new Dictionary<string, UnrealPackage>();
+        private static readonly Dictionary<string, UStruct> _LoadedClasses = new Dictionary<string, UStruct>();
 
 
         private static UnrealPackage GetPreloadedPackage(string packageName)
@@ -67,6 +68,40 @@ namespace UELib
             #endregion
             return foundStruct;
         } 
+
+        public static UStruct FindClassInCache(string className)
+        {
+            _LoadedClasses.TryGetValue(className, out UStruct classObject);
+            if (classObject == null)
+            {
+                Log.Debug($"Did not find {className} in cache");
+                return null;
+            }
+            return classObject;
+        }
+
+        private static void CacheExportClasses(UnrealPackage package)
+        {
+            foreach (var obj in package.Objects)
+            {
+                if (obj.ExportTable == null || obj.Name == "None")
+                {
+                    //Skip classes that are not defined in this package. And None classes(Wtf even is that..)
+                    continue;
+                }
+                if (obj.IsClassType("Class") || obj.IsClassType("ScriptStruct"))
+                {
+                    if (_LoadedClasses.ContainsKey(obj.Name))
+                    {
+                        _LoadedClasses[obj.Name] = (UStruct)obj;
+                        Log.Debug($"{obj.Name} already in class cache. Overwriting with class from {package.FullPackageName} (What could go wrong right?");
+                    }else
+                    {
+                        _LoadedClasses.Add(obj.Name, (UStruct)obj);
+                    }
+                }
+            }
+        }
         /// <summary>
         /// Loads the given file specified by PackagePath and
         /// returns the serialized UnrealPackage.
@@ -74,12 +109,6 @@ namespace UELib
         public static UnrealPackage LoadPackage( string packagePath, FileAccess fileAccess = FileAccess.Read )
         {
             var packageName = Path.GetFileNameWithoutExtension(packagePath);
-            UnrealPackage preloadedPackage;
-            _LoadedPackages.TryGetValue(packageName, out preloadedPackage);
-            if (preloadedPackage != null)
-            {
-                return preloadedPackage;
-            }
 
             UPackageStream stream;
             if (packageName.EndsWith("_decrypted"))
@@ -94,7 +123,6 @@ namespace UELib
             }
             var package = new UnrealPackage( stream );
             package.Deserialize( stream );
-            _LoadedPackages.Add(packageName, package);
             return package;
         }
 
@@ -107,8 +135,7 @@ namespace UELib
             var stream = new UPackageStream( packagePath, FileMode.Open, fileAccess );
             var package = new UnrealPackage( stream ) {Decoder = decoder};
             package.Deserialize( stream );
-            var packageName = Path.GetFileNameWithoutExtension(packagePath);
-            _LoadedPackages.Add(packageName, package);
+
             return package;
         }
 
@@ -136,11 +163,19 @@ namespace UELib
         /// </summary>
         public static UnrealPackage LoadFullPackage( string packagePath, FileAccess fileAccess = FileAccess.Read )
         {
+            var packageName = Path.GetFileNameWithoutExtension(packagePath);
+            _LoadedPackages.TryGetValue(packageName, out UnrealPackage preloadedPackage);
+            if (preloadedPackage != null)
+            {
+                return preloadedPackage;
+            }
             var package = LoadPackage( packagePath, fileAccess );
             if( package != null )
             {
                 package.InitializePackage();
             }
+            _LoadedPackages.Add(packageName, package);
+            CacheExportClasses(package);
             return package;
         }
     }

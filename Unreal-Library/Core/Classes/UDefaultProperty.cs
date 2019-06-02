@@ -776,7 +776,8 @@ namespace UELib.Core
             {
                 if (_object.ExportTable == null) 
                 {
-                    var realClass = UnrealLoader.FindClassInPackage(_object.Outer.Name, _object.Name);
+                    var realClass = UnrealLoader.FindClassInCache(_object.Name);
+                    //var realClass = UnrealLoader.FindClassInPackage(_object.Outer.Name, _object.Name);
                     return realClass;
                 }
                 return _object as UStruct;
