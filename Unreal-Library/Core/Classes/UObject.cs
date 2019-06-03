@@ -651,7 +651,7 @@ namespace UELib.Core
     ///     Instances of this class are created because of a class type that was not found within the 'RegisteredClasses' list.
     ///     Instances of this class will only be deserialized on demand.
     /// </summary>
-    public sealed class UnknownObject : UObject
+    public sealed class UnknownObject : UObject, IExtract
     {
         /// <summary>
         /// Creates a new instance of the UELib.Core.UnknownObject class.

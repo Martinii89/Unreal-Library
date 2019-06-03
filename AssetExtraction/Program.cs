@@ -35,10 +35,12 @@ namespace AssetExtraction
             var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
             //Init the asset extractor
             assetExtractor = new AssetExtractor(package);
+            assetExtractor.ExportClasses(packageName);
+            assetExtractor.ExportData(packageName);
 
-            ExtractClasses(packageName);
-            ExtractStaticMeshes(packageName);
-            ExtractFXActors(packageName);
+            //ExtractClasses(packageName);
+            //ExtractStaticMeshes(packageName);
+            //ExtractFXActors(packageName);
         }
 
         private static void PreloadBasicPackages()
@@ -92,25 +94,18 @@ namespace AssetExtraction
         //    }
         //}
 
-        private static void ExtractClasses(string packageName)
-        {
-            string outputFolder = Path.Combine(packageName, "Classes");
-            var assetTypes = new List<string>() { "Class" };
-            assetExtractor.Extract(assetTypes, outputFolder);
-        }
-
         private static void ExtractStaticMeshes(string packageName)
         {
             string outputFolder = Path.Combine(packageName, "StaticMesh");
             var assetTypes = new List<string>() { "StaticMeshComponent", "StaticMeshActor" };
-            assetExtractor.Extract(assetTypes, outputFolder);
+            assetExtractor.Export(assetTypes, outputFolder);
         }
 
         private static void ExtractFXActors(string packageName)
         {
             string outputFolder = Path.Combine(packageName, "FXActor_TA");
             var assetTypes = new List<string>() { "FXActor_TA"};
-            assetExtractor.Extract(assetTypes, outputFolder);
+            assetExtractor.Export(assetTypes, outputFolder);
         }
     }
 }

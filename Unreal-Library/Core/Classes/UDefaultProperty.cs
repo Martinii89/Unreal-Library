@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using UELib.Types;
 
 namespace UELib.Core
@@ -683,34 +684,45 @@ namespace UELib.Core
                                 {
                                     arrayType = PropertyType.StructProperty;
                                 }
-
+                                var sb = new StringBuilder();
+                                sb.Append("(");
                                 for( int i = 0; i < arraySize; ++ i )
                                 {
-                                    propertyValue += DeserializeDefaultPropertyValue( arrayType, ref deserializeFlags )
-                                        + (i != arraySize - 1 ? "," : String.Empty);
+                                    sb.Append(DeserializeDefaultPropertyValue(arrayType, ref deserializeFlags)
+                                        + (i != arraySize - 1 ? "," : String.Empty));
+                                    //propertyValue += DeserializeDefaultPropertyValue( arrayType, ref deserializeFlags )
+                                    //    + (i != arraySize - 1 ? "," : String.Empty);
                                 }
-                                propertyValue = "(" + propertyValue + ")";
+                                sb.Append(")");
+                                propertyValue = sb.ToString();
+                                //propertyValue = "(" + propertyValue + ")";
                             }
                             else
                             {
-                                for( int i = 0; i < arraySize; ++ i )
+                                var sb = new StringBuilder();
+                                for ( int i = 0; i < arraySize; ++ i )
                                 {
                                     string elementValue = DeserializeDefaultPropertyValue( arrayType, ref deserializeFlags );
                                     if( (_TempFlags & ReplaceNameMarker) != 0 )
                                     {
-                                        propertyValue += elementValue.Replace( "%ARRAYNAME%", Name + "(" + i + ")" );
+                                        sb.Append(elementValue.Replace("%ARRAYNAME%", Name + "(" + i + ")"));
+
+                                        //propertyValue += elementValue.Replace( "%ARRAYNAME%", Name + "(" + i + ")" );
                                         _TempFlags = 0x00;
                                     }
                                     else
                                     {
-                                        propertyValue += Name + "(" + i + ")=" + elementValue;
+                                        sb.Append($"{Name}({i})={elementValue}");
+                                        //propertyValue += Name + "(" + i + ")=" + elementValue;
                                     }
 
                                     if( i != arraySize - 1 )
                                     {
-                                        propertyValue += "\r\n" + UDecompilingState.Tabs;
+                                        sb.Append($"\r\n{UDecompilingState.Tabs}");
+                                        //propertyValue += "\r\n" + UDecompilingState.Tabs;
                                     }
                                 }
+                                propertyValue += sb.ToString();
                             }
 
                             _TempFlags |= DoNotAppendName;

@@ -3,7 +3,7 @@
 namespace UELib.Engine.Classes
 {
     [UnrealRegisterClass]
-    public class UStaticMeshActor : UObject
+    public class UStaticMeshActor : UObject, IExtract
     {
         public UStaticMeshActor()
         {

@@ -8,7 +8,7 @@ namespace UELib.Core
     /// Represents a unreal class.
     /// </summary>
     [UnrealRegisterClass]
-    public partial class UClass : UState
+    public partial class UClass : UState, IExtract
     {
         public struct Dependency : IUnrealSerializableClass
         {
@@ -334,5 +334,9 @@ namespace UELib.Core
             return Within != null && !string.Equals( Within.Name, "Object", StringComparison.OrdinalIgnoreCase );
         }
         #endregion
+    }
+
+    public interface IExtract
+    {
     }
 }

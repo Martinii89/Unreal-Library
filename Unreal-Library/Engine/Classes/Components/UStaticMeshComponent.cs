@@ -7,7 +7,7 @@ using UELib.Core;
 namespace UELib.Engine.Classes.Components
 {
     [UnrealRegisterClass]
-    public class UStaticMeshComponent: UObject
+    public class UStaticMeshComponent: UObject, IExtract
     {
         public UStaticMeshComponent()
         {
