@@ -671,8 +671,11 @@ namespace UELib.Core
                 if (oindex1 == oindex2 && oindex1 == Table.ClassIndex)
                 {
                     _Buffer.Position = initial_position + 22;
-
-                }else
+                }else if (oindex1 == 0 && oindex2 == -1)
+                {
+                    _Buffer.Position = initial_position + 4;
+                }
+                else
                 {
                     _Buffer.Position = initial_position;
                 }

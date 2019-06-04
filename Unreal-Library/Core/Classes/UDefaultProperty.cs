@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using UELib.Logging;
 using UELib.Types;
 
 namespace UELib.Core
@@ -795,13 +796,14 @@ namespace UELib.Core
                 return _object as UStruct;
 
             }
-
             UProperty property = null;
+
             outer = _Outer ?? _Container.Class as UStruct;
-            outer = GetRealObject(outer);
-            for( var structField = outer; structField != null; structField = GetRealObject(structField)?.Super as UStruct )
+            //outer = GetRealObject(outer);
+            for( var structField = outer; structField != null; structField = structField.Super as UStruct )
             {
-                if( structField.Variables == null || !structField.Variables.Any() )
+                structField = GetRealObject(structField);
+                if ( structField.Variables == null || !structField.Variables.Any() )
                     continue;
 
                 property = structField.Variables.Find( i => i.Name == Name );
