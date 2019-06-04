@@ -663,19 +663,42 @@ namespace UELib.Core
 
         protected override void Deserialize()
         {
-            if( Package.Version > 400 && _Buffer.Length >= 12 )
+            var initial_position = _Buffer.Position;
+            try
             {
-                // componentClassIndex
-                _Buffer.Position += sizeof(int);
-                var componentNameIndex = _Buffer.ReadNameIndex();
-                if( componentNameIndex == (int)Table.ObjectName )
+                var oindex1 = _Buffer.ReadObjectIndex();
+                var oindex2 = _Buffer.ReadObjectIndex();
+                if (oindex1 == oindex2 && oindex1 == Table.ClassIndex)
                 {
-                    base.Deserialize();
-                    return;
+                    _Buffer.Position = initial_position + 22;
+
+                }else
+                {
+                    _Buffer.Position = initial_position;
                 }
-                _Buffer.Position -= 12;
+            }
+            catch(ArgumentOutOfRangeException e)
+            {
+                _Buffer.Position = initial_position;
             }
             base.Deserialize();
+            //if( Package.Version > 400 && _Buffer.Length >= 12 )
+            //{
+            //    // componentClassIndex
+            //    _Buffer.Position += sizeof(int);
+            //    if (Name == "FXActor_TA_28")
+            //    {
+            //        Console.WriteLine("here");
+            //    }
+            //    var componentNameIndex = _Buffer.ReadNameIndex();
+            //    if( componentNameIndex == (int)Table.ObjectName )
+            //    {
+            //        base.Deserialize();
+            //        return;
+            //    }
+            //    _Buffer.Position -= 12;
+            //}
+            //base.Deserialize();
         }
 
         protected override bool CanDisposeBuffer()
