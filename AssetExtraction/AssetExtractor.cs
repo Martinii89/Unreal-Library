@@ -64,7 +64,9 @@ namespace AssetExtraction
         {
             //var objects = package.Objects.Where((u) => u.ExportTable != null && u.Name != "None" && u.ExportTable.ExportFlags == 1 && u.Table.ClassName != "Package");
             var extractableObjects = package.Objects.Where((o) => o.ExportTable != null && o is IExtract && o.Name != "None");
-            var dataObjects = extractableObjects.Where((o) => !o.IsClassType("Class"));
+            var dataObjects = extractableObjects.Where(
+                (o) => !o.IsClassType("Class")
+                && !o.GetOuterGroup().StartsWith("Default__"));
             //Theworld stuff does not set exportflag = 1
             Console.WriteLine($"Extracting {dataObjects.Count()} objects");
             foreach (var obj in dataObjects)
