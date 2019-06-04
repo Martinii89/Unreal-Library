@@ -5,9 +5,45 @@ using UELib;
 using UELib.Types;
 using UELib.Core;
 using UELib.Logging;
+using System.Reflection;
 
 namespace AssetExtraction
 {
+    public class MyFileLogger : ILogger, IDisposable
+    {
+        private readonly string logFile;
+        readonly StreamWriter writer;
+
+        public MyFileLogger(string fileName = "log", bool overwriteFile = true)
+        {
+            logFile = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{fileName}.txt";
+            if (overwriteFile)
+            {
+                DeleteOldLogfile();
+            }
+            writer = new StreamWriter(logFile, append: true);
+        }
+
+        private void DeleteOldLogfile()
+        {
+            if (File.Exists(logFile))
+            {
+                File.Delete(logFile);
+            }
+        }
+
+
+        public void WriteLine(string message)
+        {
+            writer.WriteLine(message);
+        }
+
+        public void Dispose()
+        {
+            ((IDisposable)writer).Dispose();
+        }
+    }
+
     internal class Program
     {
 
@@ -15,32 +51,35 @@ namespace AssetExtraction
 
         private static void Main(string[] args)
         {
-            Log.SetLogger(new FileLogger());
-            Log.IsDebugEnabled = true;
-            //Preloading packages works better and more reliable
-            //ConfigArrayTypes();
-            string pathToPackage;
-            if (args.Length < 2)
+            using (var logger = new MyFileLogger())
             {
-                Console.WriteLine("Usage: -p \"Path to package\"");
-                return;
-            }
-            else
-            {
-                pathToPackage = args[1];
-            }
-            PreloadBasicPackages();
-            
-            var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
-            var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
-            //Init the asset extractor
-            assetExtractor = new AssetExtractor(package);
-            assetExtractor.ExportClasses(packageName);
-            assetExtractor.ExportData(packageName);
+                Log.SetLogger(logger);
+                Log.IsDebugEnabled = true;
+                //Preloading packages works better and more reliable
+                //ConfigArrayTypes();
+                string pathToPackage;
+                if (args.Length < 2)
+                {
+                    Console.WriteLine("Usage: -p \"Path to package\"");
+                    return;
+                }
+                else
+                {
+                    pathToPackage = args[1];
+                }
+                PreloadBasicPackages();
 
-            //ExtractClasses(packageName);
-            //ExtractStaticMeshes(packageName);
-            //ExtractFXActors(packageName);
+                var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
+                var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
+                //Init the asset extractor
+                assetExtractor = new AssetExtractor(package);
+                assetExtractor.ExportClasses(packageName);
+                assetExtractor.ExportData(packageName);
+
+                //ExtractClasses(packageName);
+                //ExtractStaticMeshes(packageName);
+                //ExtractFXActors(packageName);
+            }
         }
 
         private static void PreloadBasicPackages()
