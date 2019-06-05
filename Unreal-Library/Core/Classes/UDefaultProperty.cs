@@ -622,7 +622,7 @@ namespace UELib.Core
                                     var tag = new UDefaultProperty( _Container, _Outer );
                                     if( tag.Deserialize() )
                                     {
-                                        propertyValue += "\r\n" + UDecompilingState.Tabs + UnrealConfig.Indention + tag.Name +
+                                        propertyValue += tag.Name +
                                             (tag.ArrayIndex > 0 && tag.Type != PropertyType.BoolProperty
                                             ? "[" + tag.ArrayIndex + "]" : String.Empty) +
                                                 "=" + tag.DeserializeValue( deserializeFlags ) + ",";

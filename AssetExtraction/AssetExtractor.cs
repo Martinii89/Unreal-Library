@@ -60,18 +60,29 @@ namespace AssetExtraction
 
         }
 
+        private string DefaultsFolder(UObject obj)
+        {
+            var outerGroup = obj.GetOuterGroup();
+            if (outerGroup != null && outerGroup.StartsWith("Default__"))
+            {
+                return ".Classes\\Defaults\\";
+            }else
+            {
+                return "";
+            }
+        }
+
         public int ExportData(string outputPath)
         {
             //var objects = package.Objects.Where((u) => u.ExportTable != null && u.Name != "None" && u.ExportTable.ExportFlags == 1 && u.Table.ClassName != "Package");
             var extractableObjects = package.Objects.Where((o) => o.ExportTable != null && o is IExtract && o.Name != "None");
             var dataObjects = extractableObjects.Where(
-                (o) => !o.IsClassType("Class")
-                && !o.GetOuterGroup().StartsWith("Default__"));
+                (o) => !o.IsClassType("Class"));
             //Theworld stuff does not set exportflag = 1
             Console.WriteLine($"Extracting {dataObjects.Count()} objects");
             foreach (var obj in dataObjects)
             {
-                var outputFile = Path.Combine(outputPath, GetFullObjectName(obj) + ".uc");
+                var outputFile = Path.Combine(outputPath, $"{DefaultsFolder(obj)}{GetFullObjectName(obj)}.uc");
                 new FileInfo(outputFile).Directory.Create();
                 File.WriteAllText(outputFile, obj.Decompile());
             }

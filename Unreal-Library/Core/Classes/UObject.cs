@@ -663,6 +663,22 @@ namespace UELib.Core
 
         protected override void Deserialize()
         {
+            if (Package.Version > 400 && _Buffer.Length >= 12)
+            {
+                // componentClassIndex
+                _Buffer.Position += sizeof(int);
+                if (Name == "FXActor_TA_28")
+                {
+                    Console.WriteLine("here");
+                }
+                var componentNameIndex = _Buffer.ReadNameIndex();
+                if (componentNameIndex == (int)Table.ObjectName)
+                {
+                    base.Deserialize();
+                    return;
+                }
+                _Buffer.Position -= 12;
+            }
             var initial_position = _Buffer.Position;
             try
             {
