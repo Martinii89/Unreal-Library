@@ -19,7 +19,7 @@ namespace UELib.Core
         /// <returns></returns>
         public override string Decompile()
         {
-            string code = "//Function decompiling is disabled";
+            string code = "\r\n{}//Function decompiling is disabled";
             //try
             //{
             //    code = FormatCode();
