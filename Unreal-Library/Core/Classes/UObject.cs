@@ -133,6 +133,7 @@ namespace UELib.Core
                 ThrownException = e;
                 ExceptionPosition = _Buffer != null ? _Buffer.Position : -1;
                 DeserializationState |= ObjectState.Errorlized;
+                Log.DeserializationErrors += 1;
 
                 Log.Error( 
                     $"Deserialization error!:"
@@ -663,44 +664,67 @@ namespace UELib.Core
 
         protected override void Deserialize()
         {
-            if (Package.Version > 400 && _Buffer.Length >= 12)
-            {
-                // componentClassIndex
-                _Buffer.Position += sizeof(int);
-                if (Name == "FXActor_TA_28")
-                {
-                    Console.WriteLine("here");
-                }
-                var componentNameIndex = _Buffer.ReadNameIndex();
-                if (componentNameIndex == (int)Table.ObjectName)
-                {
-                    base.Deserialize();
-                    return;
-                }
-                _Buffer.Position -= 12;
-            }
-            var initial_position = _Buffer.Position;
+            //if (Package.Version > 400 && _Buffer.Length >= 12)
+            //{
+            //    // componentClassIndex
+            //    _Buffer.Position += sizeof(int);
+            //    var componentNameIndex = _Buffer.ReadNameIndex();
+            //    if (componentNameIndex == (int)Table.ObjectName)
+            //    {
+            //        base.Deserialize();
+            //        return;
+            //    }
+            //    _Buffer.Position -= 12;
+            //}
+            //var initial_position = _Buffer.Position;
+            //try
+            //{
+            //    var oindex1 = _Buffer.ReadObjectIndex();
+            //    var oindex2 = _Buffer.ReadObjectIndex();
+            //    if (oindex1 == oindex2 && oindex1 == Table.ClassIndex)
+            //    {
+            //        _Buffer.Position = initial_position + 22;
+            //    }else if (oindex1 == 0 && oindex2 == -1)
+            //    {
+            //        _Buffer.Position = initial_position + 4;
+            //    }
+            //    else
+            //    {
+            //        _Buffer.Position = initial_position;
+            //    }
+            //}
+            //catch(ArgumentOutOfRangeException e)
+            //{
+            //    _Buffer.Position = initial_position;
+            //}
             try
             {
-                var oindex1 = _Buffer.ReadObjectIndex();
-                var oindex2 = _Buffer.ReadObjectIndex();
-                if (oindex1 == oindex2 && oindex1 == Table.ClassIndex)
-                {
-                    _Buffer.Position = initial_position + 22;
-                }else if (oindex1 == 0 && oindex2 == -1)
-                {
-                    _Buffer.Position = initial_position + 4;
-                }
-                else
-                {
-                    _Buffer.Position = initial_position;
-                }
-            }
-            catch(ArgumentOutOfRangeException e)
+                base.Deserialize();
+            }catch (Exception e)
             {
-                _Buffer.Position = initial_position;
+                //Console.WriteLine("Deserialize failed. Trying bruteforce");
+                var maxBrutceForce = _Buffer.Length > 200 ? 200 : _Buffer.Length;
+                for (int i = 0; i < 50; i++)
+                {
+                    try
+                    {
+                        _Buffer.Position = i;
+                        base.Deserialize();
+                        Log.Debug($"Brute force succesfully with offset {i} deserialized to {_Buffer.Position}/{_Buffer.Length}");
+                        DeserializationState ^= ObjectState.Errorlized;
+                        return;
+                        //Console.WriteLine($"Brute force succesfully with offset {i}");
+                    }
+                    catch (Exception e2)
+                    {
+                        continue;
+                    }
+                }
+                Console.WriteLine("Brute force failed");
+                //Brute force failed, rethrow the initial error
+                throw e;
+
             }
-            base.Deserialize();
             //if( Package.Version > 400 && _Buffer.Length >= 12 )
             //{
             //    // componentClassIndex

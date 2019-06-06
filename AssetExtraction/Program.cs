@@ -72,9 +72,13 @@ namespace AssetExtraction
                 var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
                 var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
                 //Init the asset extractor
+                Log.DeserializationErrors = 0;
                 assetExtractor = new AssetExtractor(package);
                 assetExtractor.ExportClasses(packageName);
                 assetExtractor.ExportData(packageName);
+                string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
+                Log.Debug(deserializationErrors);
+                Console.WriteLine(deserializationErrors);
 
                 //ExtractClasses(packageName);
                 //ExtractStaticMeshes(packageName);

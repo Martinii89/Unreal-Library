@@ -6,7 +6,7 @@ using UELib.Core;
 
 namespace UELib.Engine.Classes.Components
 {
-    [UnrealRegisterClass]
+    //[UnrealRegisterClass]
     public class UStaticMeshComponent: UObject, IExtract
     {
         public UStaticMeshComponent()
@@ -16,14 +16,11 @@ namespace UELib.Engine.Classes.Components
         }
         protected override void Deserialize()
         {
+            if (Name == "StaticMeshActor_SMC_12")
             if (Package.Version > 400 && _Buffer.Length >= 12)
             {
                 // componentClassIndex
                 _Buffer.Position += sizeof(int);
-                if (Name == "FXActor_TA_28")
-                {
-                    Console.WriteLine("here");
-                }
                 var componentNameIndex = _Buffer.ReadNameIndex();
                 if (componentNameIndex == (int)Table.ObjectName)
                 {
@@ -43,7 +40,8 @@ namespace UELib.Engine.Classes.Components
                 }
                 else
                 {
-                    _Buffer.Position = initial_position;
+                    //temporary (who are we kidding, it's gonna stay here untill something breaks)
+                    _Buffer.Position = initial_position + 4;
                 }
             }
             catch (ArgumentOutOfRangeException e)

@@ -61,6 +61,7 @@ namespace UELib.Logging
         public static bool IsWarnEnabled { get; set; }
         public static bool IsErrorEnabled { get; set; }
         public static bool IsFatalEnabled { get; set; }
+        public static int DeserializationErrors = 0;
 
         public static void SetLogger(ILogger logger)
         {
@@ -72,6 +73,11 @@ namespace UELib.Logging
         public static void Warn(string message)  { if (Log.IsWarnEnabled)  { logger.WriteLine(message); } }
         public static void Error(string message) { if (Log.IsErrorEnabled) { logger.WriteLine(message); } }
         public static void Fatal(string message) { if (Log.IsFatalEnabled) { logger.WriteLine(message); } }
+        public static void DeserializationError(string message)
+        {
+            Error(message);
+            Log.DeserializationErrors++;
+        }
 
         static Log()
         {
