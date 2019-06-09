@@ -1165,7 +1165,7 @@ namespace UELib
             {
                 throw new LinkingObjectsException();
             }
-            DisposeStream();
+            //DisposeStream();
         }
 
         /// <summary>

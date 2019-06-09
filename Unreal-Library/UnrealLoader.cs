@@ -118,8 +118,17 @@ namespace UELib
             }
             else
             {
-                stream = new RLPackageStream(packagePath);
-                Log.Info("Loading encrypted RL package");
+                try
+                {
+                    stream = new RLPackageStream(packagePath);
+                    Log.Info("Loading encrypted RL package");
+                }
+                catch(InvalidDataException e)
+                {
+                    stream = new UPackageStream(packagePath, FileMode.Open, fileAccess);
+                    stream.Position = 0;
+                }
+                
             }
             var package = new UnrealPackage( stream );
             package.Deserialize( stream );
