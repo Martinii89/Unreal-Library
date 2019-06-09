@@ -102,6 +102,7 @@ namespace AssetExtraction
             {
                 obj.BeginDeserializing();
                 var outer = obj.Outer;
+                if (outer == null) continue;
                 nodeCache.TryGetValue(outer, out var outerNode);
                 if (outerNode == null)
                 {
