@@ -1,91 +1,151 @@
-﻿using System;
+﻿using CommandLine;
+using CommandLine.Text;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UELib;
-using UELib.Types;
-using UELib.Core;
 using UELib.Logging;
-using System.Reflection;
 
 namespace AssetExtraction
 {
-    public class MyFileLogger : ILogger, IDisposable
+    internal class Options
     {
-        private readonly string logFile;
-        readonly StreamWriter writer;
+        [Option('d', "debug", Default = false)]
+        public bool Debug { get; set; }
 
-        public MyFileLogger(string fileName = "log", bool overwriteFile = true)
+        [Option("preload", Default = true, HelpText = "Should you preload default packages?")]
+        public bool preload { get; set; }
+
+        [Option('c', "classes", Default = false, Required = false, HelpText = "Should classes be outputted?")]
+        public bool ExtractClasses { get; set; }
+
+        [Option('o', "objects", Default = false, Required = false, HelpText = "Should objects be outputted?")]
+        public bool ExtractData { get; set; }
+
+        [Option('m', "meshinfo", Default = false, Required = false, HelpText = "Should data be outputted?")]
+        public bool ExtractMeshInfo { get; set; }
+
+        [Option('f', "folder", Required = false, HelpText = "Path to package folder. If not specified current working folder will be used")]
+        public string packageFolder { get; set; }
+
+        [Option('g', "glob", HelpText = "glob pattern for files to process")]
+        public string fileGlob { get; set; }
+
+        [Option('p', "packages", Separator = ':', HelpText = "packages to process. Separated by :")]
+        public IEnumerable<string> packages { get; set; }
+
+        [Usage(ApplicationAlias = "AssetExtractor.exe")]
+        public static IEnumerable<Example> Examples
         {
-            logFile = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{fileName}.txt";
-            if (overwriteFile)
+            get
             {
-                DeleteOldLogfile();
+                yield return new Example("Extract all Underwater files", 
+                    new UnParserSettings() { PreferShortName = true},
+                    new Options
+                    {
+                        ExtractClasses = true,
+                        ExtractData = true,
+                        ExtractMeshInfo = true,
+                        fileGlob = "Underwater*.upk"
+                    });
+                yield return new Example("Extract classes from a list of package", new Options
+                {
+                    ExtractClasses = true,
+                    packages = new List<string>() { "Core.upk", "Engine.upk", "ProjectX.upk", "TAGame.upk" }
+                });
             }
-            writer = new StreamWriter(logFile, append: true);
-        }
-
-        private void DeleteOldLogfile()
-        {
-            if (File.Exists(logFile))
-            {
-                File.Delete(logFile);
-            }
-        }
-
-
-        public void WriteLine(string message)
-        {
-            writer.WriteLine(message);
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable)writer).Dispose();
         }
     }
 
     internal class Program
     {
-
-        static AssetExtractor assetExtractor;
+        private static AssetExtractor assetExtractor;
 
         private static void Main(string[] args)
         {
+            var argParse = Parser.Default.ParseArguments<Options>(args);
+            Options options = null;
+            argParse.WithParsed(_options =>
+            {
+                options = _options;
+            });
+            if (options == null)
+            {
+                return;
+            }
             using (var logger = new MyFileLogger())
             {
                 Log.SetLogger(logger);
-                Log.IsDebugEnabled = true;
-                //Preloading packages works better and more reliable
-                //ConfigArrayTypes();
-                string pathToPackage;
-                if (args.Length < 2)
+                if (options.Debug)
                 {
-                    Console.WriteLine("Usage: -p \"Path to package\"");
-                    return;
+                    Log.IsDebugEnabled = true;
                 }
-                else
+
+                string pathToPackages = options.packageFolder ?? ".";
+                if (options.preload)
                 {
-                    pathToPackage = args[1];
+                    PreloadBasicPackages(pathToPackages);
                 }
-                PreloadBasicPackages();
 
-                var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
-                var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
-                var outputMainFolder = Path.Combine("Extracted", packageName);
-                //Init the asset extractor
-                Log.DeserializationErrors = 0;
-                assetExtractor = new AssetExtractor(package);
-                assetExtractor.ExportClasses(outputMainFolder);
-                assetExtractor.ExportData(outputMainFolder);
-                assetExtractor.ExportMeshObjects(outputMainFolder);
-                string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
-                Log.Debug(deserializationErrors);
-                Console.WriteLine(deserializationErrors);
-
+                var filesToProcess = GetFilesToProcess(options, pathToPackages);
+                foreach (var file in filesToProcess)
+                {
+                    ProcessPackage(pathToPackages, file, options);
+                }
             }
         }
 
-        private static void PreloadBasicPackages()
+        private static void ProcessPackage(string pathToPackages, string file, Options options)
+        {
+            var packagePath = Path.Combine(pathToPackages, file);
+            var package = UnrealLoader.LoadFullPackage(packagePath, System.IO.FileAccess.Read);
+            var packageName = Path.GetFileNameWithoutExtension(packagePath);
+            var outputMainFolder = Path.Combine("Extracted", packageName);
+            //Init the asset extractor
+            Log.DeserializationErrors = 0;
+            assetExtractor = new AssetExtractor(package);
+            Console.WriteLine($"Processing: {file}");
+            if (options.ExtractClasses)
+            {
+                assetExtractor.ExportClasses(outputMainFolder);
+            }
+            if (options.ExtractData)
+            {
+                assetExtractor.ExportData(outputMainFolder);
+            }
+            if (options.ExtractMeshInfo)
+            {
+                assetExtractor.ExportMeshObjects(outputMainFolder);
+            }
+
+            string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
+            Log.Debug(deserializationErrors);
+            Console.WriteLine(deserializationErrors);
+        }
+
+        private static List<string> GetFilesToProcess(Options options, string pathToPackages)
+        {
+            List<string> filesToProcess = new List<string>();
+            if (options.packages != null)
+            {
+                filesToProcess.AddRange(options.packages);
+            }
+            if (options.fileGlob != null)
+            {
+                foreach (var file in Directory.EnumerateFiles(pathToPackages, options.fileGlob))
+                {
+                    var fileName = Path.GetFileName(file);
+                    if (!filesToProcess.Contains(fileName))
+                    {
+                        filesToProcess.Add(fileName);
+                    }
+                }
+            }
+
+            return filesToProcess;
+        }
+
+        private static void PreloadBasicPackages(string baseFolder)
         {
             var basicPackageNames = new List<string>()
             {
@@ -99,42 +159,19 @@ namespace AssetExtraction
             {
                 try
                 {
-                    UnrealLoader.LoadFullPackage(packageName, System.IO.FileAccess.Read);
-                }catch (FileNotFoundException e)
+                    Console.WriteLine($"Preloading {packageName}");
+                    string packagePath = Path.Combine(baseFolder, packageName);
+                    UnrealLoader.LoadFullPackage(packagePath, System.IO.FileAccess.Read);
+                }
+                catch (FileNotFoundException e)
                 {
                     Console.WriteLine(
                         $"Did not find {packageName} in the current directory."
-                        +"This is optional, but recommended. "
-                        +"Preloading this package improves type recognition.");
+                        + "This is optional, but recommended. "
+                        + "Preloading this package improves type recognition.");
                 }
             }
         }
-
-        //private static void ConfigArrayTypes()
-        //{
-        //    if (UnrealConfig.VariableTypes == null)
-        //    {
-        //        UnrealConfig.VariableTypes = new Dictionary<string, Tuple<string, PropertyType>>();
-        //    }
-        //    var tupleList = new List<(string propName, PropertyType propType)>
-        //      {
-        //        ("Skins",  PropertyType.ObjectProperty),
-        //        ("Components",  PropertyType.ObjectProperty),
-        //        ("AnimSets",  PropertyType.ObjectProperty),
-        //        ("InputLinks",  PropertyType.StructProperty),
-        //        ("OutputLinks",  PropertyType.StructProperty),
-        //        ("VariableLinks",  PropertyType.StructProperty),
-        //        ("Targets",  PropertyType.ObjectProperty),
-        //        ("Controls",  PropertyType.ObjectProperty),
-        //        ("Expressions",  PropertyType.ObjectProperty),
-        //        ("Emitters",  PropertyType.ObjectProperty),
-        //        //("Attachments", PropertyType.StructProperty)
-        //      };
-        //    foreach(var (propName, propType) in tupleList)
-        //    {
-        //        UnrealConfig.VariableTypes.Add(propName, new Tuple<string, PropertyType>(propName, propType));
-        //    }
-        //}
 
         private static void ExtractStaticMeshes(string packageName)
         {
@@ -146,7 +183,7 @@ namespace AssetExtraction
         private static void ExtractFXActors(string packageName)
         {
             string outputFolder = Path.Combine(packageName, "FXActor_TA");
-            var assetTypes = new List<string>() { "FXActor_TA"};
+            var assetTypes = new List<string>() { "FXActor_TA" };
             assetExtractor.Export(assetTypes, outputFolder);
         }
     }

@@ -50,7 +50,7 @@ namespace AssetExtraction
         {
             string outputFolder = Path.Combine(outputPath, ".Classes");
             var objects = FindObjectsOfType(new List<string>() { "Class" });
-            Console.WriteLine($"Extracting {objects.Count} classes");
+            Console.WriteLine($"\tExtracting {objects.Count} classes");
             foreach (var obj in objects)
             {
                 var outputFile = Path.Combine(outputFolder, GetFullObjectName(obj) + ".uc");
@@ -80,7 +80,7 @@ namespace AssetExtraction
             var dataObjects = extractableObjects.Where(
                 (o) => !o.IsClassType("Class"));
             //Theworld stuff does not set exportflag = 1
-            Console.WriteLine($"Extracting {dataObjects.Count()} objects");
+            Console.WriteLine($"\tExtracting {dataObjects.Count()} objects");
             foreach (var obj in dataObjects)
             {
                 var outputFile = Path.Combine(outputPath, $"{DefaultsFolder(obj)}{GetFullObjectName(obj)}.uc");
@@ -97,6 +97,7 @@ namespace AssetExtraction
             var outputFile = Path.Combine(outputPath, ".json", $"{package.FullPackageName}_MeshObjects.json");
             var dataObjects = FindObjectsOfType(new List<string>() { "StaticMeshComponent" });
             var nodeCache = new Dictionary<UObject, DataNode>();
+            Console.WriteLine($"\tExtracting {dataObjects.Count()} instances of meshInfo");
             foreach (var obj in dataObjects)
             {
                 obj.BeginDeserializing();
