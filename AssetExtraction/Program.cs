@@ -71,18 +71,17 @@ namespace AssetExtraction
 
                 var package = UnrealLoader.LoadFullPackage(pathToPackage, System.IO.FileAccess.Read);
                 var packageName = Path.GetFileNameWithoutExtension(pathToPackage);
+                var outputMainFolder = Path.Combine("Extracted", packageName);
                 //Init the asset extractor
                 Log.DeserializationErrors = 0;
                 assetExtractor = new AssetExtractor(package);
-                assetExtractor.ExportClasses(packageName);
-                assetExtractor.ExportData(packageName);
+                assetExtractor.ExportClasses(outputMainFolder);
+                assetExtractor.ExportData(outputMainFolder);
+                assetExtractor.ExportMeshObjects(outputMainFolder);
                 string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
                 Log.Debug(deserializationErrors);
                 Console.WriteLine(deserializationErrors);
 
-                //ExtractClasses(packageName);
-                //ExtractStaticMeshes(packageName);
-                //ExtractFXActors(packageName);
             }
         }
 

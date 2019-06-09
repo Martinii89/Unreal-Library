@@ -45,6 +45,9 @@ namespace UELib.Core
         /// </summary>
         public UName                Name{ get; private set; }
 
+        //If type equals Object/component/interface or array of these
+        public List<UObject> uObjects { get; private set; } = new List<UObject>();
+
         /// <summary>
         /// Name of the UStruct. If type equals StructProperty.
         /// </summary>
@@ -343,30 +346,31 @@ namespace UELib.Core
                     case PropertyType.ComponentProperty:
                     case PropertyType.ObjectProperty:
                         {
-                            var obj = _Buffer.ReadObject();
-                            _Container.Record( "object", obj );
-                            if( obj != null )
+                            var uObject = _Buffer.ReadObject();
+                            uObjects.Add(uObject);
+                            _Container.Record( "object", uObject);
+                            if(uObject != null )
                             {
                                 bool inline = false;
                                 // If true, object is an archetype or subobject.
-                                if( obj.Outer == _Container && (deserializeFlags & DeserializeFlags.WithinStruct) == 0 )
+                                if(uObject.Outer == _Container && (deserializeFlags & DeserializeFlags.WithinStruct) == 0 )
                                 {
                                     // Unknown objects are only deserialized on demand.
-                                    obj.BeginDeserializing();
-                                    if( obj.Properties != null && obj.Properties.Count > 0 )
+                                    uObject.BeginDeserializing();
+                                    if(uObject.Properties != null && uObject.Properties.Count > 0 )
                                     {
                                         inline = true;
-                                        propertyValue = obj.Decompile() + "\r\n" + UDecompilingState.Tabs;
+                                        propertyValue = uObject.Decompile() + "\r\n" + UDecompilingState.Tabs;
 
                                         _TempFlags |= DoNotAppendName;
                                         if( (deserializeFlags & DeserializeFlags.WithinArray) != 0 )
                                         {
                                             _TempFlags |= ReplaceNameMarker;
-                                            propertyValue += "%ARRAYNAME%=" + obj.Name;
+                                            propertyValue += "%ARRAYNAME%=" + uObject.Name;
                                         }
                                         else
                                         {
-                                            propertyValue += Name + "=" + obj.Name;
+                                            propertyValue += Name + "=" + uObject.Name;
                                         }
                                     }
                                 }
@@ -374,7 +378,7 @@ namespace UELib.Core
                                 if( !inline )
                                 {
                                     // =CLASS'Package.Group(s)+.Name'
-                                    propertyValue = String.Format( "{0}\'{1}\'", obj.GetClassName(), obj.GetOuterGroup() );
+                                    propertyValue = String.Format( "{0}\'{1}\'", uObject.GetClassName(), uObject.GetOuterGroup() );
                                 }
                             }
                             else
@@ -387,9 +391,10 @@ namespace UELib.Core
 
                     case PropertyType.ClassProperty:
                         {
-                            var obj = _Buffer.ReadObject();
-                            _Container.Record( "object", obj );
-                            propertyValue = (obj != null ? "class\'" + obj.Name + "\'" : "none");
+                            var uObject = _Buffer.ReadObject();
+                            uObjects.Add(uObject);
+                            _Container.Record( "object", uObject);
+                            propertyValue = (uObject != null ? "class\'" + uObject.Name + "\'" : "none");
                             break;
                         }
 

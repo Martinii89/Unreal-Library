@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -88,6 +89,84 @@ namespace AssetExtraction
             }
 
             return dataObjects.Count();
+        }
+
+        public int ExportMeshObjects(string outputPath)
+        {
+
+            var outputFile = Path.Combine(outputPath, ".json", $"{package.FullPackageName}_MeshObjects.json");
+            var dataObjects = FindObjectsOfType(new List<string>() { "StaticMeshComponent" });
+            var nodeCache = new Dictionary<UObject, DataNode>();
+            foreach (var obj in dataObjects)
+            {
+                obj.BeginDeserializing();
+                var outer = obj.Outer;
+                nodeCache.TryGetValue(outer, out var outerNode);
+                if (outerNode == null)
+                {
+                    outer.BeginDeserializing();
+                    outerNode = new DataNode(outer);
+                    nodeCache.Add(outer, outerNode);
+                }
+                outerNode.AddChild(new DataNode(obj));
+                while (outer.Outer != null)
+                {
+                    var nextOuter = outer.Outer;
+                    nodeCache.TryGetValue(nextOuter, out var nextOuterNode);
+                    if (nextOuterNode == null)
+                    {
+                        //If it's not in the cache. 
+                        //We need to add it, add the previous as a child. And continue up the chain
+                        nextOuter.BeginDeserializing();
+                        nextOuterNode = new DataNode(nextOuter);
+                        nodeCache.Add(nextOuter, nextOuterNode);
+                        nextOuterNode.AddChild(outerNode);
+                        outer = nextOuter;
+                        outerNode = nextOuterNode;
+                    }else
+                    {
+                        //If it's already in the cache. We can add the previous as a child and exit out of the loop
+                        nextOuterNode.AddChild(outerNode);
+                        break;
+                    }
+                }
+            }
+            var rootNodes = nodeCache.Where((kv) => kv.Value.parent == null).Select((kv) => kv.Value);
+            new FileInfo(outputFile).Directory.Create();
+            using (var fileWriter = new StreamWriter(outputFile))
+            {
+                var json_data = JsonConvert.SerializeObject(rootNodes,
+                            Newtonsoft.Json.Formatting.Indented,
+                            new JsonSerializerSettings
+                            {
+                                NullValueHandling = NullValueHandling.Ignore
+                            });
+                fileWriter.Write(json_data);
+                //foreach (var rootNode in rootNodes)
+                //{
+                //    fileWriter.WriteLine(rootNode.print());
+                //}
+            }
+            return 0;
+        }
+
+        private bool FilteredDeserialization(UObject obj, ISet<string> properties, out string output, int tabs)
+        {
+            if ((obj.DeserializationState & UObject.ObjectState.Deserialied) == 0)
+            {
+                obj.BeginDeserializing();
+            }
+            output = "";
+            string indentation = new StringBuilder().Insert(0, "\t", tabs).ToString();
+            if (obj.Properties == null) return false;
+
+            var propsToDeserialize = obj?.Properties.Where((p) => properties.Contains(p.Name));
+            foreach (var prop in propsToDeserialize)
+            {
+                output += ($"{indentation}{prop.Decompile()}\r\n");
+            }
+
+            return output.Length > 0;
         }
 
         private List<UObject> FindObjectsOfType(IList<string> types)

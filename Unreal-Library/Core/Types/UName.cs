@@ -52,8 +52,8 @@ namespace UELib
             var index = stream.ReadNameIndex( out _Number );
             _NameItem = stream.Package.Names[index];
 
-            Debug.Assert( _NameItem != null, "_NameItem cannot be null! " + index );
-            Debug.Assert( _Number >= -1, "Invalid _Number value! " + _Number );
+            //Debug.Assert( _NameItem != null, "_NameItem cannot be null! " + index );
+            //Debug.Assert( _Number >= -1, "Invalid _Number value! " + _Number );
         }
 
         public void Serialize( IUnrealStream stream )

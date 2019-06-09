@@ -43,6 +43,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\Unreal-Library\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,11 +57,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssetExtractor.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\BaseConverter.cs" />
+    <Compile Include="JsonExtract\DataNode.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\FloatConverter.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\ObjectConverter.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\RotationConverter.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\VectorConverter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\RightOfEqualSign.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Unreal-Library\Eliot.UELib.csproj">
