@@ -66,6 +66,7 @@
     <Compile Include="JsonExtract\JsonFormaters\ObjectConverter.cs" />
     <Compile Include="JsonExtract\JsonFormaters\RotationConverter.cs" />
     <Compile Include="JsonExtract\JsonFormaters\VectorConverter.cs" />
+    <Compile Include="JsonExtract\JsonFormaters\ListObjectConverter.cs" />
     <Compile Include="MyFileLogger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

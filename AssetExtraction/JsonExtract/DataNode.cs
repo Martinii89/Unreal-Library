@@ -28,6 +28,8 @@ namespace AssetExtraction
         [JsonConverter(typeof(RotationConverter))]
         public string Rotation => TryGetPropertyValue("Rotation");
 
+
+
         //[JsonProperty("DrawScale", Order = 5)]
         //[JsonConverter(typeof(FloatConverter))]
         //public string DrawScale => TryGetPropertyValue("DrawScale");
@@ -68,8 +70,18 @@ namespace AssetExtraction
         [JsonConverter(typeof(ObjectConverter))]
         public string StaticMesh => TryGetPropertyValue("StaticMesh");
 
+        [JsonProperty("Materials", Order = 8)]
+        [JsonConverter(typeof(ListObjectConverter))]
+        public string Materials => TryGetPropertyValue("Materials");
 
-        [JsonProperty("subNodes", Order = 8)]
+        [JsonProperty("InvisiTekMaterials", Order = 9)]
+        [JsonConverter(typeof(ListObjectConverter))]
+        public string InvisiTekMaterials => TryGetPropertyValue("InvisiTekMaterials");
+
+        
+
+
+        [JsonProperty("subNodes", Order = 10)]
         public List<DataNode> subNodes = new List<DataNode>();
 
         public bool ShouldSerializesubNodes() => subNodes.Count > 0;
