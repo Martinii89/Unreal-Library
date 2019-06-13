@@ -7,15 +7,121 @@ using System.Threading.Tasks;
 
 namespace UELib
 {
-    class RLPackageWriter : UnrealWriter
+    internal class MinimalTexture2D
     {
-        uint _version;
+        public static int serialSize = 402;
+
+        private byte[] minimalTex2D = new byte[] {
+            0xFF, 0xFF, 0xFF, 0xFF, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+            0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x15, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0E, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1D, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xCA, 0x1C, 0x18, 0x15, 0x18, 0x50, 0x24, 0x40, 0xAD, 0xF7,
+            0xE2, 0x10, 0xF0, 0x7C, 0xA9, 0x4E, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xC8, 0x06, 0x00, 0x00, 0xFF, 0xFF,
+            0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00,
+            0x00, 0x00, 0xE0, 0x06, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
+            0x00, 0x00, 0x3E, 0x1F, 0x64, 0xDA, 0xE1, 0x27, 0x27, 0x4F, 0xA7, 0xAA, 0x20, 0x7E, 0x43, 0xA9,
+            0xCE, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x07, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+        };
+
+        public void Write(IUnrealStream stream, UnrealPackage package)
+        {
+            FixNameIndexAtPosition(package, "SizeX", 4);
+            FixNameIndexAtPosition(package, "IntProperty", 12);
+
+            FixNameIndexAtPosition(package, "SizeY", 32);
+            FixNameIndexAtPosition(package, "IntProperty", 40);
+
+            FixNameIndexAtPosition(package, "OriginalSizeX", 60);
+            FixNameIndexAtPosition(package, "IntProperty", 68);
+
+            FixNameIndexAtPosition(package, "OriginalSizeY", 88);
+            FixNameIndexAtPosition(package, "IntProperty", 96);
+
+            FixNameIndexAtPosition(package, "OriginalSizeX", 60);
+            FixNameIndexAtPosition(package, "IntProperty", 68);
+
+            FixNameIndexAtPosition(package, "Format", 116);
+            FixNameIndexAtPosition(package, "ByteProperty", 124);
+
+            FixNameIndexAtPosition(package, "EPixelFormat", 140);
+            FixNameIndexAtPosition(package, "PF_A8R8G8B8", 148);
+
+            FixNameIndexAtPosition(package, "bIsSourceArtUncompressed", 156);
+            FixNameIndexAtPosition(package, "BoolProperty", 164);
+
+            FixNameIndexAtPosition(package, "CompressionNone", 181);
+            FixNameIndexAtPosition(package, "BoolProperty", 189);
+
+            FixNameIndexAtPosition(package, "MipGenSettings", 206);
+            FixNameIndexAtPosition(package, "ByteProperty", 214);
+
+            FixNameIndexAtPosition(package, "TextureMipGenSettings", 230);
+            FixNameIndexAtPosition(package, "TMGS_NoMipmaps", 238);
+
+            FixNameIndexAtPosition(package, "LightingGuid", 246);
+            FixNameIndexAtPosition(package, "StructProperty", 254);
+
+            FixNameIndexAtPosition(package, "Guid", 270);
+            FixNameIndexAtPosition(package, "None", 294);
+
+            stream.Write(minimalTex2D, 0, serialSize);
+        }
+
+        private void FixNameIndexAtPosition(UnrealPackage package, string name, int startPosition)
+        {
+            var test = package.Names.FindIndex((n) => n.Name == name);
+            var bytes = BitConverter.GetBytes(test);
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                minimalTex2D[i + startPosition] = bytes[i];
+            }
+        }
+
+        public static void AddNamesToNameTable(UnrealPackage package)
+        {
+            var namesToAdd = new List<string>()
+            {
+                "SizeX", "IntProperty", "SizeY", "OriginalSizeX",
+                "OriginalSizeY","Format","ByteProperty","EPixelFormat",
+                "PF_A8R8G8B8","bIsSourceArtUncompressed","BoolProperty","CompressionNone",
+                "MipGenSettings","TextureMipGenSettings","TMGS_NoMipmaps",
+                "LightingGuid", "StructProperty", "Guid", "None"
+            };
+            foreach (var name in namesToAdd)
+            {
+                if (!package.Names.Any((o) => o.Name == name))
+                {
+                    package.Names.Add(new UNameTableItem() { Name = name, Flags = 1970393556451328 });
+                }
+            }
+        }
+    }
+
+    internal class RLPackageWriter : UnrealWriter
+    {
+        private uint _version;
 
         protected override uint _Version
         {
             get { return _version; }
         }
-
 
         public RLPackageWriter(Stream stream, uint version) : base(stream)
         {
@@ -46,8 +152,6 @@ namespace UELib
 
         //public uint Version { get; set; }
 
-
-
         public RLDummyPackageStream(UnrealPackage package, string filePath)
         {
             this.package = package;
@@ -56,8 +160,10 @@ namespace UELib
             Package = package;
 
             UW = new RLPackageWriter(_stream, DummyEngineVersion);
+            MinimalTexture2D.AddNamesToNameTable(package);
         }
 
+        private const int ExportTableItemSize = 68;
 
         public void Serialize()
         {
@@ -66,7 +172,7 @@ namespace UELib
             //Serialize name table
             var nameOffset = UW.BaseStream.Position;
             WriteIntAtPosition(package.Names.Count(), NameCountPosition);
-            WriteIntAtPosition((int)nameOffset, NameCountPosition+4);
+            WriteIntAtPosition((int)nameOffset, NameCountPosition + 4);
 
             foreach (var name in package.Names)
             {
@@ -82,50 +188,66 @@ namespace UELib
                 import.Serialize(this);
             }
 
-            //var exportsToSerialize = package.Exports.Skip(1);
-            var exportsToSerialize = new List<UExportTableItem>() { package.Exports[1], package.Exports[3] };
+            var exportsToSerialize = package.Exports;
+
+            //var exportsToSerialize = new List<UExportTableItem>() { package.Exports[1], package.Exports[3] };
             //WriteIntAtPosition();
             var exportOffset = UW.BaseStream.Position;
             WriteIntAtPosition(exportsToSerialize.Count(), ExportCountPosition);
             WriteIntAtPosition((int)exportOffset, ExportCountPosition + 4);
 
-            
-
-            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + 68 * exportsToSerialize.Count()) + 24; //24 = unknown footer data
-            int i = 0;
+            int footerNumbers = 8;
+            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + footerNumbers * 4; //24 = unknown footer data
+            int serialOffset = calculatedTotalHeaderSize;
             foreach (var export in exportsToSerialize)
             {
-                int serialOffset = calculatedTotalHeaderSize + 12 * i;
-                DummyExportTableSerialize(export, serialOffset);
-                i++;
+                switch (export.ClassName)
+                {
+                    case "Texture2D":
+                        DummyExportTableSerialize(export, serialOffset, MinimalTexture2D.serialSize);
+                        serialOffset += MinimalTexture2D.serialSize;
+                        break;
+
+                    default:
+                        DummyExportTableSerialize(export, serialOffset, DummySerialSize);
+                        serialOffset += DummySerialSize;
+                        break;
+                }
+
                 //export.Serialize( this );
             }
-            //unknown footer info 
+            //unknown footer info
             WriteIntAtPosition((int)UW.BaseStream.Position, 49);
-            UW.Write(0);
-            UW.Write(0);
             WriteIntAtPosition((int)UW.BaseStream.Position, 53);
-            UW.Write(0);
-            UW.Write(0);
-            UW.Write(0);
             WriteIntAtPosition((int)UW.BaseStream.Position, 65);
-            UW.Write(0);
+            for (int ii = 0; ii < footerNumbers; ii++)
+            {
+                UW.Write(0);
+            }
 
             WriteIntAtPosition((int)UW.BaseStream.Position, TotalHeaderSizePosition);
 
             int noneIndex = package.Names.FindIndex((n) => n.Name == "None");
-            foreach(var exportObject in exportsToSerialize)
+            foreach (var exportObject in exportsToSerialize)
             {
-                //We just need the netindex and a None FName
-                package.Stream.Position = exportObject.SerialOffset;
-                //NetIndex
-                UW.Write(package.Stream.ReadInt32());
-                //None index and count
-                UW.Write(noneIndex);
-                UW.Write(0);
+                switch (exportObject.ClassName)
+                {
+                    case "Texture2D":
+                        new MinimalTexture2D().Write(this, package);
+                        //MinimalTexture2D.Write(this, package);
+                        break;
+
+                    default:
+                        //We just need the netindex and a None FName
+                        package.Stream.Position = exportObject.SerialOffset;
+                        //NetIndex
+                        UW.Write(package.Stream.ReadInt32());
+                        //None index and count
+                        UW.Write(noneIndex);
+                        UW.Write(0);
+                        break;
+                }
             }
-
-
 
             //var stream = package.Stream;
             //// Serialize tables
@@ -289,7 +411,7 @@ namespace UELib
 
         private const int DummySerialSize = 12;
 
-        public void DummyExportTableSerialize(UExportTableItem tableItem, int serialOffset)
+        public void DummyExportTableSerialize(UExportTableItem tableItem, int serialOffset, int serialSize)
         {
             this.Write(tableItem?.ClassTable?.Object);
             this.Write(tableItem?.SuperTable?.Object);
@@ -299,7 +421,7 @@ namespace UELib
             //this.Write(tableItem.ObjectFlags);
             this.Write(4222141830530048);
 
-            this.Write(DummySerialSize);
+            this.Write(serialSize);
 
             //this.Write(tableItem.SerialOffset);
             this.Write(serialOffset);
