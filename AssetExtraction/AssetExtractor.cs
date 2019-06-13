@@ -152,6 +152,17 @@ namespace AssetExtraction
             return 0;
         }
 
+        public void ExportDummyAssets(string outputPath)
+        {
+            string outputFolder = Path.Combine(outputPath, ".DummyAssets");
+            var outputFile = Path.Combine(outputFolder, package.FullPackageName + ".upk");
+            new FileInfo(outputFile).Directory.Create();
+            RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, outputFile);
+            packageSerializer.Serialize();
+                
+
+        }
+
         private bool FilteredDeserialization(UObject obj, ISet<string> properties, out string output, int tabs)
         {
             if ((obj.DeserializationState & UObject.ObjectState.Deserialied) == 0)

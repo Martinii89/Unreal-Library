@@ -90,7 +90,7 @@ namespace UELib
         [System.Diagnostics.CodeAnalysis.SuppressMessage( "Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes" )]
         private IUnrealStream _UnrealStream;
 
-        private uint _Version
+        protected virtual uint _Version
         {
             get{ return _UnrealStream.Version; }
         }
@@ -406,7 +406,7 @@ namespace UELib
 
     public class UPackageStream : IUnrealStream
     {
-        public UnrealPackage Package{ get; private set; }
+        public UnrealPackage Package{ get; protected set; }
 
         /// <inheritdoc/>
         public uint Version

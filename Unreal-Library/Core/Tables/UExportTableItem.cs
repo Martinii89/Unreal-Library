@@ -7,7 +7,7 @@ namespace UELib
     /// <summary>
     /// Represents a unreal export table with deserialized data from a unreal package header.
     /// </summary>
-    public sealed class UExportTableItem : UObjectTableItem, IUnrealSerializableClass
+    public class UExportTableItem : UObjectTableItem, IUnrealSerializableClass
     {
         private const uint VArchetype = 220;
         private const uint VObjectFlagsToULONG = 195;
@@ -89,11 +89,12 @@ namespace UELib
             }
 
             _ObjectFlagsOffset = stream.Position;
-            ObjectFlags = stream.ReadUInt32();
-            if( stream.Version >= VObjectFlagsToULONG )
-            {
-                ObjectFlags = (ObjectFlags << 32) | stream.ReadUInt32();
-            }
+            ObjectFlags = stream.ReadUInt64();
+            //if( stream.Version >= VObjectFlagsToULONG )
+            //{
+            //    //ObjectFlags = (ObjectFlags << 32) | stream.ReadUInt32();
+            //    ObjectFlags = (ObjectFlags << 32) | stream.ReadUInt64();
+            //}
 
             SerialSize = stream.ReadIndex();
             SerialOffset = (int)stream.ReadInt64();
