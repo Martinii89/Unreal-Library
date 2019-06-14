@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UELib.Core;
 
 namespace UELib.Engine

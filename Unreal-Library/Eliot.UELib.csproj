@@ -179,6 +179,11 @@
     <Compile Include="Core\Classes\UClassDecompiler.cs" />
     <Compile Include="Core\Classes\UComponent.cs" />
     <Compile Include="ByteCodeDecompiler.cs" />
+    <Compile Include="Dummy\DummyExportTableItem.cs" />
+    <Compile Include="Dummy\MinimalBase.cs" />
+    <Compile Include="Dummy\MinimalStaticMesh.cs" />
+    <Compile Include="Dummy\MinimalTexture2D.cs" />
+    <Compile Include="Dummy\RLPackageWriter.cs" />
     <Compile Include="Engine\Classes\Components\UStaticMeshComponent.cs" />
     <Compile Include="Engine\Classes\UPalette.cs" />
     <Compile Include="Decoding\IBufferDecoder.cs" />
@@ -223,7 +228,7 @@
     <Compile Include="Core\Classes\UStruct.cs" />
     <Compile Include="Engine\Classes\UFont.cs" />
     <Compile Include="NativesTablePackage.cs" />
-    <Compile Include="RLDummyPackageStream.cs" />
+    <Compile Include="Dummy\RLDummyPackageStream.cs" />
     <Compile Include="RLPackageStream.cs" />
     <Compile Include="UDecompilingState.cs" />
     <Compile Include="Core\Types\UName.cs" />
@@ -277,7 +282,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

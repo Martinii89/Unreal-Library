@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UELib;
 using UELib.Core;
+using UELib.Dummy;
 
 namespace AssetExtraction
 {
