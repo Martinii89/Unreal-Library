@@ -15,6 +15,8 @@ namespace UELib.Dummy
 
         public UExportTableItem original;
 
+        public int packageFlag { get; private set; }
+
 
         public DummyExportTableItem(UExportTableItem b)
         {
