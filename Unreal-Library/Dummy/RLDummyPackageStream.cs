@@ -68,10 +68,13 @@ namespace UELib.Dummy
             }
 
             //var exportsToSerialize = package.Exports;
-            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0).Select((e) => e as DummyExportTableItem);
+            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0)
+                .Select((e) => new DummyExportTableItem(e))
+                .ToList();
+            //exportsToSerialize = exportsToSerialize.Skip(2).Take(2).ToList();
             foreach(var export in exportsToSerialize)
             {
-                //FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
+                FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
             }
 
             //var exportsToSerialize = new List<UExportTableItem>() { package.Exports[1], package.Exports[3] };
@@ -83,26 +86,27 @@ namespace UELib.Dummy
             int footerNumbers = 8;
             int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + footerNumbers * 4; //24 = unknown footer data
             int serialOffset = calculatedTotalHeaderSize;
-            foreach (var export in exportsToSerialize)
+            foreach (var dummyExport in exportsToSerialize)
             {
+                var export = dummyExport.original;
                 switch (export.ClassName)
                 {
                     case "Texture2D":
-                        DummyExportTableSerialize(export, serialOffset, MinimalTexture2D.serialSize);
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTexture2D.serialSize);
                         serialOffset += MinimalTexture2D.serialSize;
                         break;
                     case "StaticMesh":
-                        DummyExportTableSerialize(export, serialOffset, MinimalStaticMesh.serialSize);
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalStaticMesh.serialSize);
                         serialOffset += MinimalStaticMesh.serialSize;
                         break;
                     case "class":
                         if (export.SerialSize == 0)
                         {
-                            DummyExportTableSerialize(export, 0, 0);
+                            DummyExportTableSerialize(dummyExport, 0, 0);
                         }
                         break;
                     default:
-                        DummyExportTableSerialize(export, serialOffset, DummySerialSize);
+                        DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
                         serialOffset += DummySerialSize;
                         break;
                 }
@@ -121,8 +125,9 @@ namespace UELib.Dummy
             WriteIntAtPosition((int)UW.BaseStream.Position, TotalHeaderSizePosition);
 
             int noneIndex = package.Names.FindIndex((n) => n.Name == "None");
-            foreach (var exportObject in exportsToSerialize)
+            foreach (var dummyExport in exportsToSerialize)
             {
+                var exportObject = dummyExport.original;
                 switch (exportObject.ClassName)
                 {
                     case "Texture2D":
@@ -149,17 +154,29 @@ namespace UELib.Dummy
                         break;
                 }
             }
+            for (int ii = 0; ii <250; ii++)
+            {
+                UW.Write(0);
+            }
         }
 
-        private void FixObjectReferencesInFilteredExports(DummyExportTableItem export, IList<UExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
+        private void FixObjectReferencesInFilteredExports(DummyExportTableItem export, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
         {
-            if (export.ClassIndex > 0)
+            export.newClassIndex = FindNewReference(export.original.ClassIndex, exportsToSerialize, exports);
+            export.newSuperIndex = FindNewReference(export.original.SuperIndex, exportsToSerialize, exports);
+            export.newOuterIndex = FindNewReference(export.original.OuterIndex, exportsToSerialize, exports);
+            export.newArchetypeIndex = FindNewReference(export.original.ArchetypeIndex, exportsToSerialize, exports);
+        }
+
+        private int FindNewReference(int originalIndex, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
+        {
+            if (originalIndex <= 0)
             {
-                var reference = package.Exports[export.ClassIndex - 1];
-                var newReferenceIndex = exportsToSerialize.IndexOf(reference);
-                //export.ClassIndex = newReferenceIndex;
+                return originalIndex;
             }
-            throw new NotImplementedException();
+            var reference = exports[originalIndex - 1];
+            var newReferenceIndex = exportsToSerialize.FindIndex((e) => e.original == reference) + 1;
+            return newReferenceIndex;
         }
 
         private void WriteIntAtPosition(int value, int writePosition)
@@ -225,13 +242,13 @@ namespace UELib.Dummy
 
         private const int DummySerialSize = 12;
 
-        public void DummyExportTableSerialize(UExportTableItem tableItem, int serialOffset, int serialSize)
+        private void DummyExportTableSerialize(DummyExportTableItem tableItem, int serialOffset, int serialSize)
         {
-            this.Write(tableItem?.ClassTable?.Object);
-            this.Write(tableItem?.SuperTable?.Object);
-            this.Write((int)tableItem?.OuterTable?.Object);
-            this.Write(tableItem.ObjectName);
-            this.Write(tableItem.ArchetypeIndex);
+            this.Write(tableItem.newClassIndex);
+            this.Write(tableItem.newSuperIndex);
+            this.Write(tableItem.newOuterIndex);
+            this.Write(tableItem.original.ObjectName);
+            this.Write(tableItem.newArchetypeIndex);
             //this.Write(tableItem.ObjectFlags);
             this.Write(4222141830530048);
 

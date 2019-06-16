@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    class DummyExportTableItem: UExportTableItem
+    class DummyExportTableItem
     {
-        int newClassIndex;
-        int newSuperIndex;
-        int newPackageIndex;
-        int newArchetypeIndex;
+        public int newClassIndex = 0;
+        public int newSuperIndex = 0;
+        public int newOuterIndex = 0;
+        public int newArchetypeIndex = 0;
+
+        public UExportTableItem original;
 
 
         public DummyExportTableItem(UExportTableItem b)
         {
-            this.ClassIndex = b.ClassIndex;
-            this.SuperIndex = b.SuperIndex;
-            this.OuterIndex = b.OuterIndex;
-            this.ArchetypeIndex = b.ArchetypeIndex;
+            original = b;
         }
     }
 }
