@@ -12,29 +12,49 @@ namespace UELib.Dummy
         List<ThumbnailTableItem> thumbnailTable;
         List<ThumbnailDataItem> thumbnailDataTable;
 
-        int thumbnailDataOffset;
+        public int thumbnailDataOffset;
+        public int thumbnailTableOffset;
 
         public void Init(List<DummyExportTableItem> dummyExports)
         {
             thumbnailTable = new List<ThumbnailTableItem>();
+            thumbnailDataTable = new List<ThumbnailDataItem>();
             var exportsWithThumbnail = dummyExports.Where((e) => e.packageFlag == 0).ToList();
             foreach (var export in exportsWithThumbnail)
             {
-                thumbnailTable.Add(new ThumbnailTableItem(export.ObjectName, export.OuterName, 0));
+                thumbnailTable.Add(new ThumbnailTableItem(export.original.ObjectName, export.original.OuterName, 0));
                 // Can everything be a 0 pixel large thumbnail? 
                 thumbnailDataTable.Add(new ThumbnailDataItem(0, 0, null));
             }
         }
 
+        public int GetSerialSize()
+        {
+            int sum = 0;
+            foreach (var item in thumbnailDataTable)
+            {
+                sum += item.GetSerialSize();
+            }
+
+            sum += sizeof(int);
+            foreach(var item in thumbnailTable)
+            {
+                sum += item.GetSerialSize();
+            }
+            return sum;
+        }
+
         public void Serialize(IUnrealStream stream)
         {
             var offsetList = new List<int>();
+            thumbnailDataOffset = (int)stream.Position;
             foreach (var thumbnailData in thumbnailDataTable)
             {
                 offsetList.Add((int)stream.Position);
                 thumbnailData.Serialize(stream);
             }
 
+            thumbnailTableOffset = (int)stream.Position;
             stream.Write(thumbnailTable.Count());
             for (int i = 0; i < thumbnailTable.Count(); i++)
             {
@@ -58,7 +78,7 @@ namespace UELib.Dummy
             this.dataOffset = dataOffset;
         }
 
-        public int SerialSize() => name.Length
+        public int GetSerialSize() => name.Length
                                    + 1 //null termination
                                    + group.Length
                                    + 1 //null termination
@@ -93,7 +113,7 @@ namespace UELib.Dummy
             }
         }
 
-        public int SerialSize() => dataSize + 3 * sizeof(int);
+        public int GetSerialSize() => dataSize + 3 * sizeof(int);
 
         internal void Serialize(IUnrealStream stream)
         {

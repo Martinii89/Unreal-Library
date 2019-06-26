@@ -117,7 +117,7 @@ namespace AssetExtraction
             {
                 assetExtractor.ExportMeshObjects(outputMainFolder);
             }
-            assetExtractor.ExportDummyAssets(outputMainFolder);
+            //assetExtractor.ExportDummyAssets(outputMainFolder);
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
             Log.Debug(deserializationErrors);

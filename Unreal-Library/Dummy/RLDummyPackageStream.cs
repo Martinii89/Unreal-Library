@@ -43,48 +43,33 @@ namespace UELib.Dummy
         }
 
         private const int ExportTableItemSize = 68;
+        private const int DependsOffsetPosition = 49;
+        private const int ThumbnailDataOffsetPosition = 53;
+        private const int ThumbnailTableOffsetPosition = 65;
 
         public void Serialize()
         {
             initHeader();
+            SerializeNameTable();
+            SerializeImportsTable();
 
-            //Serialize name table
-            var nameOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(package.Names.Count(), NameCountPosition);
-            WriteIntAtPosition((int)nameOffset, NameCountPosition + 4);
+            List<DummyExportTableItem> exportsToSerialize = GetExportsToSerialize();
 
-            foreach (var name in package.Names)
-            {
-                name.Serialize(this);
-            }
-
-            //Serialize imports table
-            var importOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(package.Imports.Count(), ImportCountPosition);
-            WriteIntAtPosition((int)importOffset, ImportCountPosition + 4);
-            foreach (var import in package.Imports)
-            {
-                import.Serialize(this);
-            }
-
-            //var exportsToSerialize = package.Exports;
-            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0)
-                .Select((e) => new DummyExportTableItem(e))
-                .ToList();
-            //exportsToSerialize = exportsToSerialize.Skip(2).Take(2).ToList();
-            foreach(var export in exportsToSerialize)
-            {
-                FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
-            }
-
-            //var exportsToSerialize = new List<UExportTableItem>() { package.Exports[1], package.Exports[3] };
-            //WriteIntAtPosition();
             var exportOffset = UW.BaseStream.Position;
             WriteIntAtPosition(exportsToSerialize.Count(), ExportCountPosition);
             WriteIntAtPosition((int)exportOffset, ExportCountPosition + 4);
 
+
+            //This comes after. But we need to know it's size. so we can set the serialOffsets for the export items.
+            var thumbnails = new ThumbnailTable();
+            thumbnails.Init(exportsToSerialize);
+            var thumbnailsTotalSize = thumbnails.GetSerialSize();
+
+            //TODO - understand this table...
+            var dependsTotalSize = exportsToSerialize.Count() * 4;
+
             int footerNumbers = 8;
-            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + footerNumbers * 4; //24 = unknown footer data
+            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + thumbnailsTotalSize + dependsTotalSize;
             int serialOffset = calculatedTotalHeaderSize;
             foreach (var dummyExport in exportsToSerialize)
             {
@@ -114,13 +99,11 @@ namespace UELib.Dummy
                 //export.Serialize( this );
             }
             //unknown footer info
-            WriteIntAtPosition((int)UW.BaseStream.Position, 49);
-            WriteIntAtPosition((int)UW.BaseStream.Position, 53);
-            WriteIntAtPosition((int)UW.BaseStream.Position, 65);
-            for (int ii = 0; ii < footerNumbers; ii++)
-            {
-                UW.Write(0);
-            }
+            SerializeDependsTable(exportsToSerialize.Count());
+
+            thumbnails.Serialize(this);
+            WriteIntAtPosition(thumbnails.thumbnailDataOffset, ThumbnailDataOffsetPosition);
+            WriteIntAtPosition(thumbnails.thumbnailTableOffset, ThumbnailTableOffsetPosition);
 
             WriteIntAtPosition((int)UW.BaseStream.Position, TotalHeaderSizePosition);
 
@@ -154,9 +137,55 @@ namespace UELib.Dummy
                         break;
                 }
             }
-            for (int ii = 0; ii <250; ii++)
+            for (int ii = 0; ii < 250; ii++)
             {
                 UW.Write(0);
+            }
+        }
+
+        private void SerializeDependsTable(int exportCount)
+        {
+            WriteIntAtPosition((int)UW.BaseStream.Position, DependsOffsetPosition);
+            for (int i = 0; i < exportCount; i++)
+            {
+                UW.Write(0);
+            }
+        }
+
+        private List<DummyExportTableItem> GetExportsToSerialize()
+        {
+            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null ||  e.OuterTable.ClassName == "Package"))
+                .Select((e) => new DummyExportTableItem(e))
+                .ToList();
+            //exportsToSerialize = exportsToSerialize.Skip(2).Take(2).ToList();
+            foreach (var export in exportsToSerialize)
+            {
+                FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
+            }
+
+            return exportsToSerialize;
+        }
+
+        private void SerializeImportsTable()
+        {
+            var importOffset = UW.BaseStream.Position;
+            WriteIntAtPosition(package.Imports.Count(), ImportCountPosition);
+            WriteIntAtPosition((int)importOffset, ImportCountPosition + 4);
+            foreach (var import in package.Imports)
+            {
+                import.Serialize(this);
+            }
+        }
+
+        private void SerializeNameTable()
+        {
+            var nameOffset = UW.BaseStream.Position;
+            WriteIntAtPosition(package.Names.Count(), NameCountPosition);
+            WriteIntAtPosition((int)nameOffset, NameCountPosition + 4);
+
+            foreach (var name in package.Names)
+            {
+                name.Serialize(this);
             }
         }
 
@@ -250,7 +279,14 @@ namespace UELib.Dummy
             this.Write(tableItem.original.ObjectName);
             this.Write(tableItem.newArchetypeIndex);
             //this.Write(tableItem.ObjectFlags);
-            this.Write(4222141830530048);
+            if (tableItem.original.ClassName == "Package")
+            {
+                this.Write(1970342016843776);
+            }else
+            {
+                this.Write(4222141830530048);
+            }
+            
 
             this.Write(serialSize);
 
@@ -268,7 +304,14 @@ namespace UELib.Dummy
             this.Write(0);
 
             //Package flags
-            this.Write(0);
+            if (tableItem.original.ClassName == "Package")
+            {
+                this.Write(1);
+            }
+            else
+            {
+                this.Write(0);
+            }
         }
     }
 }

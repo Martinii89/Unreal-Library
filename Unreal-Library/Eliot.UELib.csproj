@@ -184,6 +184,7 @@
     <Compile Include="Dummy\MinimalStaticMesh.cs" />
     <Compile Include="Dummy\MinimalTexture2D.cs" />
     <Compile Include="Dummy\RLPackageWriter.cs" />
+    <Compile Include="Dummy\ThumbnailTable.cs" />
     <Compile Include="Engine\Classes\Components\UStaticMeshComponent.cs" />
     <Compile Include="Engine\Classes\UPalette.cs" />
     <Compile Include="Decoding\IBufferDecoder.cs" />
@@ -282,7 +283,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
+      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
