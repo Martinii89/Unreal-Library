@@ -807,7 +807,12 @@ namespace UELib.Core
             //outer = GetRealObject(outer);
             for( var structField = outer; structField != null; structField = structField.Super as UStruct )
             {
+                var temp = structField;
                 structField = GetRealObject(structField);
+                if (structField == null)
+                {
+                    structField = temp;
+                }
                 if ( structField.Variables == null || !structField.Variables.Any() )
                     continue;
 

@@ -25,6 +25,9 @@ namespace AssetExtraction
         [Option('m', "meshinfo", Default = false, Required = false, HelpText = "Should data be outputted?")]
         public bool ExtractMeshInfo { get; set; }
 
+        [Option("dummy", Default = false, Required = false, HelpText = "Should dummy package be outputted?")]
+        public bool ExtractDummy { get; set; }
+
         [Option('f', "folder", Required = false, HelpText = "Path to package folder. If not specified current working folder will be used")]
         public string packageFolder { get; set; }
 
@@ -117,7 +120,10 @@ namespace AssetExtraction
             {
                 assetExtractor.ExportMeshObjects(outputMainFolder);
             }
-            //assetExtractor.ExportDummyAssets(outputMainFolder);
+            if (options.ExtractDummy)
+            {
+                assetExtractor.ExportDummyAssets(outputMainFolder);
+            }
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
             Log.Debug(deserializationErrors);

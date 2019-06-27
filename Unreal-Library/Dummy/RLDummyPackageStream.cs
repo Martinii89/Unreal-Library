@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-
     public class RLDummyPackageStream : UPackageStream, IUnrealStream
     {
         private const int DummyPackageFlag = 1;
@@ -50,17 +47,40 @@ namespace UELib.Dummy
         public void Serialize()
         {
             initHeader();
+            // TODO: Trim these tables down to what the dummy assets actually use.
+            // This would require preparsing the export items. Should not be impossible to do.
+
+            /*
+            Export table item:
+                OIndex ClassIndex; (Usually \ always from the import table)
+                OIndex SuperIndex; (most often null)
+                OIndex PackageIndex; (always(?) from the export table)
+                FName ObjectName; (just a name)
+                OIndex Archetype;
+
+            Import table item:
+                FName PackageName; (just a name)
+                FName ClassName;   (just a name)
+                OIndex OuterIndex; ( import \ export reference)
+                FName ObjectName;  (just a name)
+             */
             SerializeNameTable();
             SerializeImportsTable();
 
             List<DummyExportTableItem> exportsToSerialize = GetExportsToSerialize();
 
+            var newNameTable = new List<UNameTableItem>();
+            var newImportTable = new List<DummyImportTableItem>();
+
+            //Let's start by trimming down the import table
+            TrimImportTable(exportsToSerialize, newImportTable);
+
+            //Write info about exports in header
             var exportOffset = UW.BaseStream.Position;
             WriteIntAtPosition(exportsToSerialize.Count(), ExportCountPosition);
             WriteIntAtPosition((int)exportOffset, ExportCountPosition + 4);
 
-
-            //This comes after. But we need to know it's size. so we can set the serialOffsets for the export items.
+            //This comes after the export table, but we need to know it's size so we can set the correct serialOffsets for the export items.
             var thumbnails = new ThumbnailTable();
             thumbnails.Init(exportsToSerialize);
             var thumbnailsTotalSize = thumbnails.GetSerialSize();
@@ -68,37 +88,10 @@ namespace UELib.Dummy
             //TODO - understand this table...
             var dependsTotalSize = exportsToSerialize.Count() * 4;
 
-            int footerNumbers = 8;
-            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + thumbnailsTotalSize + dependsTotalSize;
-            int serialOffset = calculatedTotalHeaderSize;
-            foreach (var dummyExport in exportsToSerialize)
-            {
-                var export = dummyExport.original;
-                switch (export.ClassName)
-                {
-                    case "Texture2D":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTexture2D.serialSize);
-                        serialOffset += MinimalTexture2D.serialSize;
-                        break;
-                    case "StaticMesh":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalStaticMesh.serialSize);
-                        serialOffset += MinimalStaticMesh.serialSize;
-                        break;
-                    case "class":
-                        if (export.SerialSize == 0)
-                        {
-                            DummyExportTableSerialize(dummyExport, 0, 0);
-                        }
-                        break;
-                    default:
-                        DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
-                        serialOffset += DummySerialSize;
-                        break;
-                }
+            //Serialize the export table
+            SerializeExportTable(exportsToSerialize, thumbnailsTotalSize, dependsTotalSize);
 
-                //export.Serialize( this );
-            }
-            //unknown footer info
+            //Serialize depends table.
             SerializeDependsTable(exportsToSerialize.Count());
 
             thumbnails.Serialize(this);
@@ -120,12 +113,14 @@ namespace UELib.Dummy
                     case "StaticMesh":
                         new MinimalStaticMesh().Write(this, package);
                         break;
+
                     case "class":
                         if (exportObject.SerialSize == 0)
                         {
                             break;
                         }
                         break;
+
                     default:
                         //We just need the netindex and a None FName
                         package.Stream.Position = exportObject.SerialOffset;
@@ -143,6 +138,84 @@ namespace UELib.Dummy
             }
         }
 
+        private void TrimImportTable(List<DummyExportTableItem> exportsToSerialize, List<DummyImportTableItem> newImportTable)
+        {
+            foreach (var export in exportsToSerialize)
+            {
+                int classIndex = export.newClassIndex;
+                if (classIndex < 0) //import
+                {
+                    var import = package.Imports[-classIndex - 1];
+                    var newIndex = newImportTable.FindIndex((i) => i.original == import);
+                    if (newIndex == -1)
+                    {
+                        newImportTable.Add(new DummyImportTableItem(import));
+                        newIndex = newImportTable.Count - 1;
+                    }
+                    export.newClassIndex = newIndex;
+
+
+                    //Process the outer\parent object(s) of the import
+                    var dummyImport = newImportTable[newIndex];
+                    while (dummyImport.newOuterIndex < 0)
+                    {
+                        var parentImport = package.Imports[-dummyImport.original.OuterIndex - 1];
+                        var newParentIndex = newImportTable.FindIndex((i) => i.original == parentImport);
+                        if (newParentIndex == -1)
+                        {
+                            newImportTable.Add(new DummyImportTableItem(parentImport));
+                            newParentIndex = newImportTable.Count - 1;
+                            dummyImport.newOuterIndex = newParentIndex;
+                            dummyImport = newImportTable[newParentIndex];
+                        }
+                        else
+                        {
+                            //We've already added this to the table. And we assume we can break the "recursion" here..
+                            break;
+                        }
+
+                    }
+                }
+                //if import -> add it to the new import table and get the new index.
+                // If already in the new import table. just return the new index
+                // Add the name to the names table
+            }
+        }
+
+        private void SerializeExportTable(List<DummyExportTableItem> exportsToSerialize, int thumbnailsTotalSize, int dependsTotalSize)
+        {
+            int calculatedTotalHeaderSize = (int)(UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + thumbnailsTotalSize + dependsTotalSize;
+            int serialOffset = calculatedTotalHeaderSize;
+            foreach (var dummyExport in exportsToSerialize)
+            {
+                switch (dummyExport.original.ClassName)
+                {
+                    case "Texture2D":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTexture2D.serialSize);
+                        serialOffset += MinimalTexture2D.serialSize;
+                        break;
+
+                    case "StaticMesh":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalStaticMesh.serialSize);
+                        serialOffset += MinimalStaticMesh.serialSize;
+                        break;
+
+                    case "class":
+                        if (dummyExport.original.SerialSize == 0)
+                        {
+                            //These should really be skipped right??
+                            DummyExportTableSerialize(dummyExport, 0, 0);
+                        }
+                        break;
+
+                    default:
+                        DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
+                        serialOffset += DummySerialSize;
+                        break;
+                }
+            }
+        }
+
         private void SerializeDependsTable(int exportCount)
         {
             WriteIntAtPosition((int)UW.BaseStream.Position, DependsOffsetPosition);
@@ -154,16 +227,34 @@ namespace UELib.Dummy
 
         private List<DummyExportTableItem> GetExportsToSerialize()
         {
-            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null ||  e.OuterTable.ClassName == "Package"))
+            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null || e.OuterTable.ClassName == "Package"))
                 .Select((e) => new DummyExportTableItem(e))
                 .ToList();
-            //exportsToSerialize = exportsToSerialize.Skip(2).Take(2).ToList();
             foreach (var export in exportsToSerialize)
             {
                 FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
             }
 
             return exportsToSerialize;
+        }
+
+        private void FixObjectReferencesInFilteredExports(DummyExportTableItem export, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
+        {
+            export.newClassIndex = FindNewReference(export.original.ClassIndex, exportsToSerialize, exports);
+            export.newSuperIndex = FindNewReference(export.original.SuperIndex, exportsToSerialize, exports);
+            export.newOuterIndex = FindNewReference(export.original.OuterIndex, exportsToSerialize, exports);
+            export.newArchetypeIndex = FindNewReference(export.original.ArchetypeIndex, exportsToSerialize, exports);
+        }
+
+        private int FindNewReference(int originalIndex, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
+        {
+            if (originalIndex <= 0)
+            {
+                return originalIndex;
+            }
+            var reference = exports[originalIndex - 1];
+            var newReferenceIndex = exportsToSerialize.FindIndex((e) => e.original == reference) + 1;
+            return newReferenceIndex;
         }
 
         private void SerializeImportsTable()
@@ -187,25 +278,6 @@ namespace UELib.Dummy
             {
                 name.Serialize(this);
             }
-        }
-
-        private void FixObjectReferencesInFilteredExports(DummyExportTableItem export, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
-        {
-            export.newClassIndex = FindNewReference(export.original.ClassIndex, exportsToSerialize, exports);
-            export.newSuperIndex = FindNewReference(export.original.SuperIndex, exportsToSerialize, exports);
-            export.newOuterIndex = FindNewReference(export.original.OuterIndex, exportsToSerialize, exports);
-            export.newArchetypeIndex = FindNewReference(export.original.ArchetypeIndex, exportsToSerialize, exports);
-        }
-
-        private int FindNewReference(int originalIndex, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
-        {
-            if (originalIndex <= 0)
-            {
-                return originalIndex;
-            }
-            var reference = exports[originalIndex - 1];
-            var newReferenceIndex = exportsToSerialize.FindIndex((e) => e.original == reference) + 1;
-            return newReferenceIndex;
         }
 
         private void WriteIntAtPosition(int value, int writePosition)
@@ -282,11 +354,11 @@ namespace UELib.Dummy
             if (tableItem.original.ClassName == "Package")
             {
                 this.Write(1970342016843776);
-            }else
+            }
+            else
             {
                 this.Write(4222141830530048);
             }
-            
 
             this.Write(serialSize);
 

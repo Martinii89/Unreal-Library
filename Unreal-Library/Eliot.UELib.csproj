@@ -180,6 +180,7 @@
     <Compile Include="Core\Classes\UComponent.cs" />
     <Compile Include="ByteCodeDecompiler.cs" />
     <Compile Include="Dummy\DummyExportTableItem.cs" />
+    <Compile Include="Dummy\DummyImportTableItem.cs" />
     <Compile Include="Dummy\MinimalBase.cs" />
     <Compile Include="Dummy\MinimalStaticMesh.cs" />
     <Compile Include="Dummy\MinimalTexture2D.cs" />
@@ -283,7 +284,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

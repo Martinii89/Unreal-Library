@@ -18,9 +18,6 @@ namespace UELib.Dummy
         public int packageFlag { get; private set; }
 
 
-        public DummyExportTableItem(UExportTableItem b)
-        {
-            original = b;
-        }
+        public DummyExportTableItem(UExportTableItem b) => original = b;
     }
 }
