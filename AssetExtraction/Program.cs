@@ -13,8 +13,8 @@ namespace AssetExtraction
         [Option('d', "debug", Default = false)]
         public bool Debug { get; set; }
 
-        [Option("preload", Default = true, HelpText = "Should you preload default packages?")]
-        public bool preload { get; set; }
+        [Option("nopreload", Default = false, HelpText = "Should you preload default packages?")]
+        public bool nopreload { get; set; }
 
         [Option('c', "classes", Default = false, Required = false, HelpText = "Should classes be outputted?")]
         public bool ExtractClasses { get; set; }
@@ -85,7 +85,7 @@ namespace AssetExtraction
                 }
 
                 string pathToPackages = options.packageFolder ?? ".";
-                if (options.preload)
+                if (options.nopreload == false)
                 {
                     PreloadBasicPackages(pathToPackages);
                 }
@@ -122,7 +122,8 @@ namespace AssetExtraction
             }
             if (options.ExtractDummy)
             {
-                assetExtractor.ExportDummyAssets(outputMainFolder);
+                var outputDummyFolder = Path.Combine("Extracted", ".Dummy");
+                assetExtractor.ExportDummyAssets(outputDummyFolder);
             }
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";

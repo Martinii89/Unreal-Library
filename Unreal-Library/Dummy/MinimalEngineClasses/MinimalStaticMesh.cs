@@ -40,7 +40,7 @@ namespace UELib.Dummy
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        protected override byte[] minimalByteArray => throw new NotImplementedException();
+        protected override byte[] minimalByteArray => minimalMesh;
 
 
         public static void AddNamesToNameTable(UnrealPackage package)
@@ -56,7 +56,7 @@ namespace UELib.Dummy
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
-            FixNameIndexAtPosition(package, "StaticMesh", 0);
+            //FixNameIndexAtPosition(package, "StaticMesh", 0);
 
             FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
             FixNameIndexAtPosition(package, "StrProperty", 12);

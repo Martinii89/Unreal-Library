@@ -11,7 +11,7 @@ namespace UELib
     {
         #region Serialized Members
         public UName PackageName;
-        private UName _ClassName;
+        public UName _ClassName;
 
         [Pure]public override string ClassName{ get{ return _ClassName; } }
         #endregion

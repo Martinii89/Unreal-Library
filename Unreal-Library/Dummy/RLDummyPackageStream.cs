@@ -37,6 +37,9 @@ namespace UELib.Dummy
 
             UW = new RLPackageWriter(_stream, DummyEngineVersion);
             MinimalTexture2D.AddNamesToNameTable(package);
+            MinimalStaticMesh.AddNamesToNameTable(package);
+            MinimalTextureRenderTarget2D.AddNamesToNameTable(package);
+            MinimalTextureRenderTargetCube.AddNamesToNameTable(package);
         }
 
         private const int ExportTableItemSize = 68;
@@ -50,22 +53,9 @@ namespace UELib.Dummy
             // TODO: Trim these tables down to what the dummy assets actually use.
             // This would require preparsing the export items. Should not be impossible to do.
 
-            /*
-            Export table item:
-                OIndex ClassIndex; (Usually \ always from the import table)
-                OIndex SuperIndex; (most often null)
-                OIndex PackageIndex; (always(?) from the export table)
-                FName ObjectName; (just a name)
-                OIndex Archetype;
 
-            Import table item:
-                FName PackageName; (just a name)
-                FName ClassName;   (just a name)
-                OIndex OuterIndex; ( import \ export reference)
-                FName ObjectName;  (just a name)
-             */
             SerializeNameTable();
-            SerializeImportsTable();
+            //SerializeImportsTable();
 
             List<DummyExportTableItem> exportsToSerialize = GetExportsToSerialize();
 
@@ -74,6 +64,13 @@ namespace UELib.Dummy
 
             //Let's start by trimming down the import table
             TrimImportTable(exportsToSerialize, newImportTable);
+            var importOffset = UW.BaseStream.Position;
+            WriteIntAtPosition(newImportTable.Count(), ImportCountPosition);
+            WriteIntAtPosition((int)importOffset, ImportCountPosition + 4);
+            foreach (var import in newImportTable)
+            {
+                import.Serialize(this);
+            }
 
             //Write info about exports in header
             var exportOffset = UW.BaseStream.Position;
@@ -110,8 +107,26 @@ namespace UELib.Dummy
                         new MinimalTexture2D().Write(this, package);
                         break;
 
+                    case "TextureCube":
+                        new MinimalTextureCube().Write(this, package);
+                        break;
+
+                    case "TextureRenderTarget2D":
+                        new MinimalTextureRenderTarget2D().Write(this, package);
+                        break;
+
+                    case "TextureRenderTargetCube":
+                        new MinimalTextureRenderTargetCube().Write(this, package);
+                        break;
+                    case "LightMapTexture2D":
+                        new MinimalLightMapTexture2D().Write(this, package);
+                        break;
                     case "StaticMesh":
                         new MinimalStaticMesh().Write(this, package);
+                        break;
+
+                    case "Material":
+                        new MinimalMaterial().Write(this, package);
                         break;
 
                     case "class":
@@ -142,44 +157,55 @@ namespace UELib.Dummy
         {
             foreach (var export in exportsToSerialize)
             {
-                int classIndex = export.newClassIndex;
-                if (classIndex < 0) //import
-                {
-                    var import = package.Imports[-classIndex - 1];
-                    var newIndex = newImportTable.FindIndex((i) => i.original == import);
-                    if (newIndex == -1)
-                    {
-                        newImportTable.Add(new DummyImportTableItem(import));
-                        newIndex = newImportTable.Count - 1;
-                    }
-                    export.newClassIndex = newIndex;
-
-
-                    //Process the outer\parent object(s) of the import
-                    var dummyImport = newImportTable[newIndex];
-                    while (dummyImport.newOuterIndex < 0)
-                    {
-                        var parentImport = package.Imports[-dummyImport.original.OuterIndex - 1];
-                        var newParentIndex = newImportTable.FindIndex((i) => i.original == parentImport);
-                        if (newParentIndex == -1)
-                        {
-                            newImportTable.Add(new DummyImportTableItem(parentImport));
-                            newParentIndex = newImportTable.Count - 1;
-                            dummyImport.newOuterIndex = newParentIndex;
-                            dummyImport = newImportTable[newParentIndex];
-                        }
-                        else
-                        {
-                            //We've already added this to the table. And we assume we can break the "recursion" here..
-                            break;
-                        }
-
-                    }
-                }
-                //if import -> add it to the new import table and get the new index.
-                // If already in the new import table. just return the new index
-                // Add the name to the names table
+                export.newClassIndex = AddToImportTable(newImportTable, export, export.newClassIndex);
+                export.newSuperIndex = AddToImportTable(newImportTable, export, export.newSuperIndex);
+                export.newOuterIndex = AddToImportTable(newImportTable, export, export.newOuterIndex);
+                export.newArchetypeIndex = AddToImportTable(newImportTable, export, export.newArchetypeIndex);
             }
+        }
+
+        private int FromListIndexToImportTableIndex(int index)
+        {
+            return -index - 1;
+        }
+
+        private int AddToImportTable(List<DummyImportTableItem> newImportTable, DummyExportTableItem export, int importIndex)
+        {
+            if (importIndex < 0) //import
+            {
+                var import = package.Imports[-importIndex - 1];
+                var newIndex = newImportTable.FindIndex((i) => i.original == import);
+                if (newIndex == -1)
+                {
+                    newImportTable.Add(new DummyImportTableItem(import));
+                    newIndex = newImportTable.Count - 1;
+                }
+
+                //Process the outer\parent object(s) of the import
+                var dummyImport = newImportTable[newIndex];
+                while (dummyImport.newOuterIndex < 0)
+                {
+                    var parentImport = package.Imports[-dummyImport.original.OuterIndex - 1];
+                    var newParentIndex = newImportTable.FindIndex((i) => i.original == parentImport);
+                    if (newParentIndex == -1)
+                    {
+                        newImportTable.Add(new DummyImportTableItem(parentImport));
+                        newParentIndex = newImportTable.Count - 1;
+                        dummyImport.newOuterIndex = FromListIndexToImportTableIndex(newParentIndex);
+                        dummyImport = newImportTable[newParentIndex];
+                    }
+                    else
+                    {
+                        dummyImport.newOuterIndex = FromListIndexToImportTableIndex(newParentIndex);
+                        //We've already added this to the table. And we assume we can break the "recursion" here..
+                        break;
+                    }
+
+                }
+                return FromListIndexToImportTableIndex(newIndex);
+            }
+            //if export, just return the old one.
+            return importIndex;
         }
 
         private void SerializeExportTable(List<DummyExportTableItem> exportsToSerialize, int thumbnailsTotalSize, int dependsTotalSize)
@@ -195,9 +221,32 @@ namespace UELib.Dummy
                         serialOffset += MinimalTexture2D.serialSize;
                         break;
 
+                    case "TextureCube":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureCube.serialSize);
+                        serialOffset += MinimalTextureCube.serialSize;
+                        break;
+                    case "TextureRenderTarget2D":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureRenderTarget2D.serialSize);
+                        serialOffset += MinimalTextureRenderTarget2D.serialSize;
+                        break;
+
+                    case "TextureRenderTargetCube":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureRenderTargetCube.serialSize);
+                        serialOffset += MinimalTextureRenderTargetCube.serialSize;
+                        break;
+
+                    case "LightMapTexture2D":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalLightMapTexture2D.serialSize);
+                        serialOffset += MinimalLightMapTexture2D.serialSize;
+                        break;
                     case "StaticMesh":
                         DummyExportTableSerialize(dummyExport, serialOffset, MinimalStaticMesh.serialSize);
                         serialOffset += MinimalStaticMesh.serialSize;
+                        break;
+
+                    case "Material":
+                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalMaterial.serialSize);
+                        serialOffset += MinimalMaterial.serialSize;
                         break;
 
                     case "class":
@@ -227,9 +276,42 @@ namespace UELib.Dummy
 
         private List<DummyExportTableItem> GetExportsToSerialize()
         {
-            var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null || e.OuterTable.ClassName == "Package"))
-                .Select((e) => new DummyExportTableItem(e))
-                .ToList();
+            var packagesNotInUse = package.Exports.Where((e) => e.ClassName == "Package").ToList();
+            var exportsToSerialize = new List<DummyExportTableItem>();
+            int i = 0;
+            foreach (var export in package.Exports)
+            {
+                //None 
+                if (export.SerialSize == 0)
+                    continue;
+                // any object not a child of package. Don't need it
+                if (export.OuterTable != null && export.OuterTable.ClassName != "Package")
+                    continue;
+                if (export.ClassName == "ObjectReferencer" || export.ClassName == "World")
+                    continue;
+
+                if (export.OuterTable?.ClassName == "Package")
+                {
+                    var outerPackage = export.OuterTable as UExportTableItem;
+                    packagesNotInUse.Remove(outerPackage);
+                }
+                if (i >= 0 && i <= 550)
+                {
+                    exportsToSerialize.Add(new DummyExportTableItem(export));
+                }
+                i++;
+
+            }
+            foreach (var packageToRemove in packagesNotInUse)
+            {
+                exportsToSerialize.RemoveAll((e) => e.original == packageToRemove);
+            }
+
+            //var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null || e.OuterTable.ClassName == "Package") && e.ClassName != "ObjectReferencer")
+            //    .Select((e) => new DummyExportTableItem(e))
+            //    .ToList();
+
+
             foreach (var export in exportsToSerialize)
             {
                 FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
@@ -240,13 +322,13 @@ namespace UELib.Dummy
 
         private void FixObjectReferencesInFilteredExports(DummyExportTableItem export, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
         {
-            export.newClassIndex = FindNewReference(export.original.ClassIndex, exportsToSerialize, exports);
-            export.newSuperIndex = FindNewReference(export.original.SuperIndex, exportsToSerialize, exports);
-            export.newOuterIndex = FindNewReference(export.original.OuterIndex, exportsToSerialize, exports);
-            export.newArchetypeIndex = FindNewReference(export.original.ArchetypeIndex, exportsToSerialize, exports);
+            export.newClassIndex = FindNewExportReference(export.original.ClassIndex, exportsToSerialize, exports);
+            export.newSuperIndex = FindNewExportReference(export.original.SuperIndex, exportsToSerialize, exports);
+            export.newOuterIndex = FindNewExportReference(export.original.OuterIndex, exportsToSerialize, exports);
+            export.newArchetypeIndex = FindNewExportReference(export.original.ArchetypeIndex, exportsToSerialize, exports);
         }
 
-        private int FindNewReference(int originalIndex, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
+        private int FindNewExportReference(int originalIndex, List<DummyExportTableItem> exportsToSerialize, List<UExportTableItem> exports)
         {
             if (originalIndex <= 0)
             {

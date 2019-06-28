@@ -18,5 +18,14 @@ namespace UELib.Dummy
             this.original = original;
             newOuterIndex = original.OuterIndex;
         }
+
+
+        public void Serialize(IUnrealStream stream)
+        {
+            stream.Write(original.PackageName);
+            stream.Write(original._ClassName);
+            stream.Write(newOuterIndex); // Always an ordinary integer
+            stream.Write(original.ObjectName);
+        }
     }
 }

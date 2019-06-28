@@ -181,9 +181,14 @@
     <Compile Include="ByteCodeDecompiler.cs" />
     <Compile Include="Dummy\DummyExportTableItem.cs" />
     <Compile Include="Dummy\DummyImportTableItem.cs" />
-    <Compile Include="Dummy\MinimalBase.cs" />
-    <Compile Include="Dummy\MinimalStaticMesh.cs" />
-    <Compile Include="Dummy\MinimalTexture2D.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalBase.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalLightMapTexture2D.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalMaterial.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalStaticMesh.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalTexture2D.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalTextureCube.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalTextureRenderTargetCube.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalTextureRenderTarget2D.cs" />
     <Compile Include="Dummy\RLPackageWriter.cs" />
     <Compile Include="Dummy\ThumbnailTable.cs" />
     <Compile Include="Engine\Classes\Components\UStaticMeshComponent.cs" />
