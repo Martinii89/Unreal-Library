@@ -225,10 +225,12 @@ namespace UELib.Dummy
                 //None 
                 if (export.SerialSize == 0)
                     continue;
+                if (export.Object.IsClassType("Class") || export.ObjectName.ToString().StartsWith("Default__"))
+                    continue;
                 // any object not a child of package. Don't need it
                 if (export.OuterTable != null && export.OuterTable.ClassName != "Package")
                     continue;
-                if (export.ClassName == "ObjectReferencer" || export.ClassName == "World")
+                if (export.ClassName == "ObjectReferencer" || export.ClassName == "World" || export.ClassName == "ObjectRedirector")
                     continue;
 
                 if (export.OuterTable?.ClassName == "Package")
