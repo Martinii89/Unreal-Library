@@ -8,9 +8,9 @@ namespace UELib.Dummy
     public class RLDummyPackageStream : UPackageStream, IUnrealStream
     {
         private const int DummyPackageFlag = 1;
-        private const int DummyFileVersion = 868;
+        private const int DummyFileVersion = 867;
         private const int DummyLicenseeVersion = 0;
-        private const int DummyEngineVersion = 12791;
+        private const int DummyEngineVersion = 10897;
         private const int DummyCookerVersion = 0;
         private const int DummyCompression = 0;
         private const int DummyCompressedChunksData = 0;
@@ -42,6 +42,7 @@ namespace UELib.Dummy
             StaticMesh.AddNamesToNameTable(package);
             TextureRenderTarget2D.AddNamesToNameTable(package);
             TextureRenderTargetCube.AddNamesToNameTable(package);
+            SkeletalMesh.AddNamesToNameTable(package);
 
             //Init the factory
             dummyFactory = DummyFactory.Instance;

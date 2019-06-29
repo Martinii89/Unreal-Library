@@ -26,5 +26,7 @@ namespace UELib.Dummy
         }
 
     }
+
+    class DecalMaterial: Material{}
 }
 

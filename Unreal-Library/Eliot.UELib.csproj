@@ -185,6 +185,7 @@
     <Compile Include="Dummy\MinimalEngineClasses\MinimalBase.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\LightMapTexture2D.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Material.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\SkeletalMesh.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\StaticMesh.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Texture2D.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\TextureCube.cs" />
