@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    class MinimalTextureCube : MinimalBase
+    class TextureCube : MinimalBase
     {
 
         public static int serialSize = 28;
@@ -17,6 +17,7 @@ namespace UELib.Dummy
         };
 
         protected override byte[] minimalByteArray => MinimalTextureCubeByteArray;
+        public override int GetSerialSize() => serialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {

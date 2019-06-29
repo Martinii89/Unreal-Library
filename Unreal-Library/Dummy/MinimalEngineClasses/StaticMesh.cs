@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    internal class MinimalStaticMesh : MinimalBase
+    internal class StaticMesh : MinimalBase
     {
 
         public static int serialSize = 406;
@@ -41,6 +41,7 @@ namespace UELib.Dummy
         };
 
         protected override byte[] minimalByteArray => minimalMesh;
+        public override int GetSerialSize() => serialSize;
 
 
         public static void AddNamesToNameTable(UnrealPackage package)

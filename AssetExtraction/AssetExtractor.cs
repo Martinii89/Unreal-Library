@@ -155,7 +155,7 @@ namespace AssetExtraction
 
         public void ExportDummyAssets(string outputPath)
         {
-            var outputFile = Path.Combine(outputPath, package.FullPackageName + "_dummy.upk");
+            var outputFile = Path.Combine(outputPath, package.FullPackageName + ".upk");
             new FileInfo(outputFile).Directory.Create();
             RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, outputFile);
             packageSerializer.Serialize();

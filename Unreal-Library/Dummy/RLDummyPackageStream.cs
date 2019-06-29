@@ -25,6 +25,7 @@ namespace UELib.Dummy
         private const int TotalHeaderSizePosition = 8;
 
         private UnrealPackage package;
+        private DummyFactory dummyFactory;
 
         //public uint Version { get; set; }
 
@@ -36,10 +37,15 @@ namespace UELib.Dummy
             Package = package;
 
             UW = new RLPackageWriter(_stream, DummyEngineVersion);
-            MinimalTexture2D.AddNamesToNameTable(package);
-            MinimalStaticMesh.AddNamesToNameTable(package);
-            MinimalTextureRenderTarget2D.AddNamesToNameTable(package);
-            MinimalTextureRenderTargetCube.AddNamesToNameTable(package);
+            //Could this be done by the factory?
+            Texture2D.AddNamesToNameTable(package);
+            StaticMesh.AddNamesToNameTable(package);
+            TextureRenderTarget2D.AddNamesToNameTable(package);
+            TextureRenderTargetCube.AddNamesToNameTable(package);
+
+            //Init the factory
+            dummyFactory = DummyFactory.Instance;
+            
         }
 
         private const int ExportTableItemSize = 68;
@@ -97,59 +103,30 @@ namespace UELib.Dummy
 
             WriteIntAtPosition((int)UW.BaseStream.Position, TotalHeaderSizePosition);
 
+            SerializeExportSerialData(exportsToSerialize);
+        }
+
+        private void SerializeExportSerialData(List<DummyExportTableItem> exportsToSerialize)
+        {
             int noneIndex = package.Names.FindIndex((n) => n.Name == "None");
             foreach (var dummyExport in exportsToSerialize)
             {
                 var exportObject = dummyExport.original;
-                switch (exportObject.ClassName)
+                var dummyClass = dummyFactory.Create(exportObject.ClassName);
+                if (dummyClass != null)
                 {
-                    case "Texture2D":
-                        new MinimalTexture2D().Write(this, package);
-                        break;
-
-                    case "TextureCube":
-                        new MinimalTextureCube().Write(this, package);
-                        break;
-
-                    case "TextureRenderTarget2D":
-                        new MinimalTextureRenderTarget2D().Write(this, package);
-                        break;
-
-                    case "TextureRenderTargetCube":
-                        new MinimalTextureRenderTargetCube().Write(this, package);
-                        break;
-                    case "LightMapTexture2D":
-                        new MinimalLightMapTexture2D().Write(this, package);
-                        break;
-                    case "StaticMesh":
-                        new MinimalStaticMesh().Write(this, package);
-                        break;
-
-                    case "Material":
-                        new MinimalMaterial().Write(this, package);
-                        break;
-
-                    case "class":
-                        if (exportObject.SerialSize == 0)
-                        {
-                            break;
-                        }
-                        break;
-
-                    default:
-                        //We just need the netindex and a None FName
-                        package.Stream.Position = exportObject.SerialOffset;
-                        //NetIndex
-                        UW.Write(package.Stream.ReadInt32());
-                        //None index and count
-                        UW.Write(noneIndex);
-                        UW.Write(0);
-                        break;
+                    dummyClass.Write(this, package);
                 }
-            }
-            for (int ii = 0; ii < 250; ii++)
-            {
-                UW.Write(0);
+                else
+                {
+                    //We just need the netindex and a None FName
+                    package.Stream.Position = exportObject.SerialOffset;
+                    //NetIndex
+                    UW.Write(package.Stream.ReadInt32());
+                    //None index and count
+                    UW.Write(noneIndex);
+                    UW.Write(0);
+                }
             }
         }
 
@@ -214,53 +191,16 @@ namespace UELib.Dummy
             int serialOffset = calculatedTotalHeaderSize;
             foreach (var dummyExport in exportsToSerialize)
             {
-                switch (dummyExport.original.ClassName)
+                var dummyClass = dummyFactory.Create(dummyExport.original.ClassName);
+                if (dummyClass != null)
                 {
-                    case "Texture2D":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTexture2D.serialSize);
-                        serialOffset += MinimalTexture2D.serialSize;
-                        break;
-
-                    case "TextureCube":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureCube.serialSize);
-                        serialOffset += MinimalTextureCube.serialSize;
-                        break;
-                    case "TextureRenderTarget2D":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureRenderTarget2D.serialSize);
-                        serialOffset += MinimalTextureRenderTarget2D.serialSize;
-                        break;
-
-                    case "TextureRenderTargetCube":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalTextureRenderTargetCube.serialSize);
-                        serialOffset += MinimalTextureRenderTargetCube.serialSize;
-                        break;
-
-                    case "LightMapTexture2D":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalLightMapTexture2D.serialSize);
-                        serialOffset += MinimalLightMapTexture2D.serialSize;
-                        break;
-                    case "StaticMesh":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalStaticMesh.serialSize);
-                        serialOffset += MinimalStaticMesh.serialSize;
-                        break;
-
-                    case "Material":
-                        DummyExportTableSerialize(dummyExport, serialOffset, MinimalMaterial.serialSize);
-                        serialOffset += MinimalMaterial.serialSize;
-                        break;
-
-                    case "class":
-                        if (dummyExport.original.SerialSize == 0)
-                        {
-                            //These should really be skipped right??
-                            DummyExportTableSerialize(dummyExport, 0, 0);
-                        }
-                        break;
-
-                    default:
-                        DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
-                        serialOffset += DummySerialSize;
-                        break;
+                    DummyExportTableSerialize(dummyExport, serialOffset, dummyClass.GetSerialSize());
+                    serialOffset += dummyClass.GetSerialSize();
+                }
+                else
+                {
+                    DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
+                    serialOffset += DummySerialSize;
                 }
             }
         }
@@ -278,7 +218,7 @@ namespace UELib.Dummy
         {
             var packagesNotInUse = package.Exports.Where((e) => e.ClassName == "Package").ToList();
             var exportsToSerialize = new List<DummyExportTableItem>();
-            int i = 0;
+            //int i = 0;
             foreach (var export in package.Exports)
             {
                 //None 
@@ -295,21 +235,17 @@ namespace UELib.Dummy
                     var outerPackage = export.OuterTable as UExportTableItem;
                     packagesNotInUse.Remove(outerPackage);
                 }
-                if (i >= 0 && i <= 550)
-                {
-                    exportsToSerialize.Add(new DummyExportTableItem(export));
-                }
-                i++;
+                exportsToSerialize.Add(new DummyExportTableItem(export));
+                //if (i >= 0 && i <= 550)
+                //{
+                //}
+                //i++;
 
             }
             foreach (var packageToRemove in packagesNotInUse)
             {
                 exportsToSerialize.RemoveAll((e) => e.original == packageToRemove);
             }
-
-            //var exportsToSerialize = package.Exports.Where((e) => e.SerialSize != 0 && (e.OuterTable == null || e.OuterTable.ClassName == "Package") && e.ClassName != "ObjectReferencer")
-            //    .Select((e) => new DummyExportTableItem(e))
-            //    .ToList();
 
 
             foreach (var export in exportsToSerialize)

@@ -9,10 +9,11 @@ namespace UELib.Dummy
 {
     internal abstract class MinimalBase
     {
-        protected static int serialSize;
+        //protected static int serialSize;
         abstract protected byte[] minimalByteArray { get;}
 
         abstract public void Write(IUnrealStream stream, UnrealPackage package);
+        abstract public int GetSerialSize();
 
         protected void FixNameIndexAtPosition(UnrealPackage package, string name, int startPosition)
         {
@@ -23,6 +24,8 @@ namespace UELib.Dummy
                 minimalByteArray[i + startPosition] = bytes[i];
             }
         }
+
+
 
         protected static void AddNamesToNameTable(UnrealPackage package, IList<string> namesToAdd)
         {

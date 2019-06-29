@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace UELib.Dummy
 {
 
-    internal class MinimalTexture2D : MinimalBase
+    internal class Texture2D : MinimalBase
     {
         public static int serialSize = 402;
 
@@ -42,6 +42,7 @@ namespace UELib.Dummy
         };
 
         protected override byte[] minimalByteArray => minimalTexture2DBytes;
+        public override int GetSerialSize() => serialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {

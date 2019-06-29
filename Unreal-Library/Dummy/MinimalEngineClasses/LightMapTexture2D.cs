@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    class MinimalLightMapTexture2D : MinimalBase
+    class LightMapTexture2D : MinimalBase
     {
         public static int serialSize = 84;
 
@@ -21,6 +21,8 @@ namespace UELib.Dummy
 
 
         protected override byte[] minimalByteArray => MinimalLightMapTexture2DByteArray;
+
+        public override int GetSerialSize() => serialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    class MinimalTextureRenderTarget2D : MinimalBase
+    class TextureRenderTarget2D : MinimalBase
     {
         public static int serialSize = 84;
 
@@ -20,6 +20,7 @@ namespace UELib.Dummy
         };
 
         protected override byte[] minimalByteArray => MinimalTextureRenderTarget2DByteArray;
+        public override int GetSerialSize() => serialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {

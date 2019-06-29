@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
-    class MinimalMaterial : MinimalBase
+    class Material : MinimalBase
     {
         public static int serialSize = 16;
 
@@ -16,6 +16,8 @@ namespace UELib.Dummy
 
 
         protected override byte[] minimalByteArray => minimalMaterialByteArray;
+
+        public override int GetSerialSize() => serialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
