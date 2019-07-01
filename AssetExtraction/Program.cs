@@ -28,6 +28,9 @@ namespace AssetExtraction
         [Option("dummy", Default = false, Required = false, HelpText = "Should dummy package be outputted?")]
         public bool ExtractDummy { get; set; }
 
+        [Option("dummyFolder", Required = false, HelpText = "Path to DUMMY output package folder. If not specified current working folder  + .dummy will be used")]
+        public string dummyPackageFolder { get; set; }
+
         [Option('f', "folder", Required = false, HelpText = "Path to package folder. If not specified current working folder will be used")]
         public string packageFolder { get; set; }
 
@@ -122,7 +125,11 @@ namespace AssetExtraction
             }
             if (options.ExtractDummy)
             {
-                var outputDummyFolder = Path.Combine("Extracted", ".Dummy");
+                string outputDummyFolder = Path.Combine("Extracted", ".Dummy");
+                if (options.dummyPackageFolder != null)
+                {
+                    outputDummyFolder = options.dummyPackageFolder;
+                }
                 assetExtractor.ExportDummyAssets(outputDummyFolder);
             }
 
