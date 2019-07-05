@@ -46,7 +46,6 @@ namespace UELib.Dummy
 
             //Init the factory
             dummyFactory = DummyFactory.Instance;
-            
         }
 
         private const int ExportTableItemSize = 68;
@@ -219,6 +218,10 @@ namespace UELib.Dummy
         {
             var packagesNotInUse = package.Exports.Where((e) => e.ClassName == "Package").ToList();
             var exportsToSerialize = new List<DummyExportTableItem>();
+            var classesToSkip = new List<string>()
+            {
+                "ObjectReferencer","World", "ObjectRedirector", "ShadowMapTexture2D"
+            };
             //int i = 0;
             foreach (var export in package.Exports)
             {
@@ -230,7 +233,7 @@ namespace UELib.Dummy
                 // any object not a child of package. Don't need it
                 if (export.OuterTable != null && export.OuterTable.ClassName != "Package")
                     continue;
-                if (export.ClassName == "ObjectReferencer" || export.ClassName == "World" || export.ClassName == "ObjectRedirector")
+                if (classesToSkip.Contains(export.ClassName))
                     continue;
 
                 if (export.OuterTable?.ClassName == "Package")
@@ -239,7 +242,7 @@ namespace UELib.Dummy
                     packagesNotInUse.Remove(outerPackage);
                 }
                 exportsToSerialize.Add(new DummyExportTableItem(export));
-                //if (i >= 0 && i <= 550)
+                //if (i >= 0 && i <= 203)
                 //{
                 //}
                 //i++;
