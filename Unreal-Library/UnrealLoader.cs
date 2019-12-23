@@ -120,7 +120,14 @@ namespace UELib
             {
                 try
                 {
-                    stream = new RLPackageStream(packagePath);
+                    var rlStream = new RLPackageStream(packagePath);
+                    if (rlStream.decryptionState == RLUPKT.Core.DecryptionState.Success)
+                    {
+                        stream = rlStream;
+                    }else
+                    {
+                        return null;
+                    }
                     Log.Info("Loading encrypted RL package");
                 }
                 catch(InvalidDataException e)
@@ -182,9 +189,9 @@ namespace UELib
             if( package != null )
             {
                 package.InitializePackage();
+                _LoadedPackages.Add(packageName, package);
+                CacheExportClasses(package);
             }
-            _LoadedPackages.Add(packageName, package);
-            CacheExportClasses(package);
             return package;
         }
     }

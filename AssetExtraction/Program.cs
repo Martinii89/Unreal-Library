@@ -111,6 +111,11 @@ namespace AssetExtraction
             Log.DeserializationErrors = 0;
             assetExtractor = new AssetExtractor(package);
             Console.WriteLine($"Processing: {file}");
+            if (package == null)
+            {
+                Console.WriteLine($"Unable to load: {packageName}");
+                return;
+            }
             if (options.ExtractClasses)
             {
                 assetExtractor.ExportClasses(outputMainFolder);
@@ -135,7 +140,7 @@ namespace AssetExtraction
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
             Log.Debug(deserializationErrors);
-            Console.WriteLine(deserializationErrors);
+            //Console.WriteLine(deserializationErrors);
         }
 
         private static List<string> GetFilesToProcess(Options options, string pathToPackages)
