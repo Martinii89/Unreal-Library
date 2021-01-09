@@ -924,7 +924,7 @@ namespace UELib
 
                 int generationCount = stream.ReadInt32();
                 Generations = new UArray<UGenerationTableItem>( stream, generationCount );
-                Log.Info( $"Deserialized {Generations.Count} generations");
+                Log.Debug( $"Deserialized {Generations.Count} generations");
 
 
                 if( Version >= VEngineVersion )
@@ -997,7 +997,7 @@ namespace UELib
                     nameEntry.Size = (int)(stream.Position - nameEntry.Offset);
                     Names.Add( nameEntry );
                 }
-                Log.Info($"Deserialized {Names.Count} names");
+                Log.Debug($"Deserialized {Names.Count} names");
             }
 
             // Read Import Table
@@ -1014,7 +1014,7 @@ namespace UELib
                     imp.Size = (int)(stream.Position - imp.Offset);
                     Imports.Add( imp );
                 }
-                Log.Info($"Deserialized { Imports.Count } imports");
+                Log.Debug($"Deserialized { Imports.Count } imports");
             }
 
             // Read Export Table
@@ -1043,7 +1043,7 @@ namespace UELib
                         Exports.Add( exp );
                     }
                 }
-                Log.Info($"Deserialized {Exports.Count } exports");
+                Log.Debug($"Deserialized {Exports.Count } exports");
             }
 
             /*if( pkg.Data.DependsOffset > 0 )

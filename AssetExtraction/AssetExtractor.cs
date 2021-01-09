@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UELib;
 using UELib.Core;
+using UELib.Dummy;
 
 namespace AssetExtraction
 {
@@ -154,8 +155,7 @@ namespace AssetExtraction
 
         public void ExportDummyAssets(string outputPath)
         {
-            string outputFolder = Path.Combine(outputPath, ".DummyAssets");
-            var outputFile = Path.Combine(outputFolder, package.FullPackageName + ".upk");
+            var outputFile = Path.Combine(outputPath, package.FullPackageName + ".upk");
             new FileInfo(outputFile).Directory.Create();
             RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, outputFile);
             packageSerializer.Serialize();

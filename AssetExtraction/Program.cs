@@ -13,8 +13,8 @@ namespace AssetExtraction
         [Option('d', "debug", Default = false)]
         public bool Debug { get; set; }
 
-        [Option("preload", Default = true, HelpText = "Should you preload default packages?")]
-        public bool preload { get; set; }
+        [Option("nopreload", Default = false, HelpText = "Should you preload default packages?")]
+        public bool nopreload { get; set; }
 
         [Option('c', "classes", Default = false, Required = false, HelpText = "Should classes be outputted?")]
         public bool ExtractClasses { get; set; }
@@ -24,6 +24,12 @@ namespace AssetExtraction
 
         [Option('m', "meshinfo", Default = false, Required = false, HelpText = "Should data be outputted?")]
         public bool ExtractMeshInfo { get; set; }
+
+        [Option("dummy", Default = false, Required = false, HelpText = "Should dummy package be outputted?")]
+        public bool ExtractDummy { get; set; }
+
+        [Option("dummyFolder", Required = false, HelpText = "Path to DUMMY output package folder. If not specified current working folder  + .dummy will be used")]
+        public string dummyPackageFolder { get; set; }
 
         [Option('f', "folder", Required = false, HelpText = "Path to package folder. If not specified current working folder will be used")]
         public string packageFolder { get; set; }
@@ -82,7 +88,7 @@ namespace AssetExtraction
                 }
 
                 string pathToPackages = options.packageFolder ?? ".";
-                if (options.preload)
+                if (options.nopreload == false)
                 {
                     PreloadBasicPackages(pathToPackages);
                 }
@@ -105,6 +111,11 @@ namespace AssetExtraction
             Log.DeserializationErrors = 0;
             assetExtractor = new AssetExtractor(package);
             Console.WriteLine($"Processing: {file}");
+            if (package == null)
+            {
+                Console.WriteLine($"Unable to load: {packageName}");
+                return;
+            }
             if (options.ExtractClasses)
             {
                 assetExtractor.ExportClasses(outputMainFolder);
@@ -117,11 +128,19 @@ namespace AssetExtraction
             {
                 assetExtractor.ExportMeshObjects(outputMainFolder);
             }
-            assetExtractor.ExportDummyAssets(outputMainFolder);
+            if (options.ExtractDummy)
+            {
+                string outputDummyFolder = Path.Combine("Extracted", ".Dummy");
+                if (options.dummyPackageFolder != null)
+                {
+                    outputDummyFolder = options.dummyPackageFolder;
+                }
+                assetExtractor.ExportDummyAssets(outputDummyFolder);
+            }
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
             Log.Debug(deserializationErrors);
-            Console.WriteLine(deserializationErrors);
+            //Console.WriteLine(deserializationErrors);
         }
 
         private static List<string> GetFilesToProcess(Options options, string pathToPackages)

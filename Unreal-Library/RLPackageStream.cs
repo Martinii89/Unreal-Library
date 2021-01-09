@@ -13,12 +13,13 @@ namespace UELib
     {
         UPKFile upkFile;
         MemoryStream decryptedStream;
+        public DecryptionState decryptionState;
         public RLPackageStream(string path)
         {
             upkFile = new UPKFile(path);
             Name = Path.GetFileNameWithoutExtension(path);
             decryptedStream = new MemoryStream();
-            upkFile.Decrypt(new RLDecryptor().GetCryptoTransform(), decryptedStream);
+            decryptionState = upkFile.Decrypt(decryptedStream);
             _stream = decryptedStream;
             _stream.Position = 0;
             UR = new UnrealReader(this, _stream);

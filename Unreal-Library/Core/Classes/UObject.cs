@@ -135,7 +135,7 @@ namespace UELib.Core
                 DeserializationState |= ObjectState.Errorlized;
                 Log.DeserializationErrors += 1;
 
-                Log.Error( 
+                Log.Debug( 
                     $"Deserialization error!:"
                     +$"\r\n{Package}:{Name}:{e.GetType().Name} with object index:{ExportTable.Index}"
                     +$"\r\nError occurred at {ExceptionPosition}/{ExportTable.SerialSize} from offset {ExportTable.SerialOffset}"

@@ -124,9 +124,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=1.1.0.145, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
-      <HintPath>packages\SharpZipLib.1.1.0\lib\net45\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -179,6 +176,20 @@
     <Compile Include="Core\Classes\UClassDecompiler.cs" />
     <Compile Include="Core\Classes\UComponent.cs" />
     <Compile Include="ByteCodeDecompiler.cs" />
+    <Compile Include="Dummy\DummyExportTableItem.cs" />
+    <Compile Include="Dummy\DummyFactory.cs" />
+    <Compile Include="Dummy\DummyImportTableItem.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\MinimalBase.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\LightMapTexture2D.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Material.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\SkeletalMesh.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\StaticMesh.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Texture2D.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\TextureCube.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\TextureRenderTargetCube.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\TextureRenderTarget2D.cs" />
+    <Compile Include="Dummy\RLPackageWriter.cs" />
+    <Compile Include="Dummy\ThumbnailTable.cs" />
     <Compile Include="Engine\Classes\Components\UStaticMeshComponent.cs" />
     <Compile Include="Engine\Classes\UPalette.cs" />
     <Compile Include="Decoding\IBufferDecoder.cs" />
@@ -223,7 +234,7 @@
     <Compile Include="Core\Classes\UStruct.cs" />
     <Compile Include="Engine\Classes\UFont.cs" />
     <Compile Include="NativesTablePackage.cs" />
-    <Compile Include="RLDummyPackageStream.cs" />
+    <Compile Include="Dummy\RLDummyPackageStream.cs" />
     <Compile Include="RLPackageStream.cs" />
     <Compile Include="UDecompilingState.cs" />
     <Compile Include="Core\Types\UName.cs" />
@@ -277,7 +288,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

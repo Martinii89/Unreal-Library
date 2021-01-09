@@ -18,7 +18,7 @@ namespace UELib
         /// Object index to the Super(parent) object of structs.
         /// -- Not Fixed
         /// </summary>
-        public int SuperIndex{ get; private set; }
+        public int SuperIndex{ get; protected set; }
         [Pure]public UObjectTableItem SuperTable{ get{ return Owner.GetIndexTable( SuperIndex ); } }
         [Pure]public string SuperName{ get{ var table = SuperTable; return table != null ? table.ObjectName : String.Empty; } }
 
@@ -26,7 +26,7 @@ namespace UELib
         /// Object index.
         /// -- Not Fixed
         /// </summary>
-        public int ArchetypeIndex{ get; private set; }
+        public int ArchetypeIndex{ get; protected set; }
         [Pure]public UObjectTableItem ArchetypeTable{ get{ return Owner.GetIndexTable( ArchetypeIndex ); } }
         [Pure]public string ArchetypeName{ get{ var table = ArchetypeTable; return table != null ? table.ObjectName : String.Empty; } }
 

@@ -47,7 +47,8 @@ namespace UELib.Logging
         {
             using (var writer = new StreamWriter(logFile, append: true))
             {
-                writer.WriteLine(message);
+                var now = DateTime.Now.ToLongTimeString();
+                writer.WriteLine($"{now}: {message}");
             }
         }
     }
@@ -82,11 +83,12 @@ namespace UELib.Logging
         static Log()
         {
             IsDebugEnabled = false;
-            IsInfoEnabled = false;
+            IsInfoEnabled = true;
             IsWarnEnabled = false;
-            IsErrorEnabled = true;
+            IsErrorEnabled = false;
             IsFatalEnabled = true;
-            logger = new ConsoleLogger(); //Default to console logging
+            //logger = new ConsoleLogger(); //Default to console logging
+            logger = new FileLogger("Eliot.UELib"); //Default to console logging
         }
     }
 }
