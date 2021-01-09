@@ -13,9 +13,6 @@ namespace AssetExtraction
         [Option('d', "debug", Default = false)]
         public bool Debug { get; set; }
 
-        [Option("nopreload", Default = false, HelpText = "Should you preload default packages?")]
-        public bool nopreload { get; set; }
-
         [Option('c', "classes", Default = false, Required = false, HelpText = "Should classes be outputted?")]
         public bool ExtractClasses { get; set; }
 
@@ -88,10 +85,6 @@ namespace AssetExtraction
                 }
 
                 string pathToPackages = options.packageFolder ?? ".";
-                if (options.nopreload == false)
-                {
-                    PreloadBasicPackages(pathToPackages);
-                }
 
                 var filesToProcess = GetFilesToProcess(options, pathToPackages);
                 foreach (var file in filesToProcess)
@@ -163,34 +156,6 @@ namespace AssetExtraction
             }
 
             return filesToProcess;
-        }
-
-        private static void PreloadBasicPackages(string baseFolder)
-        {
-            var basicPackageNames = new List<string>()
-            {
-                "Core.upk",
-                "Engine.upk",
-                "ProjectX.upk",
-                "AkAudio.upk",
-                "TAGame.upk"
-            };
-            foreach (var packageName in basicPackageNames)
-            {
-                try
-                {
-                    Console.WriteLine($"Preloading {packageName}");
-                    string packagePath = Path.Combine(baseFolder, packageName);
-                    UnrealLoader.LoadFullPackage(packagePath, System.IO.FileAccess.Read);
-                }
-                catch (FileNotFoundException e)
-                {
-                    Console.WriteLine(
-                        $"Did not find {packageName} in the current directory."
-                        + "This is optional, but recommended. "
-                        + "Preloading this package improves type recognition.");
-                }
-            }
         }
 
         private static void ExtractStaticMeshes(string packageName)
