@@ -27,7 +27,7 @@ namespace UELib
 
         public void Deserialize( IUnrealStream stream )
         {
-            Log.Info($"Reading import {Index} at {stream.Position}");
+            Log.Debug($"Reading import {Index} at {stream.Position}");
             PackageName         = stream.ReadNameReference();
             _ClassName          = stream.ReadNameReference();
             ClassIndex         = (int)_ClassName;
