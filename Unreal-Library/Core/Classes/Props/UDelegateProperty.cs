@@ -23,6 +23,11 @@ namespace UELib.Core
             Type = PropertyType.DelegateProperty;
         }
 
+        public override string Decompile()
+        {
+            return "";
+        }
+
         protected override void Deserialize()
         {
             base.Deserialize();
