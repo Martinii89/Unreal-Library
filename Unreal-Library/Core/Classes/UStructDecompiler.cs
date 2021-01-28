@@ -216,8 +216,9 @@ namespace UELib.Core
                 output += FormatConstants() + FormatEnums() + FormatStructs();
             }
 
+            var nonDelegaProperties = Variables.Where(i => !(i is UDelegateProperty));
             // Don't use foreach, screws up order.
-            foreach( var property in Variables )
+            foreach( var property in nonDelegaProperties )
             {
                 try
                 {
