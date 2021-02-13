@@ -675,6 +675,12 @@ namespace UELib.Core
                                     arrayType = varTuple.Item2;
                                 }
                             }
+                            // Hardcoded fix for Materials and Rocket League InvisiTekMaterials
+                            // which have a PropertyType of None when loaded for some reason.
+                            else if ((Name == "Materials" || Name == "InvisiTekMaterials") && _Outer?.Name == "StaticMeshComponent")
+                            {
+                                arrayType = PropertyType.ObjectProperty;
+                            }
 
                             if( arrayType == PropertyType.None )
                             {
