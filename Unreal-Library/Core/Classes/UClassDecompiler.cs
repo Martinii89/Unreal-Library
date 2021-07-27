@@ -90,7 +90,7 @@ namespace UELib.Core
                 FormatProperties() +
                 FormatDefaultProperties()+
                 //FormatReplication() +
-                FormatFunctions() +
+                //FormatFunctions() +
                 FormatStates();
 
             return content;

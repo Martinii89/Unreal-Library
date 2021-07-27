@@ -32,7 +32,7 @@ namespace UELib.Core
         }
 
         #region Serialized Members
-        private ulong   ClassFlags{ get; set; }
+        public ulong   ClassFlags{ get; set; }
 
         public string   ClassGuid{ get; private set; }
         public UClass   Within{ get; private set; }
