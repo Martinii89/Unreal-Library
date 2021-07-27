@@ -1,6 +1,7 @@
 ﻿#if DECOMPILE
 using System;
 using System.Linq;
+using UELib.Types;
 
 namespace UELib.Core
 {
@@ -50,13 +51,23 @@ namespace UELib.Core
         protected override string FormatHeader()
         {
             var output = "struct " + FormatFlags() + Name + (Super != null ? " " + FormatExtends() + " "
-                + Super.Name : String.Empty);
+                + FormatSuper() : String.Empty);
             var metaData = DecompileMeta();
             if( metaData != String.Empty )
             {
                 output = metaData + "\r\n" + UDecompilingState.Tabs + output;
             }
             return output;
+        }
+
+        private string FormatSuper()
+        {
+            if (Super.Outer != null && Super.Outer.IsClassType("class"))
+            {
+                return $"{Super.Outer.Name}.{Super.Name}";
+            }
+
+            return Super.Name;
         }
 
         private string FormatFlags()
@@ -219,6 +230,8 @@ namespace UELib.Core
             // Don't use foreach, screws up order.
             foreach( var property in Variables )
             {
+                // irrelevant for dummy stuff
+                if (property.Type == PropertyType.DelegateProperty) continue;
                 try
                 {
                     // Fix for properties within structs

@@ -64,7 +64,12 @@ namespace UELib.Core
         /// <inheritdoc/>
         public override string GetFriendlyType()
         {
-            return EnumObject != null ? EnumObject.GetOuterGroup() : "byte";
+            if (EnumObject != null)
+            {
+                return $"{EnumObject.GetOuterName()}.{EnumObject.Name}";
+            }
+            else
+                return "byte";
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UELib;
 using UELib.Core;
 using UELib.Dummy;
+using UELib.Flags;
 
 namespace AssetExtraction
 {
@@ -52,8 +53,14 @@ namespace AssetExtraction
             string outputFolder = Path.Combine(outputPath, ".Classes");
             var objects = FindObjectsOfType(new List<string>() { "Class" });
             Console.WriteLine($"\tExtracting {objects.Count} classes");
-            foreach (var obj in objects)
+            foreach (var o in objects)
             {
+                var obj = (UClass) o;
+                if (obj.HasClassFlag(ClassFlags.ParseConfig))
+                {
+                    Console.WriteLine($"Skipping: {obj.Name}");
+                    continue;
+                }
                 var outputFile = Path.Combine(outputFolder, GetFullObjectName(obj) + ".uc");
                 new FileInfo(outputFile).Directory.Create();
                 File.WriteAllText(outputFile, obj.Decompile());

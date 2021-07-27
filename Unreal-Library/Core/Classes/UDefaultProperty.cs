@@ -782,6 +782,11 @@ namespace UELib.Core
             {
                 arrayindex += "[" + ArrayIndex + "]";
             }
+
+            if (Type == PropertyType.ArrayProperty && value == "none")
+            {
+                return $"{Name}.Empty";
+            }
             return Name + arrayindex + "=" + value;
         }
         #endregion

@@ -48,15 +48,16 @@ namespace UELib.Core
         private string FormatAccess()
         {
             string output = String.Empty;
+            // private / protected is irrelevant for dummy classes
 
             // none are true in StreamInteraction.uc???
             if( IsPrivate() )
             {
-                output += "private ";
+                //output += "private ";
             }
             else if( IsProtected() )
             {
-                output += "protected ";
+                //output += "protected ";
             }
             return output;
         }
@@ -175,13 +176,13 @@ namespace UELib.Core
                 {
                     if( HasPropertyFlag( Flags.PropertyFlagsHO.PrivateWrite ) )
                     {
-                        output += "privatewrite ";
+                        //output += "privatewrite ";
                         copyFlags &= ~(ulong)Flags.PropertyFlagsHO.PrivateWrite << 32;
                     }
 
                     if( HasPropertyFlag( Flags.PropertyFlagsHO.ProtectedWrite ) )
                     {
-                        output += "protectedwrite ";
+                        //output += "protectedwrite ";
                         copyFlags &= ~(ulong)Flags.PropertyFlagsHO.ProtectedWrite << 32;
                     }
 
