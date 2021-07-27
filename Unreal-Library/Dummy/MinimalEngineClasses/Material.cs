@@ -27,6 +27,26 @@ namespace UELib.Dummy
 
     }
 
-    class DecalMaterial: Material{}
+    class MaterialInstanceConstant : MinimalBase
+    {
+        private const int SerialSize = 12;
+
+
+        protected override byte[] minimalByteArray { get; } =
+        {
+            0xFF, 0xFF, 0xFF, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+        };
+
+        public override void Write(IUnrealStream stream, UnrealPackage package)
+        {
+            FixNameIndexAtPosition(package, "None", 4);
+            stream.Write(minimalByteArray, 0, SerialSize);
+        }
+
+        public override int GetSerialSize()
+        {
+            return SerialSize;
+        }
+    }
 }
 
