@@ -3,6 +3,7 @@ using CommandLine.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UELib;
 using UELib.Logging;
 
@@ -138,20 +139,20 @@ namespace AssetExtraction
 
         private static List<string> GetFilesToProcess(Options options, string pathToPackages)
         {
-            List<string> filesToProcess = new List<string>();
+            var filesToProcess = new List<string>();
             if (options.packages != null)
             {
-                filesToProcess.AddRange(options.packages);
+                filesToProcess.AddRange(options.packages.Select(package => !package.EndsWith(".upk") ? $"{package}.upk" : package));
             }
-            if (options.fileGlob != null)
+
+            if (options.fileGlob == null) return filesToProcess;
+            
+            foreach (var file in Directory.EnumerateFiles(pathToPackages, options.fileGlob))
             {
-                foreach (var file in Directory.EnumerateFiles(pathToPackages, options.fileGlob))
+                var fileName = Path.GetFileName(file);
+                if (!filesToProcess.Contains(fileName))
                 {
-                    var fileName = Path.GetFileName(file);
-                    if (!filesToProcess.Contains(fileName))
-                    {
-                        filesToProcess.Add(fileName);
-                    }
+                    filesToProcess.Add(fileName);
                 }
             }
 

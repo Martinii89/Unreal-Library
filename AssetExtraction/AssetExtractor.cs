@@ -17,6 +17,15 @@ namespace AssetExtraction
         private readonly UnrealPackage package;
         private readonly bool onlyExports;
 
+        private static string CreateFolderAndGetFullPath(string outputFile)
+        {
+            var fi = new FileInfo(outputFile);
+            fi.Directory.Create();
+            //https://stackoverflow.com/questions/5188527/how-to-deal-with-files-with-a-name-longer-than-259-characters
+            var fullPath = @"\\?\" + fi.FullName;
+            return fullPath;
+        }
+
         public AssetExtractor(UnrealPackage package, bool onlyExports = true)
         {
             this.package = package;
@@ -41,8 +50,8 @@ namespace AssetExtraction
             foreach (var obj in objects)
             {
                 var outputFile = Path.Combine(outputPath, GetFullObjectName(obj) + ".uc");
-                new FileInfo(outputFile).Directory.Create();
-                File.WriteAllText(outputFile, obj.Decompile());
+                var filePath = CreateFolderAndGetFullPath(outputFile);
+                File.WriteAllText(filePath, obj.Decompile());
             }
 
             return objects.Count;
@@ -56,14 +65,14 @@ namespace AssetExtraction
             foreach (var o in objects)
             {
                 var obj = (UClass) o;
-                if (obj.HasClassFlag(ClassFlags.ParseConfig))
-                {
-                    Console.WriteLine($"Skipping: {obj.Name}");
-                    continue;
-                }
+                //if (obj.HasClassFlag(ClassFlags.ParseConfig))
+                //{
+                //    Console.WriteLine($"Skipping: {obj.Name}");
+                //    continue;
+                //}
                 var outputFile = Path.Combine(outputFolder, GetFullObjectName(obj) + ".uc");
-                new FileInfo(outputFile).Directory.Create();
-                File.WriteAllText(outputFile, obj.Decompile());
+                var filePath = CreateFolderAndGetFullPath(outputFile);
+                File.WriteAllText(filePath, obj.Decompile());
             }
             return objects.Count;
 
@@ -92,8 +101,8 @@ namespace AssetExtraction
             foreach (var obj in dataObjects)
             {
                 var outputFile = Path.Combine(outputPath, $"{DefaultsFolder(obj)}{GetFullObjectName(obj)}.uc");
-                new FileInfo(outputFile).Directory.Create();
-                File.WriteAllText(outputFile, obj.Decompile());
+                var filePath = CreateFolderAndGetFullPath(outputFile);
+                File.WriteAllText(filePath, obj.Decompile());
             }
 
             return dataObjects.Count();
@@ -163,8 +172,8 @@ namespace AssetExtraction
         public void ExportDummyAssets(string outputPath)
         {
             var outputFile = Path.Combine(outputPath, package.FullPackageName + ".upk");
-            new FileInfo(outputFile).Directory.Create();
-            RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, outputFile);
+            var filePath = CreateFolderAndGetFullPath(outputFile);
+            RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, filePath);
             packageSerializer.Serialize();
                 
 
