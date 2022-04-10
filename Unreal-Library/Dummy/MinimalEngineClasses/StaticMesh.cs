@@ -57,8 +57,6 @@ namespace UELib.Dummy
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
-            //FixNameIndexAtPosition(package, "StaticMesh", 0);
-
             FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
             FixNameIndexAtPosition(package, "StrProperty", 12);
 

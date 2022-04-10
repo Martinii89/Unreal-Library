@@ -1,0 +1,48 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#ifndef EXPORTTABLE_H
+#define EXPORTTABLE_H
+
+#include "UPK_BaseStructs.bt"
+
+typedef struct
+{
+    OIndex ClassIndex;
+    OIndex SuperIndex;
+    OIndex OuterIndex;
+    FName ObjectName;
+    OIndex Archetype;
+    uint64 ObjectFlags<format=hex>;
+    int32 SerialSize;
+    if (header.rl_header)
+    {
+        int64 SerialOffset;
+    }else {
+        int32 SerialOffset;
+    }
+    
+    int32 ExportFlags;
+    FIntArray NetObjects;
+    GUID PackageGuid;
+    int32 PackageFlags;
+    
+}ExportTableItem<read=(ReadFName(ObjectName))>;
+
+typedef struct (int offset, int count)
+{
+    FSeek(offset);
+    ExportTableItem exportItem[count]<optimize=false>;
+    
+}ExportTable<fgcolor=cBlack, bgcolor=0x00FF00>;
+
+#endif

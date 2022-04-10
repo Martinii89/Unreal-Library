@@ -1,0 +1,97 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef UDKHEADER_H
+#define UDKHEADER_H
+#include "UPK_BaseStructs.bt"
+
+typedef struct
+{
+    int32 generationsCount;
+    struct
+    {
+        int32 ExportCount;
+        int32 NameCount;
+        int32 NetObjectCount;
+    } GenerationsInfo[generationsCount];
+}Generations;
+
+typedef struct
+{
+    int32 length;
+    if (length >0)
+    {
+        struct 
+        {
+            int64 UncompressedOffset;
+            int32 UncompressedSize;
+            int64 CompressedOffset;
+            int32 CompressedSize;
+        }FCompressedChunkInfo[length];
+    }
+
+}CompressedChunks;
+
+typedef struct
+{
+    int32 Unknown1;
+    int32 Unknown2;
+    int32 Unknown3;
+    int32 Unknown4;
+    int32 Unknown5;
+    FIntArray UnknownArray;
+}FUnknownTypeInSummary;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        FUnknownTypeInSummary data[arrayLength]<optimize=false>;
+    }
+
+} FUnknownTypeInSummaryArray;
+
+typedef struct 
+{
+    uint32 Tag;
+    uint16 FileVersion;
+    uint16 LicenseeVersion;
+    int32  TotalHeaderSize;
+    FString FolderName;
+    uint32 PackageFlags;
+    int32 NameCount;
+    int32 NameOffset;
+    int32 ExportCount;
+    int32 ExportOffset;
+    int32 ImportCount;
+    int32 ImportOffset;
+    int32 DependsOffset;
+    int32 ThumbnailDataOffset;
+    int32 Unknown2;
+    int32 Unknown3;
+    int32 ThumbnailTableOffset;
+    GUID guid;
+    Generations generations;
+    uint32 EngineVersion;
+    uint32 CookerVersion;
+    uint32 CompressionFlags;
+    CompressedChunks compressedChunks;
+    int32 Unknown5;
+    FStringArray UnknownStringArray;
+    FUnknownTypeInSummaryArray UnknownTypeArray;
+    local int rl_header = LicenseeVersion != 0;
+
+}Header <fgcolor=cBlack, bgcolor=0x0000FF>;
+
+#endif

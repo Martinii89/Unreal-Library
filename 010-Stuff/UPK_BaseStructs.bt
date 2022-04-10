@@ -1,0 +1,139 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef BASESTRUCTS_H
+#define BASESTRUCTS_H
+
+typedef struct
+{
+    int32  stringLength;
+    char  txt[stringLength];
+}FString <read=ReadFString>;
+
+string ReadFString( FString &ustring )
+{
+    if( exists( ustring.txt ) )
+        return ustring.txt;
+    else
+        return "";
+}
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        FString data[arrayLength];
+    }
+
+}FStringArray;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        int32 data[arrayLength];
+    }
+} FIntArray;
+
+typedef struct
+{
+    int32 index;
+}OIndex<read=ReadObjectIndex>;
+
+string ReadObjectIndex(OIndex &oIndex)
+{
+    local int i = oIndex.index;
+    if (i == 0)
+    {
+        return "Null";
+    }
+    if (i <  0)
+    {
+        //Import Table
+        return ReadFName(importTable.importItem[-i-1].ObjectName);
+    }else 
+    {
+        //Export Table
+        return ReadFName(exportTable.exportItem[i-1].ObjectName);
+    }
+}
+
+string GetObjectName(OIndex &oIndex)
+{
+    local int i = oIndex.index;
+    if (i == 0)
+    {
+        return "Null";
+    }
+    if (i <  0)
+    {
+        //Import Table
+        return ReadFNameNoIndex(importTable.importItem[-i-1].ObjectName);
+    }else 
+    {
+        //Export Table
+        return ReadFNameNoIndex(exportTable.exportItem[i-1].ObjectName);
+    }
+}
+
+typedef struct 
+{
+    int32 index;
+    int32 num;
+}FName<read=ReadFName>;
+
+string ReadFName(FName &fname)
+{
+    local string name = nameTable.names[fname.index].name.txt;
+    local string s;
+    SPrintf( s, "%s (%d)", name, fname.index );
+    return s;
+}
+
+string ReadFNameNoIndex(FName &fname)
+{
+    local string name = nameTable.names[fname.index].name.txt;
+    local string s;
+    SPrintf( s, "%s", name);
+    return s;
+}
+
+typedef struct 
+{
+    FName Name;
+    FName Type;
+    int size;
+    int array_index;
+    local string propType = ReadFNameNoIndex(Type);
+    local string val;
+    switch(propType)
+    {
+        case "IntProperty":
+            int value;
+            SPrintf( val, "%d", value );
+            break;
+        case "StrProperty":
+            FString value;
+            val = ReadFString(value);
+            break;
+        default:
+            FSkip(size);
+            val = "unkown";
+            break;
+    }
+} Property <name=(ReadFNameNoIndex(Name)), read=(val)>;
+
+
+#endif

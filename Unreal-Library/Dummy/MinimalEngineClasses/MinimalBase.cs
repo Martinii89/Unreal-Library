@@ -27,13 +27,13 @@ namespace UELib.Dummy
 
 
 
-        protected static void AddNamesToNameTable(UnrealPackage package, IList<string> namesToAdd)
+        public static void AddNamesToNameTable(UnrealPackage package, IList<string> namesToAdd)
         {
             foreach (var name in namesToAdd)
             {
                 if (!package.Names.Any((o) => o.Name == name))
                 {
-                    package.Names.Add(new UNameTableItem() { Name = name, Flags = 1970393556451328 });
+                    package.Names.Add(new UNameTableItem() { Name = name, Flags = 1970393556451328, Index = package.Names.Count});
                 }
             }
         }

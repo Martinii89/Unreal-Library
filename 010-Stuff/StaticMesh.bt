@@ -1,0 +1,226 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef STATICMESH_H
+#define STATICMESH_H
+
+typedef struct
+{
+    float x,y,z;
+}FVector;
+
+typedef struct
+{
+    int element_size;
+    int elements_count;
+    struct
+    {
+        FVector vec;
+    }elemens[elements_count]<optimize=false>;
+}
+TArray_FVector;
+
+typedef struct
+{
+    FVector v1;
+    FVector v2;
+}FkDOPBounds;
+
+typedef struct
+{
+    int element_size;
+    int elements;
+    struct{
+        uchar mins[3];
+        uchar maxs[3];
+    }FkDOPNode3New[elements]<optimize=false>;
+}TArray_FkDOPNode3New;
+
+
+typedef struct
+{
+    int element_size;
+    int elements;
+    struct{
+        int16 f0, f2, f4, f6;
+    }FkDOPTriangle3[elements]<optimize=false>;
+}TArray_FkDOPTriangle3;
+
+typedef struct
+{
+    int elements_count;
+    struct
+    {
+    }elemens[elements_count]<optimize=false>;
+}TArray_FStaticMeshUnk5;
+
+typedef struct
+{
+    uint32 BulkDataFlags<format=hex>;
+    int32 ElementCount;
+    int32 BulkDataSizeOnDisk;
+    
+    if (header.rl_header)
+    {
+        local int32 BulkDataOffsetInFile = FTell();
+    }else {
+        int32 BulkDataOffsetInFile;
+    }
+    local int ass<hidden=false>; 
+    char data[BulkDataSizeOnDisk];
+} FBulkData;
+
+typedef struct
+{
+    int count;
+    struct{
+        int item[2];
+    } data[count]<optimize=false>;;
+}TArrayOfArray_2Int;
+
+typedef struct
+{
+    int count;
+    struct{
+        OIndex mat;
+        int f10;
+        int f14;
+        int bEnableShadowCasting;
+        int FirstIndex;
+        int NumFaces;
+        int f24;
+        int f28;
+        int Index;
+        TArrayOfArray_2Int f30;
+        uchar unk;
+    }sections[count]<optimize=false>;
+}TArray_FStaticMeshSection;
+
+typedef struct
+{
+    int VertexSize;
+    int NumVerts;
+    TArray_FVector Verts;
+}FStaticMeshVertexStream3;
+
+typedef struct
+{
+    uint data;
+}FPackedNormal;
+
+typedef struct
+{
+    ushort a;
+    ushort b;
+}FMeshUVHalf;
+
+
+
+typedef struct (int num_uvs)
+{
+    int element_size;
+    int elements;
+    struct (int num_uvs){
+        FPackedNormal n0;
+        //FPackedNormal n1;
+        FPackedNormal n2;
+        FMeshUVHalf uv[num_uvs]; //converted to float 
+    }FStaticMeshUVItem3(num_uvs)[elements]<optimize=false>;
+}TArray_FStaticMeshUVItem3;
+
+typedef struct
+{
+    int NumTexCoords;
+    int ItemSize;
+    int NumVerts;
+    int bUseFullPrecisionUVs;
+    TArray_FStaticMeshUVItem3 uvs(NumTexCoords);
+}FStaticMeshUVStream3;
+
+typedef struct
+{
+    int element_size;
+    int elements;
+    struct{
+        uchar R,G,B,A;
+    }color[elements]<optimize=false>;
+}TArray_FColor;
+
+
+typedef struct
+{
+    int ItemSize;
+    int NumVerts;
+    if (NumVerts > 0){
+    TArray_FColor colors<optimize=false>;
+}
+    
+}FStaticMeshColorStream3;
+
+typedef struct
+{
+    int element_size;
+    int elements;
+    struct{
+        uint16 value;
+    }Indices[elements]<optimize=false, read=(value)>;
+}Tarray_uint16;
+
+typedef struct
+{
+    Tarray_uint16 data;
+}Tarray_FIndexBuffer3;
+
+typedef struct
+{
+    int count;
+    struct{
+        FBulkData fBulkData;
+        TArray_FStaticMeshSection sections;
+        FStaticMeshVertexStream3 vertexStream;
+        FStaticMeshUVStream3 uvStream;
+        FStaticMeshColorStream3 colorStream;
+        int numVerts;
+        Tarray_FIndexBuffer3 Indices;
+        Tarray_FIndexBuffer3 Indices2;
+        Tarray_FIndexBuffer3 Indices3;
+    }lod[count]<optimize=false>;
+}TArray_FStaticMeshLODModel3;
+
+typedef struct {
+    int NetIndex;
+    local string name = nameTable.names[ReadInt()].name.txt;
+    while(name != "None")
+    {
+        Property a;
+        name = nameTable.names[ReadInt()].name.txt;
+    }
+    FName none;
+    struct {
+        FVector Origin;
+        FVector BoxExtent;
+        float SphereRadius;
+    }FBoxSphereBounds;
+    OIndex BodySetup;
+    FkDOPBounds kDOPBounds;
+    TArray_FkDOPNode3New nodes;
+    TArray_FkDOPTriangle3 kDOPTriangles;
+    int InternalVersion;
+    int unkFlag;
+    TArray_FStaticMeshUnk5 f178;
+    int f74;
+    int unk;
+    TArray_FStaticMeshLODModel3 Lods;
+} StaticMesh;
+
+#endif
