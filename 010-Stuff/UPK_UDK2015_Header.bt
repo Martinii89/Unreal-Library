@@ -44,23 +44,23 @@ typedef struct
 
 typedef struct
 {
-    int32 Unknown1;
-    int32 Unknown2;
-    int32 Unknown3;
-    int32 Unknown4;
-    int32 Unknown5;
-    FIntArray UnknownArray;
-}FUnknownTypeInSummary;
+    int32 SizeX;
+    int32 SizeY;
+    int32 NumMips;
+    int32 Format;
+    int32 TexCreateFlags;
+    FIntArray ExportIndices;
+}FTextureType;
 
 typedef struct
 {
     int32 arrayLength;
     if (arrayLength >0)
     {
-        FUnknownTypeInSummary data[arrayLength]<optimize=false>;
+        FTextureType data[arrayLength]<optimize=false>;
     }
 
-} FUnknownTypeInSummaryArray;
+} FTextureAllocations;
 
 typedef struct 
 {
@@ -77,19 +77,19 @@ typedef struct
     int32 ImportCount;
     int32 ImportOffset;
     int32 DependsOffset;
-    int32 ThumbnailDataOffset;
-    int32 Unknown2;
-    int32 Unknown3;
+    int32 ThumbnailDataOffset; //ImportExportGuidsOffset?
+    int32 ImportGuidsCount;
+    int32 ExportGuidsCount;
     int32 ThumbnailTableOffset;
     GUID guid;
     Generations generations;
     uint32 EngineVersion;
-    uint32 CookerVersion;
+    uint32 CookedContentVersion;
     uint32 CompressionFlags;
     CompressedChunks compressedChunks;
     int32 Unknown5;
-    FStringArray UnknownStringArray;
-    FUnknownTypeInSummaryArray UnknownTypeArray;
+    FStringArray AdditionalPackagesToCook;
+    FTextureAllocations TextureAllocations;
     local int rl_header = LicenseeVersion != 0;
 
 }Header <fgcolor=cBlack, bgcolor=0x0000FF>;

@@ -76,7 +76,6 @@ typedef struct
     }else {
         int32 BulkDataOffsetInFile;
     }
-    local int ass<hidden=false>; 
     char data[BulkDataSizeOnDisk];
 } FBulkData;
 

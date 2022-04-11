@@ -33,7 +33,7 @@ typedef struct
     int32 arrayLength;
     if (arrayLength >0)
     {
-        FString data[arrayLength];
+        FString data[arrayLength]<optimize=false>;;
     }
 
 }FStringArray;
@@ -127,6 +127,10 @@ typedef struct
         case "StrProperty":
             FString value;
             val = ReadFString(value);
+            break;
+        case "BoolProperty":
+            byte value;
+            SPrintf( val, "%d", (int)value );
             break;
         default:
             FSkip(size);

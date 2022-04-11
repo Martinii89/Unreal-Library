@@ -107,7 +107,7 @@ for( i = 0;i < header.ExportCount; i++ )
     if (name == "StaticMesh")
     {
         FSeek(exportTable.exportItem[i].SerialOffset);
-        StaticMesh data;
+        StaticMesh data<size=exportTable.exportItem[i].SerialSize>;
     }
 }
 
