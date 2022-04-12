@@ -9,16 +9,11 @@ namespace UELib.Dummy
 {
     internal class RLPackageWriter : UnrealWriter
     {
-        private uint _version;
-
-        protected override uint _Version
-        {
-            get { return _version; }
-        }
+        protected override uint _Version { get; }
 
         public RLPackageWriter(Stream stream, uint version) : base(stream)
         {
-            _version = version;
+            _Version = version;
         }
     }
 }

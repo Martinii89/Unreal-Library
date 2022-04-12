@@ -173,7 +173,7 @@ namespace AssetExtraction
         {
             var outputFile = Path.Combine(outputPath, package.FullPackageName + ".upk");
             var filePath = CreateFolderAndGetFullPath(outputFile);
-            RLDummyPackageStream packageSerializer = new RLDummyPackageStream(package, filePath);
+            RlDummyPackageStream packageSerializer = new RlDummyPackageStream(package, filePath);
             packageSerializer.Serialize();
                 
 

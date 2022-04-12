@@ -96,23 +96,3 @@ if (header.ThumbnailTableOffset > 0)
         }thumbnail[thumbnailTable.num]<optimize=false>;
     }thumbnails<fgcolor=cBlack, bgcolor=0xFF00FF, optimize=false>;
 }
-
-
-#include "StaticMesh.bt"
-local int i;
-local string name;
-for( i = 0;i < header.ExportCount; i++ )
-{
-    name = GetObjectName(exportTable.exportItem[i].ClassIndex);
-    if (name == "StaticMesh")
-    {
-        FSeek(exportTable.exportItem[i].SerialOffset);
-        StaticMesh data<size=exportTable.exportItem[i].SerialSize>;
-    }
-}
-
-//FSeek(12373);
-//StaticMesh data;
-
-
-

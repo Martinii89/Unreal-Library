@@ -1,0 +1,92 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "UPK_RL.bt"
+#include "StaticMesh.bt"
+/*
+
+local int i;
+local string name;
+for( i = 0;i < header.ExportCount; i++ )
+{
+    name = GetObjectName(exportTable.exportItem[i].ClassIndex);
+    if (name == "StaticMesh")
+    {
+        FSeek(exportTable.exportItem[i].SerialOffset);
+        StaticMesh data<size=exportTable.exportItem[i].SerialSize>;
+    }
+}
+
+
+
+
+FSeek(7807);
+struct{
+    int NetIndex;
+    local string name2 = nameTable.names[ReadInt()].name.txt;
+    while(name2 != "None")
+    {
+        Property a;
+        name2 = nameTable.names[ReadInt()].name.txt;
+    }
+    FName none;
+    int unKMask;
+    //FMaterialResource
+    FStringArray CompileErrors;
+    int mapCount; // TextureDependencyLengthMap
+    int MaxTextureDependencyLength;
+    GUID Id;
+    int NumUserTexCoords;
+    int UniformExpressionTextures; //TArray<UTexture*>
+    int bUsesSceneColorTemp;
+    int bUsesSceneDepthTemp;
+    int bUsesDynamicParameterTemp;
+    int bUsesLightmapUVsTemp;    
+    int bUsesMaterialVertexPositionOffsetTemp;
+    uint UsingTransforms;
+    struct {
+        int count;
+    }TextureLookups; //TArray<FTextureLookup>
+    uint DummyDroppedFallbackComponents;
+}Mat<open=true>;
+
+*/
+
+typedef struct {
+    int count;
+    struct{
+        FBulkData	Data;
+        int32			SizeX;
+	    int32			SizeY;
+    } Mip[count]<optimize=false>;
+}Mips;
+
+FSeek(2156);
+struct {
+    int NetIndex;
+    local string name2 = nameTable.names[ReadInt()].name.txt;
+    while(name2 != "None")
+    {
+        Property a;
+        name2 = nameTable.names[ReadInt()].name.txt;
+    }
+    FName none;
+    FBulkData SourceArt;
+    Mips mips;
+    GUID TextureFileCacheGuid;
+    Mips CachedPVRTCMips;
+    int CachedFlashMipsMaxResolution;
+    Mips CachedATITCMips;
+    FBulkData CachedFlashMips;
+    Mips CachedETCMips;
+}Texture<open=true>;

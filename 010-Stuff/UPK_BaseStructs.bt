@@ -132,6 +132,24 @@ typedef struct
             byte value;
             SPrintf( val, "%d", (int)value );
             break;
+        case "ObjectProperty":
+            OIndex obj;
+            val = ReadObjectIndex(obj);
+            break;
+        case "StructProperty":
+            FName structName;
+            val = ReadFNameNoIndex(structName);
+            FSkip(size);
+            break;
+        case "ByteProperty":
+            FName enumName;
+            FName enumValue;
+            val = ReadFNameNoIndex(enumName);
+            break;
+        case "NameProperty":
+            FName name;
+            val = ReadFNameNoIndex(name);
+            break;
         default:
             FSkip(size);
             val = "unkown";

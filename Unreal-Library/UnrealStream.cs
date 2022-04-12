@@ -156,6 +156,16 @@ namespace UELib
             _UnrealStream = unrealStream;
         }
 
+        public UnrealPackage GetPackage()
+        {
+            return _UnrealStream.Package;
+        }
+
+        public IUnrealStream GetStream()
+        {
+            return _UnrealStream;
+        }
+
         /// <summary>
         /// Reads a string that was serialized for Unreal Packages, these strings use a positive or negative size to:
         /// - indicate that the bytes were encoded in ASCII.
@@ -1069,6 +1079,11 @@ namespace UELib
             stream.UW.WriteIndex( obj != null ? (int)obj : 0 );
         }
 
+        public static void Write(this IUnrealStream stream, byte number)
+        {
+            stream.UW.Write(number);
+        }
+
         public static void Write( this IUnrealStream stream, short number )
         {
             stream.UW.Write( number );
@@ -1097,6 +1112,11 @@ namespace UELib
         public static void Write( this IUnrealStream stream, ulong number )
         {
             stream.UW.Write( number );
+        }
+
+        public static void Write(this IUnrealStream stream, float number)
+        {
+            stream.UW.Write(number);
         }
 
         public static void Write( this IUnrealStream stream, byte[] buffer, int index, int count )

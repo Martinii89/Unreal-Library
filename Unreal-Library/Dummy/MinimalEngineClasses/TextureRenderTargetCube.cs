@@ -8,17 +8,17 @@ namespace UELib.Dummy
 {
     class TextureRenderTargetCube : MinimalBase
     {
-        public static int serialSize = 56;
+        public static int SerialSize = 56;
 
-        byte[] MinimalTextureRenderTargetCubeByteArray = {
+        protected override byte[] MinimalByteArray { get; } =
+        {
             0xFF, 0xFF, 0xFF, 0xFF, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
             0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0xD6, 0x04, 0x00, 0x00
         };
 
-        protected override byte[] minimalByteArray => MinimalTextureRenderTargetCubeByteArray;
-        public override int GetSerialSize() => serialSize;
+        public override int GetSerialSize() => SerialSize;
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
@@ -27,7 +27,7 @@ namespace UELib.Dummy
 
 
             FixNameIndexAtPosition(package, "None", 32);
-            stream.Write(minimalByteArray, 0, serialSize-4);
+            stream.Write(MinimalByteArray, 0, SerialSize-4);
             stream.Write((int)stream.Position + sizeof(int));
         }
 
@@ -38,6 +38,10 @@ namespace UELib.Dummy
                 "SizeX", "IntProperty", "None"
             };
             AddNamesToNameTable(package, namesToAdd);
+        }
+
+        public TextureRenderTargetCube(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
+        {
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace UELib.Dummy
 {
-    public class RLDummyPackageStream : UPackageStream, IUnrealStream
+    public class RlDummyPackageStream : UPackageStream
     {
         private const int DummyPackageFlag = 1;
         private const int DummyFileVersion = 867;
@@ -24,14 +24,14 @@ namespace UELib.Dummy
 
         private const int TotalHeaderSizePosition = 8;
 
-        private UnrealPackage package;
-        private DummyFactory dummyFactory;
+        private readonly UnrealPackage _package;
+        private readonly DummyFactory _dummyFactory;
 
         //public uint Version { get; set; }
 
-        public RLDummyPackageStream(UnrealPackage package, string filePath)
+        public RlDummyPackageStream(UnrealPackage package, string filePath)
         {
-            this.package = package;
+            _package = package;
             var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write);
             _stream = fileStream;
             Package = package;
@@ -43,11 +43,11 @@ namespace UELib.Dummy
             TextureRenderTarget2D.AddNamesToNameTable(package);
             TextureRenderTargetCube.AddNamesToNameTable(package);
             SkeletalMesh.AddNamesToNameTable(package);
-            var name_list = new List<string>() {"tagame"};
-            MinimalBase.AddNamesToNameTable(package, name_list);
+            var nameList = new List<string>() {"tagame"};
+            MinimalBase.AddNamesToNameTable(package, nameList);
 
             //Init the factory
-            dummyFactory = DummyFactory.Instance;
+            _dummyFactory = DummyFactory.Instance;
         }
 
         private const int ExportTableItemSize = 68;
@@ -57,17 +57,16 @@ namespace UELib.Dummy
 
         public void Serialize()
         {
-            initHeader();
+            InitHeader();
             // TODO: Trim these tables down to what the dummy assets actually use.
-            // This would require preparsing the export items. Should not be impossible to do.
+            // This would require pre-parsing the export items. Should not be impossible to do.
 
 
             SerializeNameTable();
             //SerializeImportsTable();
 
-            List<DummyExportTableItem> exportsToSerialize = GetExportsToSerialize();
+            var exportsToSerialize = GetExportsToSerialize();
 
-            var newNameTable = new List<UNameTableItem>();
             var newImportTable = new List<DummyImportTableItem>();
 
             //Let's start by trimming down the import table
@@ -110,21 +109,21 @@ namespace UELib.Dummy
 
         private void SerializeExportSerialData(List<DummyExportTableItem> exportsToSerialize)
         {
-            int noneIndex = package.Names.FindIndex((n) => n.Name == "None");
+            int noneIndex = _package.Names.FindIndex((n) => n.Name == "None");
             foreach (var dummyExport in exportsToSerialize)
             {
                 var exportObject = dummyExport.original;
-                var dummyClass = dummyFactory.Create(exportObject.ClassName);
+                var dummyClass = _dummyFactory.Create(dummyExport.original.ClassName, dummyExport.original, _package);
                 if (dummyClass != null)
                 {
-                    dummyClass.Write(this, package);
+                    dummyClass.Write(this, _package);
                 }
                 else
                 {
                     //We just need the netindex and a None FName
-                    package.Stream.Position = exportObject.SerialOffset;
+                    _package.Stream.Position = exportObject.SerialOffset;
                     //NetIndex
-                    UW.Write(package.Stream.ReadInt32());
+                    UW.Write(_package.Stream.ReadInt32());
                     //None index and count
                     UW.Write(noneIndex);
                     UW.Write(0);
@@ -152,7 +151,7 @@ namespace UELib.Dummy
         {
             if (importIndex < 0) //import
             {
-                var import = package.Imports[-importIndex - 1];
+                var import = _package.Imports[-importIndex - 1];
                 var newIndex = newImportTable.FindIndex((i) => i.original == import);
                 if (newIndex == -1)
                 {
@@ -164,7 +163,7 @@ namespace UELib.Dummy
                 var dummyImport = newImportTable[newIndex];
                 while (dummyImport.newOuterIndex < 0)
                 {
-                    var parentImport = package.Imports[-dummyImport.original.OuterIndex - 1];
+                    var parentImport = _package.Imports[-dummyImport.original.OuterIndex - 1];
                     var newParentIndex = newImportTable.FindIndex((i) => i.original == parentImport);
                     if (newParentIndex == -1)
                     {
@@ -185,21 +184,21 @@ namespace UELib.Dummy
             }
 
             //if export, just return the old one.
-            var exportClass = package.Exports[export.original.ClassIndex];
+            var exportClass = _package.Exports[export.original.ClassIndex];
 
             // Need to add the class to the import table
             // Also needs to add the tagame package as a import for the class?
 
-            var name_list = new List<string>() {"tagame"};
-            MinimalBase.AddNamesToNameTable(package, name_list);
+            var nameList = new List<string>() {"tagame"};
+            MinimalBase.AddNamesToNameTable(_package, nameList);
 
 
             //UName uclass_name = package.Names.FindIndex();
-            var thisClassUName = new UName(package, exportClass.ClassName);
-            var tagameUName = new UName(package, "tagame");
-            var coreUName = new UName(package, "Core");
-            var classUname = new UName(package, "Class");
-            var packageUName = new UName(package, "Package");
+            var thisClassUName = new UName(_package, exportClass.ClassName);
+            var tagameUName = new UName(_package, "tagame");
+            var coreUName = new UName(_package, "Core");
+            var classUname = new UName(_package, "Class");
+            var packageUName = new UName(_package, "Package");
 
             var thisClassImport = new UImportTableItem
             {
@@ -233,7 +232,7 @@ namespace UELib.Dummy
         {
             if (importIndex < 0) //import
             {
-                var import = package.Imports[-importIndex - 1];
+                var import = _package.Imports[-importIndex - 1];
                 var newIndex = newImportTable.FindIndex((i) => i.original == import);
                 if (newIndex == -1)
                 {
@@ -245,7 +244,7 @@ namespace UELib.Dummy
                 var dummyImport = newImportTable[newIndex];
                 while (dummyImport.newOuterIndex < 0)
                 {
-                    var parentImport = package.Imports[-dummyImport.original.OuterIndex - 1];
+                    var parentImport = _package.Imports[-dummyImport.original.OuterIndex - 1];
                     var newParentIndex = newImportTable.FindIndex((i) => i.original == parentImport);
                     if (newParentIndex == -1)
                     {
@@ -276,7 +275,7 @@ namespace UELib.Dummy
             int serialOffset = calculatedTotalHeaderSize;
             foreach (var dummyExport in exportsToSerialize)
             {
-                var dummyClass = dummyFactory.Create(dummyExport.original.ClassName);
+                var dummyClass = _dummyFactory.Create(dummyExport.original.ClassName, dummyExport.original, _package);
                 if (dummyClass != null)
                 {
                     DummyExportTableSerialize(dummyExport, serialOffset, dummyClass.GetSerialSize());
@@ -301,14 +300,14 @@ namespace UELib.Dummy
 
         private List<DummyExportTableItem> GetExportsToSerialize()
         {
-            var packagesNotInUse = package.Exports.Where((e) => e.ClassName == "Package").ToList();
+            var packagesNotInUse = _package.Exports.Where((e) => e.ClassName == "Package").ToList();
             var exportsToSerialize = new List<DummyExportTableItem>();
             var classesToSkip = new List<string>()
             {
-                "ObjectReferencer", "World", "ObjectRedirector", "ShadowMapTexture2D", "SoundClass"
+                "ObjectReferencer", "World", "ObjectRedirector", "ShadowMapTexture2D", "SoundClass", "TeamColorScriptedTexture_TA"
             };
             int i = 1;
-            foreach (var export in package.Exports)
+            foreach (var export in _package.Exports)
             {
                 //None 
                 if (export.SerialSize == 0)
@@ -347,9 +346,13 @@ namespace UELib.Dummy
                     packagesNotInUse.Remove(outerPackage);
                 }
 
-                //Console.WriteLine($"Adding {export.ObjectName} to dummy export");
+                Console.WriteLine($"{i}: Adding ({export.ClassName}) {export.ObjectName} to dummy export");
                 exportsToSerialize.Add(new DummyExportTableItem(export));
-                if (i >= 1)
+
+                //if (export.ClassName == "StaticMesh")
+                //{
+                //}
+                if (i >= 250)
                 {
                     //break;
                 }
@@ -366,7 +369,7 @@ namespace UELib.Dummy
             for (var index = 0; index < exportsToSerialize.Count; index++)
             {
                 var export = exportsToSerialize[index];
-                FixObjectReferencesInFilteredExports(export, exportsToSerialize, package.Exports);
+                FixObjectReferencesInFilteredExports(export, exportsToSerialize, _package.Exports);
             }
 
             return exportsToSerialize;
@@ -389,22 +392,22 @@ namespace UELib.Dummy
             }
 
             var reference = exports[originalIndex - 1];
-            var new_index = exportsToSerialize.FindIndex((e) => e.original == reference);
+            var newIndex = exportsToSerialize.FindIndex((e) => e.original == reference);
             //if (new_index == -1 && !reference.Object.IsClassType("Class"))
             //{
             //    exportsToSerialize.Add(new DummyExportTableItem(reference));
             //    new_index = exportsToSerialize.FindIndex((e) => e.original == reference);
             //}
-            var newReferenceIndex = new_index + 1;
+            var newReferenceIndex = newIndex + 1;
             return newReferenceIndex;
         }
 
         private void SerializeImportsTable()
         {
             var importOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(package.Imports.Count(), ImportCountPosition);
+            WriteIntAtPosition(_package.Imports.Count(), ImportCountPosition);
             WriteIntAtPosition((int) importOffset, ImportCountPosition + 4);
-            foreach (var import in package.Imports)
+            foreach (var import in _package.Imports)
             {
                 import.Serialize(this);
             }
@@ -413,10 +416,10 @@ namespace UELib.Dummy
         private void SerializeNameTable()
         {
             var nameOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(package.Names.Count(), NameCountPosition);
+            WriteIntAtPosition(_package.Names.Count(), NameCountPosition);
             WriteIntAtPosition((int) nameOffset, NameCountPosition + 4);
 
-            foreach (var name in package.Names)
+            foreach (var name in _package.Names)
             {
                 name.Serialize(this);
             }
@@ -430,7 +433,7 @@ namespace UELib.Dummy
             UW.BaseStream.Position = oldPosition;
         }
 
-        private void initHeader()
+        private void InitHeader()
         {
             UW.BaseStream.Position = 0;
             //Tag
@@ -461,10 +464,10 @@ namespace UELib.Dummy
             UW.Write(0);
 
             //guid (this might work?..)
-            UW.Write(Guid.Parse(package.GUID).ToByteArray(), 0, 16);
+            UW.Write(Guid.Parse(_package.GUID).ToByteArray(), 0, 16);
 
             //Generations
-            package.Generations.Serialize(this);
+            _package.Generations.Serialize(this);
 
             //EngineVersion
             UW.Write(DummyEngineVersion);
@@ -493,14 +496,15 @@ namespace UELib.Dummy
             this.Write(tableItem.original.ObjectName);
             this.Write(tableItem.newArchetypeIndex);
             //this.Write(tableItem.ObjectFlags);
-            if (tableItem.original.ClassName == "Package")
-            {
-                this.Write(1970342016843776);
-            }
-            else
-            {
-                this.Write(4222141830530048);
-            }
+            this.Write(tableItem.GetExportObjectFlag());
+            //if (tableItem.original.ClassName == "Package")
+            //{
+            //    this.Write(0x7000400000000);
+            //}
+            //else
+            //{
+            //    this.Write(0xF000400000000);
+            //}
 
             this.Write(serialSize);
 

@@ -64,6 +64,8 @@ typedef struct
     }elemens[elements_count]<optimize=false>;
 }TArray_FStaticMeshUnk5;
 
+#define BULKDATA_StoreInSeparateFile	0x01
+
 typedef struct
 {
     uint32 BulkDataFlags<format=hex>;
@@ -72,11 +74,20 @@ typedef struct
     
     if (header.rl_header)
     {
-        local int32 BulkDataOffsetInFile = FTell();
+        if (BulkDataFlags & BULKDATA_StoreInSeparateFile)
+        {
+            int64 BulkDataOffsetInFile;
+        }else {
+            local int32 BulkDataOffsetInFile = FTell();
+        }
+        
     }else {
         int32 BulkDataOffsetInFile;
     }
-    char data[BulkDataSizeOnDisk];
+    if (BulkDataSizeOnDisk > 0){
+        char data[BulkDataSizeOnDisk];
+    }
+    
 } FBulkData;
 
 typedef struct

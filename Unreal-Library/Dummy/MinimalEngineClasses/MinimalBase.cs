@@ -1,42 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
     internal abstract class MinimalBase
     {
-        //protected static int serialSize;
-        abstract protected byte[] minimalByteArray { get;}
+        protected MinimalBase(UExportTableItem exportTableItem, UnrealPackage package)
+        {
+            ExportTableItem = exportTableItem;
+            Package = package;
+        }
 
-        abstract public void Write(IUnrealStream stream, UnrealPackage package);
-        abstract public int GetSerialSize();
+        protected abstract byte[] MinimalByteArray { get; }
+
+        protected UExportTableItem ExportTableItem { get; }
+        public UnrealPackage Package { get; }
+
+        public abstract void Write(IUnrealStream stream, UnrealPackage package);
+        public abstract int GetSerialSize();
 
         protected void FixNameIndexAtPosition(UnrealPackage package, string name, int startPosition)
         {
-            var test = package.Names.FindIndex((n) => n.Name == name);
+            var test = package.Names.FindIndex(n => n.Name == name);
             var bytes = BitConverter.GetBytes(test);
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                minimalByteArray[i + startPosition] = bytes[i];
-            }
+            for (var i = 0; i < bytes.Length; i++) MinimalByteArray[i + startPosition] = bytes[i];
         }
-
 
 
         public static void AddNamesToNameTable(UnrealPackage package, IList<string> namesToAdd)
         {
             foreach (var name in namesToAdd)
-            {
-                if (!package.Names.Any((o) => o.Name == name))
-                {
-                    package.Names.Add(new UNameTableItem() { Name = name, Flags = 1970393556451328, Index = package.Names.Count});
-                }
-            }
+                if (package.Names.All(o => o.Name != name))
+                    package.Names.Add(new UNameTableItem {Name = name, Flags = 1970393556451328, Index = package.Names.Count});
         }
-
     }
 }

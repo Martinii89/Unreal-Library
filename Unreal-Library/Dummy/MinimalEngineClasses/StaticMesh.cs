@@ -1,17 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
+using UELib.Core;
+using UELib.Dummy.Property;
+using UELib.Dummy.Structs;
 
 namespace UELib.Dummy
 {
     internal class StaticMesh : MinimalBase
     {
+        public FBoxSphereBounds FBoxSphereBounds { get; set; } = new FBoxSphereBounds();
+        public UObject BodySetup { get; set; }
+        public FkDOPBounds FkDopBounds { get; set; } = new FkDOPBounds();
+        public TArrayWithElemtSize<FkDOPNode3New> NewNodes { get; set; } = new TArrayWithElemtSize<FkDOPNode3New>();
+        public TArrayWithElemtSize<FkDOPTriangles> Triangles { get; set; } = new TArrayWithElemtSize<FkDOPTriangles>();
+        public int InternalVersion { get; set; }
+        public int UnkFlag { get; set; }
+        public int F178ElementsCount { get; set; } // TArray<FStaticMeshUnk5> f178;
+        public int F74 { get; set; }
+        public int Unk { get; set; }
+        public TArray<FStaticMeshLODModel3> Lods { get; set; } = new TArray<FStaticMeshLODModel3>();
+        public byte[] UnknownBytes { get; set; }
 
-        public static int serialSize = 406;
+        public static int SerialSize = 406;
 
-        byte[] minimalMesh = {
+        public long PropertyEnd { get; set; }
+
+
+        protected override byte[] MinimalByteArray { get; } =
+        {
             0xFF, 0xFF, 0xFF, 0xFF, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00,
             0x32, 0x30, 0x31, 0x39, 0x2D, 0x30, 0x36, 0x2D, 0x31, 0x33, 0x20, 0x32, 0x31, 0x3A, 0x33, 0x34,
@@ -40,8 +58,69 @@ namespace UELib.Dummy
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        protected override byte[] minimalByteArray => minimalMesh;
-        public override int GetSerialSize() => serialSize;
+        private byte[] MeshData { get; } =
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0xFF, 0xFF, 0x7F, 0x7F, 0xFF, 0xFF, 0x7F, 0x7F, 0xFF, 0xFF, 0x7F, 0x7F, 0xFF, 0xFF, 0x7F, 0xFF,
+            0xFF, 0xFF, 0x7F, 0xFF, 0xFF, 0xFF, 0x7F, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x29, 0x05, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1C, 0xF1, 0xC0, 0x1B,
+            0x86, 0x87, 0x3B, 0x45, 0xA5, 0x94, 0x0B, 0x11, 0xF6, 0xE0, 0x27, 0x10, 0x02, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+
+        public StaticMesh(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
+        {
+            var reader = package.Stream.UR;
+            var writer = package.Stream.UW;
+            reader.BaseStream.Position = exportTableItem.SerialOffset;
+            var netIndex = reader.ReadInt32();
+            var property = new BaseProperty();
+            property.Deserialize(reader);
+            while (property.IsValid())
+            {
+                if (property.IsObjectProperty())
+                {
+                    // Null out any object references instead of trying to fix up the index.
+                    Debug.Assert(property.Size == 4, "Object property was not 4. Freak out!");
+                    package.Stream.Skip(-property.Size);
+                    package.Stream.Write(0);
+                }
+                property.Deserialize(reader);
+            }
+
+            PropertyEnd = reader.BaseStream.Position;
+
+            FBoxSphereBounds.Deserialize(reader);
+            BodySetup = package.Stream.ReadObject();
+            FkDopBounds.Deserialize(reader);
+            NewNodes.Deserialize(reader);
+            Triangles.Deserialize(reader);
+            InternalVersion = reader.ReadInt32();
+            UnkFlag = reader.ReadInt32();
+            F178ElementsCount = reader.ReadInt32();
+            F74 = reader.ReadInt32();
+            Unk = reader.ReadInt32();
+            Lods.Deserialize(reader);
+
+            var unknownDataLength = exportTableItem.SerialSize - (reader.BaseStream.Position - exportTableItem.SerialOffset);
+            UnknownBytes = reader.ReadBytes((int) unknownDataLength);
+
+        }
+
+
+        public override int GetSerialSize() => ExportTableItem.SerialSize + 4;
+        //public override int GetSerialSize() => SerialSize;
 
 
         public static void AddNamesToNameTable(UnrealPackage package)
@@ -49,35 +128,99 @@ namespace UELib.Dummy
             var namesToAdd = new List<string>()
             {
                 "StaticMesh", "SourceFileTimestamp", "StrProperty", "SourceFilePath",
-                "LightMapCoordinateIndex","IntProperty","LightMapResolution","None",
-
+                "LightMapCoordinateIndex", "IntProperty", "LightMapResolution", "None",
             };
             AddNamesToNameTable(package, namesToAdd);
         }
 
+        private UName _strProperty;
+        private UName _intProperty;
+
+        private void WriteStrProperty(IUnrealStream stream, UName propertyName, string propertyValue)
+        {
+            propertyName.Serialize(stream);
+            _strProperty.Serialize(stream);
+            stream.Write(propertyValue.Length + 1 + 4);
+            stream.Write(0); // Array Index
+            stream.WriteString(propertyValue);
+        }
+
+        private void WriteIntProperty(IUnrealStream stream, UName propertyName, int propertyValue)
+        {
+            propertyName.Serialize(stream);
+            _intProperty.Serialize(stream);
+            stream.Write(4);
+            stream.Write(0); // Array Index
+            stream.Write(propertyValue);
+        }
+
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
-            FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
-            FixNameIndexAtPosition(package, "StrProperty", 12);
+            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
+            var propertyBuffer = package.Stream.UR.ReadBytes((int) (PropertyEnd - ExportTableItem.SerialOffset));
+            stream.Write(propertyBuffer, 0, propertyBuffer.Length);
 
-            FixNameIndexAtPosition(package, "SourceFilePath", 52);
-            FixNameIndexAtPosition(package, "StrProperty", 60);
+            // Write the mesh data
 
-            FixNameIndexAtPosition(package, "LightMapCoordinateIndex", 86);
-            FixNameIndexAtPosition(package, "IntProperty", 94);
+            FBoxSphereBounds.Serialize(stream);
+            stream.Write((int) 0); //BodySetup
+            FkDopBounds.Serialize(stream);
+            NewNodes.Serialize(stream);
+            Triangles.Serialize(stream);
+            stream.Write(InternalVersion);
+            stream.Write(UnkFlag);
+            stream.Write(F178ElementsCount);
+            stream.Write(F74);
+            stream.Write(Unk);
+            Lods.Serialize(stream);
 
-            FixNameIndexAtPosition(package, "LightMapResolution", 114);
-            FixNameIndexAtPosition(package, "IntProperty", 122);
+            stream.Write(UnknownBytes, 0, UnknownBytes.Length);
+            return;
 
-            FixNameIndexAtPosition(package, "None", 142);
+            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
+            var buffer = package.Stream.UR.ReadBytes(ExportTableItem.SerialSize);
+            stream.Write(buffer, 0, buffer.Length);
+            return;
+
+            //var startPos = stream.Position;
+            //_strProperty = new UName(package, "StrProperty");
+            //_intProperty = new UName(package, "IntProperty");
+
+            //var sourceFileTimestamp = new UName(package, "SourceFileTimestamp");
+            //var sourceFilePath = new UName(package, "SourceFilePath");
+            //var lightMapCoordinateIndex = new UName(package, "LightMapCoordinateIndex");
+            //var lightMapResolution = new UName(package, "LightMapResolution");
 
 
-            stream.Write(minimalByteArray, 0, serialSize);
+            //stream.Write(-1); //NetIndex
+            //WriteStrProperty(stream, sourceFileTimestamp, "2019-06-13 21:34:21");
+            //WriteStrProperty(stream, sourceFilePath, "d.fbx");
+            //WriteIntProperty(stream, lightMapCoordinateIndex, 1);
+            //WriteIntProperty(stream, lightMapResolution, 32);
+
+            //var none = new UName(package, "None");
+            //none.Serialize(stream);
+
+
+            //var bytesWritten = (int) (stream.Position - startPos);
+
+            //FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
+            //FixNameIndexAtPosition(package, "StrProperty", 12);
+
+            //FixNameIndexAtPosition(package, "SourceFilePath", 52);
+            //FixNameIndexAtPosition(package, "StrProperty", 60);
+
+            //FixNameIndexAtPosition(package, "LightMapCoordinateIndex", 86);
+            //FixNameIndexAtPosition(package, "IntProperty", 94);
+
+            //FixNameIndexAtPosition(package, "LightMapResolution", 114);
+            //FixNameIndexAtPosition(package, "IntProperty", 122);
+
+            //FixNameIndexAtPosition(package, "None", 142);
+
+
+            stream.Write(MeshData, 0, MeshData.Length);
+            //stream.Write(MinimalByteArray, bytesWritten, SerialSize - bytesWritten);
         }
     }
 }
-
-
-
-
-

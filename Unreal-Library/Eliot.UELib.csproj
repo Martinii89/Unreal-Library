@@ -182,8 +182,20 @@
     <Compile Include="Dummy\MinimalEngineClasses\MinimalBase.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\LightMapTexture2D.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Material.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Property\BaseProperty.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\SkeletalMesh.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\StaticMesh.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FBoxSphereBounds.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FBulkData.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FkDOPBounds.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FkDOPNode3New.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FkDOPTriangles.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FStaticMeshLODModel3.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FStaticMeshSection.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\FVector.cs" />
+    <Compile Include="Dummy\IDummySerializable.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\TArray.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Structs\TArrayWithElemtSize.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Texture2D.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\TextureCube.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\TextureRenderTargetCube.cs" />
@@ -285,6 +297,7 @@
       <Name>RLUPKT.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
