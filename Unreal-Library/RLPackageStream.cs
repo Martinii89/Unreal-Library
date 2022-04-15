@@ -1,11 +1,5 @@
 ﻿using RLUPKT.Core;
-using RLUPKT.Core.Encryption;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UELib
 {
@@ -17,7 +11,7 @@ namespace UELib
         public RLPackageStream(string path)
         {
             upkFile = new UPKFile(path);
-            Name = Path.GetFileNameWithoutExtension(path);
+            Name = path;
             decryptedStream = new MemoryStream();
             decryptionState = upkFile.Decrypt(decryptedStream);
             _stream = decryptedStream;
@@ -28,7 +22,6 @@ namespace UELib
 
         public override void Dispose()
         {
-            return;
         }
     }
 }

@@ -157,6 +157,7 @@
     <Compile Include="Core\Classes\Props\Custom\UXWeakReferenceProperty.cs" />
     <Compile Include="Core\Classes\UPackage.cs" />
     <Compile Include="Core\Classes\UPackageNode.cs" />
+    <Compile Include="Core\Tables\Fake\FakeImportTableItem.cs" />
     <Compile Include="Core\Tables\UDependencyTableItem.cs" />
     <Compile Include="Core\Tables\UExportTableItem.cs" />
     <Compile Include="Core\Tables\UGenerationTableItem.cs" />
@@ -301,7 +302,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
+      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

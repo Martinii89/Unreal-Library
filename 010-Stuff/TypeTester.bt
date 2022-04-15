@@ -60,7 +60,7 @@ struct{
     uint DummyDroppedFallbackComponents;
 }Mat<open=true>;
 
-*/
+
 
 typedef struct {
     int count;
@@ -71,7 +71,7 @@ typedef struct {
     } Mip[count]<optimize=false>;
 }Mips;
 
-FSeek(2156);
+FSeek(18823580);
 struct {
     int NetIndex;
     local string name2 = nameTable.names[ReadInt()].name.txt;
@@ -90,3 +90,18 @@ struct {
     FBulkData CachedFlashMips;
     Mips CachedETCMips;
 }Texture<open=true>;
+
+*/
+
+FSeek(484);
+struct {
+    int a;
+    int NetIndex;
+    local string name2 = nameTable.names[ReadInt()].name.txt;
+    while(name2 != "None")
+    {
+        Property a;
+        name2 = nameTable.names[ReadInt()].name.txt;
+    }
+    FName none;
+}CameraAttachmentComponent_X<open=true>;

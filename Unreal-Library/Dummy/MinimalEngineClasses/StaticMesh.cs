@@ -24,7 +24,7 @@ namespace UELib.Dummy
         public byte[] UnknownBytes { get; set; }
 
         public static int SerialSize = 406;
-
+        public override int GetSerialSize() => ExportTableItem.SerialSize + 4;
         public long PropertyEnd { get; set; }
 
 
@@ -96,6 +96,7 @@ namespace UELib.Dummy
                     package.Stream.Skip(-property.Size);
                     package.Stream.Write(0);
                 }
+
                 property.Deserialize(reader);
             }
 
@@ -115,12 +116,7 @@ namespace UELib.Dummy
 
             var unknownDataLength = exportTableItem.SerialSize - (reader.BaseStream.Position - exportTableItem.SerialOffset);
             UnknownBytes = reader.ReadBytes((int) unknownDataLength);
-
         }
-
-
-        public override int GetSerialSize() => ExportTableItem.SerialSize + 4;
-        //public override int GetSerialSize() => SerialSize;
 
 
         public static void AddNamesToNameTable(UnrealPackage package)

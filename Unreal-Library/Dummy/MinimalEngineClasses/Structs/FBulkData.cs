@@ -12,13 +12,16 @@ namespace UELib.Dummy.Structs
         public int BulkDataOffsetInFile { get; set; }
         public byte[] BulkData { get; set; }
 
+        public bool StoredInSeparateFile { get; private set; }
+
 
         public void Deserialize(BinaryReader Reader)
         {
             BulkDataFlags = Reader.ReadUInt32();
+            StoredInSeparateFile = (BulkDataFlags & BulkdataStoreInSeparateFile) != 0;
             ElementCount = Reader.ReadInt32();
             BulkDataSizeOnDisk = Reader.ReadInt32();
-            if ((BulkDataFlags & BulkdataStoreInSeparateFile) != 0)
+            if (StoredInSeparateFile)
             {
                 BulkDataOffsetInFile = (int) Reader.ReadInt64();
             }
@@ -27,7 +30,7 @@ namespace UELib.Dummy.Structs
                 BulkDataOffsetInFile = (int)Reader.BaseStream.Position;
 
             }
-            if (BulkDataSizeOnDisk > 0)
+            if (BulkDataSizeOnDisk > 0 && !StoredInSeparateFile)
             {
                 BulkData = Reader.ReadBytes(BulkDataSizeOnDisk);
             }
@@ -42,7 +45,7 @@ namespace UELib.Dummy.Structs
             writer.Write(BulkDataSizeOnDisk);
             // TODO: Verify!
             writer.Write((int)(writer.Position+4));
-            if (BulkDataSizeOnDisk > 0)
+            if (BulkDataSizeOnDisk > 0 && !StoredInSeparateFile)
             {
                 writer.Write(BulkData, 0, BulkDataSizeOnDisk);
             }

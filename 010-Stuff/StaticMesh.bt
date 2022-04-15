@@ -84,7 +84,7 @@ typedef struct
     }else {
         int32 BulkDataOffsetInFile;
     }
-    if (BulkDataSizeOnDisk > 0){
+    if (BulkDataSizeOnDisk > 0 && !(BulkDataFlags & BULKDATA_StoreInSeparateFile)){
         char data[BulkDataSizeOnDisk];
     }
     

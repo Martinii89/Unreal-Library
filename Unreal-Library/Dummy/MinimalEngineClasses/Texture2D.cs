@@ -11,7 +11,7 @@ using UELib.Dummy.Structs;
 
 namespace UELib.Dummy
 {
-    internal class Mip: IUESerializable, IDummySerializable
+    internal class Mip : IUESerializable, IDummySerializable
     {
         public FBulkData Data { get; set; } = new FBulkData();
         public int SizeX { get; set; }
@@ -60,7 +60,8 @@ namespace UELib.Dummy
     {
         public static int SerialSize = 402;
 
-        protected override byte[] MinimalByteArray { get; } = {
+        protected override byte[] MinimalByteArray { get; } =
+        {
             0xFF, 0xFF, 0xFF, 0xFF, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
             0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -89,8 +90,7 @@ namespace UELib.Dummy
             0x00, 0x00
         };
 
-        //public override int GetSerialSize() => SerialSize;
-        public override int GetSerialSize() => ExportTableItem.SerialSize;
+        public override int GetSerialSize() => SerialSize;
 
         public FBulkData SourceArt { get; set; } = new FBulkData();
         public Structs.TArray<Mip> Mips { get; set; } = new Structs.TArray<Mip>();
@@ -103,64 +103,52 @@ namespace UELib.Dummy
 
         public Texture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
-            var reader = package.Stream.UR;
-            var writer = package.Stream.UW;
-            reader.BaseStream.Position = exportTableItem.SerialOffset;
-            var netIndex = reader.ReadInt32();
-            var property = new BaseProperty();
-            property.Deserialize(reader);
-            while (property.IsValid())
-            {
-                if (property.IsObjectProperty())
-                {
-                    // Null out any object references instead of trying to fix up the index.
-                    Debug.Assert(property.Size == 4, "Object property was not 4. Freak out!");
-                    package.Stream.Skip(-property.Size);
-                    package.Stream.Write(0);
-                }
-                property.Deserialize(reader);
-            }
+            // TODO: Fix this later. focus on mesh data for now.
+            //var reader = package.Stream.UR;
+            //reader.BaseStream.Position = exportTableItem.SerialOffset;
+            //var netIndex = reader.ReadInt32();
 
-            PropertyEnd = reader.BaseStream.Position;
+            //ReadScriptProperties();
 
-            SourceArt.Deserialize(reader);
-            Mips.Deserialize(reader);
-            TextureFileCacheGuid.Deserialize(reader);
-            CachedPVRTCMips.Deserialize(reader);
-            CachedFlashMipsMaxResolution = reader.ReadInt32();
-            CachedATITCMips.Deserialize(reader);
-            CachedFlashMips.Deserialize(reader);
-            CachedETCMips.Deserialize(reader);
+            //SourceArt.Deserialize(reader);
+            //Mips.Deserialize(reader);
+            //TextureFileCacheGuid.Deserialize(reader);
+            //CachedPVRTCMips.Deserialize(reader);
+            //CachedFlashMipsMaxResolution = reader.ReadInt32();
+            //CachedATITCMips.Deserialize(reader);
+            //CachedFlashMips.Deserialize(reader);
+            //CachedETCMips.Deserialize(reader);
         }
 
-        public long PropertyEnd { get; set; }
 
         public override void Write(IUnrealStream stream, UnrealPackage package)
         {
-            var startPos = stream.Position;
-            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
-            var propertyBuffer = package.Stream.UR.ReadBytes((int)(PropertyEnd - ExportTableItem.SerialOffset));
-            stream.Write(propertyBuffer, 0, propertyBuffer.Length);
+            WriteMinimalBytes(stream, package);
+            //TODO: Fix later. focus on mesh data now!
+            //var startPos = stream.Position;
+            //package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
+            //var propertyBuffer = package.Stream.UR.ReadBytes((int)(ScriptPropertiesEnd - ExportTableItem.SerialOffset));
+            //stream.Write(propertyBuffer, 0, propertyBuffer.Length);
 
-            // Write the mesh data
+            ////Write the mesh data
 
-            SourceArt.Serialize(stream);
-            Mips.Serialize(stream);
-            TextureFileCacheGuid.Serialize(stream);
-            CachedPVRTCMips.Serialize(stream);
-            stream.Write(CachedFlashMipsMaxResolution);
-            CachedATITCMips.Serialize(stream);
-            CachedFlashMips.Serialize(stream);
-            CachedETCMips.Serialize(stream);
+            //SourceArt.Serialize(stream);
+            ////CBA to read and decompress stuff form the TFC file
+            //Mips.RemoveAll(m => m.Data.StoredInSeparateFile);
+            //Mips.Serialize(stream);
+            //TextureFileCacheGuid.Serialize(stream);
+            //CachedPVRTCMips.Serialize(stream);
+            //stream.Write(CachedFlashMipsMaxResolution);
+            //CachedATITCMips.Serialize(stream);
+            //CachedFlashMips.Serialize(stream);
+            //CachedETCMips.Serialize(stream);
 
-            var endPos = stream.Position;
-            Console.WriteLine($"Written {endPos-startPos} to TextureData");
+            //var endPos = stream.Position;
+            //Console.WriteLine($"Written {endPos - startPos} to TextureData");
+        }
 
-            return;
-            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
-            var buffer = package.Stream.UR.ReadBytes(ExportTableItem.SerialSize);
-            stream.Write(buffer, 0, buffer.Length);
-            return;
+        private void WriteMinimalBytes(IUnrealStream stream, UnrealPackage package)
+        {
             FixNameIndexAtPosition(package, "SizeX", 4);
             FixNameIndexAtPosition(package, "IntProperty", 12);
 
@@ -209,14 +197,12 @@ namespace UELib.Dummy
             var namesToAdd = new List<string>()
             {
                 "SizeX", "IntProperty", "SizeY", "OriginalSizeX",
-                "OriginalSizeY","Format","ByteProperty","EPixelFormat",
-                "PF_A8R8G8B8","bIsSourceArtUncompressed","BoolProperty","CompressionNone",
-                "MipGenSettings","TextureMipGenSettings","TMGS_NoMipmaps",
+                "OriginalSizeY", "Format", "ByteProperty", "EPixelFormat",
+                "PF_A8R8G8B8", "bIsSourceArtUncompressed", "BoolProperty", "CompressionNone",
+                "MipGenSettings", "TextureMipGenSettings", "TMGS_NoMipmaps",
                 "LightingGuid", "StructProperty", "Guid", "None"
             };
             AddNamesToNameTable(package, namesToAdd);
         }
-
-
     }
 }

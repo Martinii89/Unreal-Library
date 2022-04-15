@@ -72,7 +72,7 @@ namespace UELib
             stream.WriteIndex( _Index );
             if( stream.Version >= VNameNumbered )
             {
-                Log.Info( _Number + " " + _Text );
+                //Log.Info($"UName.Deserialize: {_Number} {_Text}");
                 stream.Write( (uint)_Number + 1 );
             }
         }

@@ -92,7 +92,9 @@ if (header.ThumbnailTableOffset > 0)
         int x;
         int y;
         int size;
-        byte data[size];
+        if (size < 0){
+            byte data[size];
+        }
         }thumbnail[thumbnailTable.num]<optimize=false>;
     }thumbnails<fgcolor=cBlack, bgcolor=0xFF00FF, optimize=false>;
 }

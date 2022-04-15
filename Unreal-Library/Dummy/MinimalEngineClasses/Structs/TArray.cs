@@ -36,7 +36,7 @@ namespace UELib.Dummy.Structs
 
         public void Serialize(IUnrealStream writer)
         {
-            writer.Write(Capacity);
+            writer.Write(Count);
             var serializable = typeof(T).GetInterface(nameof(IDummySerializable));
             if (serializable == null)
             {

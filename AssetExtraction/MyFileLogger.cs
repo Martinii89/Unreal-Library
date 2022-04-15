@@ -18,6 +18,7 @@ namespace AssetExtraction
                 DeleteOldLogfile();
             }
             writer = new StreamWriter(logFile, append: true);
+            writer.AutoFlush = true;
         }
 
         private void DeleteOldLogfile()

@@ -349,10 +349,8 @@ namespace UELib.Dummy
                 Console.WriteLine($"{i}: Adding ({export.ClassName}) {export.ObjectName} to dummy export");
                 exportsToSerialize.Add(new DummyExportTableItem(export));
 
-                //if (export.ClassName == "StaticMesh")
-                //{
-                //}
-                if (i >= 250)
+
+                if (i >= 424)
                 {
                     //break;
                 }
@@ -495,17 +493,7 @@ namespace UELib.Dummy
             this.Write(tableItem.newOuterIndex);
             this.Write(tableItem.original.ObjectName);
             this.Write(tableItem.newArchetypeIndex);
-            //this.Write(tableItem.ObjectFlags);
             this.Write(tableItem.GetExportObjectFlag());
-            //if (tableItem.original.ClassName == "Package")
-            //{
-            //    this.Write(0x7000400000000);
-            //}
-            //else
-            //{
-            //    this.Write(0xF000400000000);
-            //}
-
             this.Write(serialSize);
 
             //this.Write(tableItem.SerialOffset);

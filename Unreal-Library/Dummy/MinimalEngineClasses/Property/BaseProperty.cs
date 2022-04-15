@@ -37,6 +37,7 @@ namespace UELib.Dummy.Property
             switch (typeName)
             {
                 case "IntProperty":
+                case "FloatProperty":
                 case "StrProperty":
                 case "ObjectProperty":
                 case "NameProperty":

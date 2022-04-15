@@ -14,13 +14,18 @@ namespace UELib
         private const uint VSerialSizeConditionless = 249;
 
         #region Serialized Members
+
+        // TODO: Fix later. focus on mesh data now!
+        //public override string ClassName => ClassIndex != 0 ? Owner.GetIndexTable(ClassIndex).ObjectName : "Class";
+        //public int ClassIndex { get; set; }
+
         /// <summary>
         /// Object index to the Super(parent) object of structs.
         /// -- Not Fixed
         /// </summary>
         public int SuperIndex{ get; protected set; }
         [Pure]public UObjectTableItem SuperTable{ get{ return Owner.GetIndexTable( SuperIndex ); } }
-        [Pure]public string SuperName{ get{ var table = SuperTable; return table != null ? table.ObjectName : String.Empty; } }
+        [Pure] public string SuperName { get { var table = SuperTable; return table != null ? table.ObjectName : String.Empty; } }
 
         /// <summary>
         /// Object index.

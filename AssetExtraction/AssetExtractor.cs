@@ -35,11 +35,12 @@ namespace AssetExtraction
         private string GetFullObjectName(UObject obj)
         {
             string name = obj.Name;
-            while(obj.Outer != null)
+            while (obj.Outer != null)
             {
                 name = $"{obj.Outer.Name}\\{name}";
                 obj = obj.Outer;
             }
+
             return name;
         }
 
@@ -60,7 +61,7 @@ namespace AssetExtraction
         public int ExportClasses(string outputPath)
         {
             string outputFolder = Path.Combine(outputPath, ".Classes");
-            var objects = FindObjectsOfType(new List<string>() { "Class" });
+            var objects = FindObjectsOfType(new List<string>() {"Class"});
             Console.WriteLine($"\tExtracting {objects.Count} classes");
             foreach (var o in objects)
             {
@@ -74,8 +75,8 @@ namespace AssetExtraction
                 var filePath = CreateFolderAndGetFullPath(outputFile);
                 File.WriteAllText(filePath, obj.Decompile());
             }
-            return objects.Count;
 
+            return objects.Count;
         }
 
         private string DefaultsFolder(UObject obj)
@@ -84,7 +85,8 @@ namespace AssetExtraction
             if (outerGroup != null && outerGroup.StartsWith("Default__"))
             {
                 return ".Classes\\Defaults\\";
-            }else
+            }
+            else
             {
                 return "";
             }
@@ -110,9 +112,8 @@ namespace AssetExtraction
 
         public int ExportMeshObjects(string outputPath)
         {
-
-            var outputFile = Path.Combine(outputPath, ".json", $"{package.FullPackageName}_MeshObjects.json");
-            var dataObjects = FindObjectsOfType(new List<string>() { "StaticMeshComponent" });
+            var outputFile = Path.Combine(outputPath, ".json", $"{package.PackageName}_MeshObjects.json");
+            var dataObjects = FindObjectsOfType(new List<string>() {"StaticMeshComponent"});
             var nodeCache = new Dictionary<UObject, DataNode>();
             Console.WriteLine($"\tExtracting {dataObjects.Count()} instances of meshInfo");
             foreach (var obj in dataObjects)
@@ -127,6 +128,7 @@ namespace AssetExtraction
                     outerNode = new DataNode(outer);
                     nodeCache.Add(outer, outerNode);
                 }
+
                 outerNode.AddChild(new DataNode(obj));
                 while (outer.Outer != null)
                 {
@@ -142,7 +144,8 @@ namespace AssetExtraction
                         nextOuterNode.AddChild(outerNode);
                         outer = nextOuter;
                         outerNode = nextOuterNode;
-                    }else
+                    }
+                    else
                     {
                         //If it's already in the cache. We can add the previous as a child and exit out of the loop
                         nextOuterNode.AddChild(outerNode);
@@ -150,33 +153,33 @@ namespace AssetExtraction
                     }
                 }
             }
+
             var rootNodes = nodeCache.Where((kv) => kv.Value.parent == null).Select((kv) => kv.Value);
             new FileInfo(outputFile).Directory.Create();
             using (var fileWriter = new StreamWriter(outputFile))
             {
                 var json_data = JsonConvert.SerializeObject(rootNodes,
-                            Newtonsoft.Json.Formatting.Indented,
-                            new JsonSerializerSettings
-                            {
-                                NullValueHandling = NullValueHandling.Ignore
-                            });
+                    Newtonsoft.Json.Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                 fileWriter.Write(json_data);
                 //foreach (var rootNode in rootNodes)
                 //{
                 //    fileWriter.WriteLine(rootNode.print());
                 //}
             }
+
             return 0;
         }
 
         public void ExportDummyAssets(string outputPath)
         {
-            var outputFile = Path.Combine(outputPath, package.FullPackageName + ".upk");
+            var outputFile = Path.Combine(outputPath, package.PackageName + ".upk");
             var filePath = CreateFolderAndGetFullPath(outputFile);
             RlDummyPackageStream packageSerializer = new RlDummyPackageStream(package, filePath);
             packageSerializer.Serialize();
-                
-
         }
 
         private bool FilteredDeserialization(UObject obj, ISet<string> properties, out string output, int tabs)
@@ -185,6 +188,7 @@ namespace AssetExtraction
             {
                 obj.BeginDeserializing();
             }
+
             output = "";
             string indentation = new StringBuilder().Insert(0, "\t", tabs).ToString();
             if (obj.Properties == null) return false;
@@ -208,7 +212,8 @@ namespace AssetExtraction
                     //Skip classes that are not defined in this package. And None classes(Wtf even is that..)
                     continue;
                 }
-                foreach(var type in types)
+
+                foreach (var type in types)
                 {
                     if (obj.IsClassType(type))
                     {
@@ -217,8 +222,8 @@ namespace AssetExtraction
                     }
                 }
             }
-            return objects;
 
+            return objects;
         }
     }
 }
