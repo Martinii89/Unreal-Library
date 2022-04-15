@@ -2,9 +2,6 @@
 {
     class LightMapTexture2D : MinimalBase
     {
-        public static int SerialSize = 84;
-
-
         protected override byte[] MinimalByteArray { get; } =
         {
             0xFF, 0xFF, 0xFF, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -15,16 +12,15 @@
             0x00, 0x00, 0x00, 0x00
         };
 
-        public override int GetSerialSize() => SerialSize;
 
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
-            FixNameIndexAtPosition(package, "None", 4);
-            stream.Write(MinimalByteArray, 0, SerialSize);
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
 
         public LightMapTexture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
+            FixNameIndexAtPosition(package, "None", 4);
         }
     }
 }

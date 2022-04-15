@@ -50,7 +50,6 @@ namespace UELib.Dummy
             _dummyFactory = DummyFactory.Instance;
         }
 
-        private const int ExportTableItemSize = 68;
         private const int DependsOffsetPosition = 49;
         private const int ThumbnailDataOffsetPosition = 53;
         private const int ThumbnailTableOffsetPosition = 65;
@@ -60,10 +59,7 @@ namespace UELib.Dummy
             InitHeader();
             // TODO: Trim these tables down to what the dummy assets actually use.
             // This would require pre-parsing the export items. Should not be impossible to do.
-
-
             SerializeNameTable();
-            //SerializeImportsTable();
 
             var exportsToSerialize = GetExportsToSerialize();
 
@@ -71,63 +67,56 @@ namespace UELib.Dummy
 
             //Let's start by trimming down the import table
             TrimImportTable(exportsToSerialize, newImportTable);
+
+            SerializeImportTable(newImportTable);
+
+            //Write info about exports in header
+            var exportOffset = UW.BaseStream.Position;
+            WriteIntAtPosition(exportsToSerialize.Count, ExportCountPosition);
+            WriteIntAtPosition((int) exportOffset, ExportCountPosition + 4);
+
+            // Build up the list of dummy exports.
+            var dummyExports = exportsToSerialize.Select(x => _dummyFactory.Create(x.original.ClassName, x.original, _package)).ToList();
+
+            //Serialize the export table. We will have to redo this once we know the real serial offset and sizes. 
+            SerializeExportTable(exportsToSerialize, dummyExports);
+
+            //Serialize depends table.
+            SerializeDependsTable(exportsToSerialize.Count);
+
+            var thumbnails = new ThumbnailTable();
+            thumbnails.Init(exportsToSerialize);
+            thumbnails.Serialize(this);
+
+            WriteIntAtPosition(thumbnails.thumbnailDataOffset, ThumbnailDataOffsetPosition);
+            WriteIntAtPosition(thumbnails.thumbnailTableOffset, ThumbnailTableOffsetPosition);
+            WriteIntAtPosition((int) UW.BaseStream.Position, TotalHeaderSizePosition);
+
+            SerializeExportSerialData(dummyExports);
+
+            // Serialize export table again now that serial offsets and sizes are known
+            UW.BaseStream.Seek(exportOffset, SeekOrigin.Begin);
+            SerializeExportTable(exportsToSerialize, dummyExports);
+        }
+
+        private void SerializeImportTable(List<DummyImportTableItem> newImportTable)
+        {
             var importOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(newImportTable.Count(), ImportCountPosition);
+            WriteIntAtPosition(newImportTable.Count, ImportCountPosition);
             WriteIntAtPosition((int) importOffset, ImportCountPosition + 4);
+
+            //Serialize the import table
             foreach (var import in newImportTable)
             {
                 import.Serialize(this);
             }
-
-            //Write info about exports in header
-            var exportOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(exportsToSerialize.Count(), ExportCountPosition);
-            WriteIntAtPosition((int) exportOffset, ExportCountPosition + 4);
-
-            //This comes after the export table, but we need to know it's size so we can set the correct serialOffsets for the export items.
-            var thumbnails = new ThumbnailTable();
-            thumbnails.Init(exportsToSerialize);
-            var thumbnailsTotalSize = thumbnails.GetSerialSize();
-
-            //TODO - understand this table...
-            var dependsTotalSize = exportsToSerialize.Count() * 4;
-
-            //Serialize the export table
-            SerializeExportTable(exportsToSerialize, thumbnailsTotalSize, dependsTotalSize);
-
-            //Serialize depends table.
-            SerializeDependsTable(exportsToSerialize.Count());
-
-            thumbnails.Serialize(this);
-            WriteIntAtPosition(thumbnails.thumbnailDataOffset, ThumbnailDataOffsetPosition);
-            WriteIntAtPosition(thumbnails.thumbnailTableOffset, ThumbnailTableOffsetPosition);
-
-            WriteIntAtPosition((int) UW.BaseStream.Position, TotalHeaderSizePosition);
-
-            SerializeExportSerialData(exportsToSerialize);
         }
 
-        private void SerializeExportSerialData(List<DummyExportTableItem> exportsToSerialize)
+        private void SerializeExportSerialData(List<MinimalBase> exportsToSerialize)
         {
-            int noneIndex = _package.Names.FindIndex((n) => n.Name == "None");
             foreach (var dummyExport in exportsToSerialize)
             {
-                var exportObject = dummyExport.original;
-                var dummyClass = _dummyFactory.Create(dummyExport.original.ClassName, dummyExport.original, _package);
-                if (dummyClass != null)
-                {
-                    dummyClass.Write(this, _package);
-                }
-                else
-                {
-                    //We just need the netindex and a None FName
-                    _package.Stream.Position = exportObject.SerialOffset;
-                    //NetIndex
-                    UW.Write(_package.Stream.ReadInt32());
-                    //None index and count
-                    UW.Write(noneIndex);
-                    UW.Write(0);
-                }
+                dummyExport.Write(this, _package);
             }
         }
 
@@ -135,10 +124,10 @@ namespace UELib.Dummy
         {
             foreach (var export in exportsToSerialize)
             {
-                export.newClassIndex = AddToImportTable(newImportTable, export, export.newClassIndex);
-                export.newSuperIndex = AddToImportTable(newImportTable, export, export.newSuperIndex);
-                export.newOuterIndex = AddToImportTable(newImportTable, export, export.newOuterIndex);
-                export.newArchetypeIndex = AddToImportTable(newImportTable, export, export.newArchetypeIndex);
+                export.newClassIndex = AddToImportTable(newImportTable, export.newClassIndex);
+                export.newSuperIndex = AddToImportTable(newImportTable, export.newSuperIndex);
+                export.newOuterIndex = AddToImportTable(newImportTable, export.newOuterIndex);
+                export.newArchetypeIndex = AddToImportTable(newImportTable, export.newArchetypeIndex);
             }
         }
 
@@ -228,7 +217,7 @@ namespace UELib.Dummy
             return FromListIndexToImportTableIndex(thisClassDummyImportIndex);
         }
 
-        private int AddToImportTable(List<DummyImportTableItem> newImportTable, DummyExportTableItem export, int importIndex)
+        private int AddToImportTable(List<DummyImportTableItem> newImportTable, int importIndex)
         {
             if (importIndex < 0) //import
             {
@@ -268,24 +257,11 @@ namespace UELib.Dummy
             return importIndex;
         }
 
-        private void SerializeExportTable(List<DummyExportTableItem> exportsToSerialize, int thumbnailsTotalSize, int dependsTotalSize)
+        private void SerializeExportTable(IReadOnlyList<DummyExportTableItem> exportsToSerialize, IReadOnlyList<MinimalBase> dummyExports)
         {
-            int calculatedTotalHeaderSize = (int) (UW.BaseStream.Position + ExportTableItemSize * exportsToSerialize.Count()) + thumbnailsTotalSize +
-                                            dependsTotalSize;
-            int serialOffset = calculatedTotalHeaderSize;
-            foreach (var dummyExport in exportsToSerialize)
+            for (int i = 0; i < exportsToSerialize.Count; i++)
             {
-                var dummyClass = _dummyFactory.Create(dummyExport.original.ClassName, dummyExport.original, _package);
-                if (dummyClass != null)
-                {
-                    DummyExportTableSerialize(dummyExport, serialOffset, dummyClass.GetSerialSize());
-                    serialOffset += dummyClass.GetSerialSize();
-                }
-                else
-                {
-                    DummyExportTableSerialize(dummyExport, serialOffset, DummySerialSize);
-                    serialOffset += DummySerialSize;
-                }
+                DummyExportTableSerialize(exportsToSerialize[i], dummyExports[i]);
             }
         }
 
@@ -364,9 +340,8 @@ namespace UELib.Dummy
             }
 
 
-            for (var index = 0; index < exportsToSerialize.Count; index++)
+            foreach (var export in exportsToSerialize)
             {
-                var export = exportsToSerialize[index];
                 FixObjectReferencesInFilteredExports(export, exportsToSerialize, _package.Exports);
             }
 
@@ -400,21 +375,10 @@ namespace UELib.Dummy
             return newReferenceIndex;
         }
 
-        private void SerializeImportsTable()
-        {
-            var importOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(_package.Imports.Count(), ImportCountPosition);
-            WriteIntAtPosition((int) importOffset, ImportCountPosition + 4);
-            foreach (var import in _package.Imports)
-            {
-                import.Serialize(this);
-            }
-        }
-
         private void SerializeNameTable()
         {
             var nameOffset = UW.BaseStream.Position;
-            WriteIntAtPosition(_package.Names.Count(), NameCountPosition);
+            WriteIntAtPosition(_package.Names.Count, NameCountPosition);
             WriteIntAtPosition((int) nameOffset, NameCountPosition + 4);
 
             foreach (var name in _package.Names)
@@ -484,9 +448,7 @@ namespace UELib.Dummy
             UW.Write(DummyUnknownTypeArray);
         }
 
-        private const int DummySerialSize = 12;
-
-        private void DummyExportTableSerialize(DummyExportTableItem tableItem, int serialOffset, int serialSize)
+        private void DummyExportTableSerialize(DummyExportTableItem tableItem, MinimalBase exportObject)
         {
             this.Write(tableItem.newClassIndex);
             this.Write(tableItem.newSuperIndex);
@@ -494,10 +456,9 @@ namespace UELib.Dummy
             this.Write(tableItem.original.ObjectName);
             this.Write(tableItem.newArchetypeIndex);
             this.Write(tableItem.GetExportObjectFlag());
-            this.Write(serialSize);
+            this.Write(exportObject.SerialSize);
 
-            //this.Write(tableItem.SerialOffset);
-            this.Write(serialOffset);
+            this.Write(exportObject.SerialOffset);
             //this.Write(tableItem.ExportFlags);
             this.Write(0);
             //Net objects count

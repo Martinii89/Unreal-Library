@@ -21,8 +21,9 @@ namespace UELib.Dummy
 
         public long ScriptPropertiesEnd { get; private set; }
 
-        public abstract void Write(IUnrealStream stream, UnrealPackage package);
-        public abstract int GetSerialSize();
+        protected abstract void WriteSerialData(IUnrealStream stream, UnrealPackage package);
+        public int SerialSize { get; private set; }
+        public int SerialOffset { get; private set; }
 
         protected void ReadScriptProperties()
         {
@@ -44,6 +45,13 @@ namespace UELib.Dummy
             }
 
             ScriptPropertiesEnd = reader.BaseStream.Position;
+        }
+
+        public void Write(IUnrealStream stream, UnrealPackage package)
+        {
+            SerialOffset = (int) stream.Position;
+            WriteSerialData(stream, package);
+            SerialSize = (int) (stream.Position - SerialOffset);
         }
 
         protected void WriteScriptProperties(IUnrealStream stream)

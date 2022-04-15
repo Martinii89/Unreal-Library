@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using UELib.Core;
@@ -23,10 +22,7 @@ namespace UELib.Dummy
         public TArray<FStaticMeshLODModel3> Lods { get; set; } = new TArray<FStaticMeshLODModel3>();
         public byte[] UnknownBytes { get; set; }
 
-        public static int SerialSize = 406;
-        public override int GetSerialSize() => ExportTableItem.SerialSize + 4;
         public long PropertyEnd { get; set; }
-
 
         protected override byte[] MinimalByteArray { get; } =
         {
@@ -82,7 +78,6 @@ namespace UELib.Dummy
         public StaticMesh(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
             var reader = package.Stream.UR;
-            var writer = package.Stream.UW;
             reader.BaseStream.Position = exportTableItem.SerialOffset;
             var netIndex = reader.ReadInt32();
             var property = new BaseProperty();
@@ -150,13 +145,13 @@ namespace UELib.Dummy
             stream.Write(propertyValue);
         }
 
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
             package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
             var propertyBuffer = package.Stream.UR.ReadBytes((int) (PropertyEnd - ExportTableItem.SerialOffset));
             stream.Write(propertyBuffer, 0, propertyBuffer.Length);
 
-            // Write the mesh data
+            // WriteSerialData the mesh data
 
             FBoxSphereBounds.Serialize(stream);
             stream.Write((int) 0); //BodySetup
@@ -188,7 +183,7 @@ namespace UELib.Dummy
             //var lightMapResolution = new UName(package, "LightMapResolution");
 
 
-            //stream.Write(-1); //NetIndex
+            //stream.WriteSerialData(-1); //NetIndex
             //WriteStrProperty(stream, sourceFileTimestamp, "2019-06-13 21:34:21");
             //WriteStrProperty(stream, sourceFilePath, "d.fbx");
             //WriteIntProperty(stream, lightMapCoordinateIndex, 1);
@@ -216,7 +211,7 @@ namespace UELib.Dummy
 
 
             stream.Write(MeshData, 0, MeshData.Length);
-            //stream.Write(MinimalByteArray, bytesWritten, SerialSize - bytesWritten);
+            //stream.WriteSerialData(MinimalByteArray, bytesWritten, SerialSize - bytesWritten);
         }
     }
 }

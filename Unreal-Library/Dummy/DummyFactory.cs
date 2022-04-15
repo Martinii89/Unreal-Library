@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UELib.Dummy
 {
@@ -27,13 +24,14 @@ namespace UELib.Dummy
             var baseType = typeof(MinimalBase);
             _registeredTypes = new Dictionary<string, Type>();
 
-            foreach (Type type in currAssembly.GetTypes())
+            foreach (var type in currAssembly.GetTypes())
             {
                 if (!type.IsClass || type.IsAbstract ||
                     !type.IsSubclassOf(baseType))
                 {
                     continue;
                 }
+
                 _registeredTypes.Add(type.Name, type);
             }
         }
@@ -41,9 +39,11 @@ namespace UELib.Dummy
         public MinimalBase Create(string id, params object[] parameters)
         {
             if (!_registeredTypes.TryGetValue(id, out var type))
-                return null;
+            {
+                return new DefaultDummy(parameters[0] as UExportTableItem, parameters[1] as UnrealPackage);
+            }
 
-            return (MinimalBase)Activator.CreateInstance(type, parameters);
+            return (MinimalBase) Activator.CreateInstance(type, parameters);
         }
     }
 }

@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace UELib.Dummy
 {
     internal class SkeletalMesh : MinimalBase
     {
-
-        private const int SerialSize = 3499;
-        
         //Calling this minimal is just a plain lie..
         protected override byte[] MinimalByteArray { get; } =
         {
@@ -235,9 +228,7 @@ namespace UELib.Dummy
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        public override int GetSerialSize() => SerialSize;
-
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        public SkeletalMesh(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
             FixNameIndexAtPosition(package, "ClothingAssets", 4);
             FixNameIndexAtPosition(package, "ArrayProperty", 12);
@@ -275,9 +266,11 @@ namespace UELib.Dummy
             FixNameIndexAtPosition(package, "SourceFileTimestamp", 472);
             FixNameIndexAtPosition(package, "StrProperty", 480);
             FixNameIndexAtPosition(package, "None", 520);
+        }
 
-
-            stream.Write(MinimalByteArray, 0, SerialSize);
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
+        {
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
 
         public static void AddNamesToNameTable(UnrealPackage package)
@@ -285,17 +278,13 @@ namespace UELib.Dummy
             var namesToAdd = new List<string>()
             {
                 "ClothingAssets", "ArrayProperty", "LODInfo", "SourceFilePath",
-                "StrProperty","SourceFileTimestamp","DisplayFactor","FloatProperty",
-                "LODHysteresis","LODMaterialMap","bEnableShadowCasting","TriangleSortSettings",
+                "StrProperty", "SourceFileTimestamp", "DisplayFactor", "FloatProperty",
+                "LODHysteresis", "LODMaterialMap", "bEnableShadowCasting", "TriangleSortSettings",
                 "TriangleSorting", "ByteProperty", "TriangleSortOption", "TRISORT_None", "CustomLeftRightAxis",
                 "TriangleSortAxis", "TSA_X_Axis", "CustomLeftRightBoneName", "NameProperty",
-                "bDisableCompressions","BoolProperty","bHasBeenSimplified",
+                "bDisableCompressions", "BoolProperty", "bHasBeenSimplified",
             };
             AddNamesToNameTable(package, namesToAdd);
-        }
-
-        public SkeletalMesh(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
-        {
         }
     }
 }

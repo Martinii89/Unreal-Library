@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RLUPKT.Core.UTypes;
-using UELib.Dummy.Property;
 using UELib.Dummy.Structs;
 
 namespace UELib.Dummy
@@ -58,7 +52,6 @@ namespace UELib.Dummy
 
     internal class Texture2D : MinimalBase
     {
-        public static int SerialSize = 402;
 
         protected override byte[] MinimalByteArray { get; } =
         {
@@ -90,7 +83,6 @@ namespace UELib.Dummy
             0x00, 0x00
         };
 
-        public override int GetSerialSize() => SerialSize;
 
         public FBulkData SourceArt { get; set; } = new FBulkData();
         public Structs.TArray<Mip> Mips { get; set; } = new Structs.TArray<Mip>();
@@ -104,46 +96,46 @@ namespace UELib.Dummy
         public Texture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
             // TODO: Fix this later. focus on mesh data for now.
-            //var reader = package.Stream.UR;
-            //reader.BaseStream.Position = exportTableItem.SerialOffset;
-            //var netIndex = reader.ReadInt32();
+            var reader = package.Stream.UR;
+            reader.BaseStream.Position = exportTableItem.SerialOffset;
+            var netIndex = reader.ReadInt32();
 
-            //ReadScriptProperties();
+            ReadScriptProperties();
 
-            //SourceArt.Deserialize(reader);
-            //Mips.Deserialize(reader);
-            //TextureFileCacheGuid.Deserialize(reader);
-            //CachedPVRTCMips.Deserialize(reader);
-            //CachedFlashMipsMaxResolution = reader.ReadInt32();
-            //CachedATITCMips.Deserialize(reader);
-            //CachedFlashMips.Deserialize(reader);
-            //CachedETCMips.Deserialize(reader);
+            SourceArt.Deserialize(reader);
+            Mips.Deserialize(reader);
+            TextureFileCacheGuid.Deserialize(reader);
+            CachedPVRTCMips.Deserialize(reader);
+            CachedFlashMipsMaxResolution = reader.ReadInt32();
+            CachedATITCMips.Deserialize(reader);
+            CachedFlashMips.Deserialize(reader);
+            CachedETCMips.Deserialize(reader);
         }
 
 
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
-            WriteMinimalBytes(stream, package);
+            //WriteMinimalBytes(stream, package);
             //TODO: Fix later. focus on mesh data now!
-            //var startPos = stream.Position;
-            //package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
-            //var propertyBuffer = package.Stream.UR.ReadBytes((int)(ScriptPropertiesEnd - ExportTableItem.SerialOffset));
-            //stream.Write(propertyBuffer, 0, propertyBuffer.Length);
+            var startPos = stream.Position;
+            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
+            var propertyBuffer = package.Stream.UR.ReadBytes((int)(ScriptPropertiesEnd - ExportTableItem.SerialOffset));
+            stream.Write(propertyBuffer, 0, propertyBuffer.Length);
 
-            ////Write the mesh data
+            //WriteSerialData the mesh data
 
-            //SourceArt.Serialize(stream);
-            ////CBA to read and decompress stuff form the TFC file
-            //Mips.RemoveAll(m => m.Data.StoredInSeparateFile);
-            //Mips.Serialize(stream);
-            //TextureFileCacheGuid.Serialize(stream);
-            //CachedPVRTCMips.Serialize(stream);
-            //stream.Write(CachedFlashMipsMaxResolution);
-            //CachedATITCMips.Serialize(stream);
-            //CachedFlashMips.Serialize(stream);
-            //CachedETCMips.Serialize(stream);
+            SourceArt.Serialize(stream);
+            //CBA to read and decompress stuff form the TFC file
+            Mips.RemoveAll(m => m.Data.StoredInSeparateFile);
+            Mips.Serialize(stream);
+            TextureFileCacheGuid.Serialize(stream);
+            CachedPVRTCMips.Serialize(stream);
+            stream.Write(CachedFlashMipsMaxResolution);
+            CachedATITCMips.Serialize(stream);
+            CachedFlashMips.Serialize(stream);
+            CachedETCMips.Serialize(stream);
 
-            //var endPos = stream.Position;
+            var endPos = stream.Position;
             //Console.WriteLine($"Written {endPos - startPos} to TextureData");
         }
 
@@ -188,7 +180,7 @@ namespace UELib.Dummy
             FixNameIndexAtPosition(package, "Guid", 270);
             FixNameIndexAtPosition(package, "None", 294);
 
-            stream.Write(MinimalByteArray, 0, SerialSize);
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
 
 
