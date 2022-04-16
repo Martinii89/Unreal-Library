@@ -1,0 +1,33 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#ifndef IMPORTTABLE_H
+#define IMPORTTABLE_H
+
+#include "UPK_BaseStructs.bt"
+
+typedef struct
+{
+    FName ClassPackage; // The name of the package that contains the class of the UObject represented by this resource.
+    FName ClassName; // The name of the class for the UObject represented by this resource.
+    OIndex OuterIndex; // Location of the resource for this resource's Outer
+    FName ObjectName;
+}ImportTableItem<read=(ReadFName(ObjectName))>;
+
+typedef struct (int offset, int count)
+{
+    FSeek(offset);
+    ImportTableItem importItem[count]<optimize=false>;
+    
+}ImportTable<fgcolor=cBlack, bgcolor=0xF0F000>;
+
+#endif

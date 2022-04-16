@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UELib.Dummy
+﻿namespace UELib.Dummy
 {
     class LightMapTexture2D : MinimalBase
     {
-        public static int serialSize = 84;
-
-        byte[] MinimalLightMapTexture2DByteArray = {
+        protected override byte[] MinimalByteArray { get; } =
+        {
             0xFF, 0xFF, 0xFF, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8D, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -20,16 +13,14 @@ namespace UELib.Dummy
         };
 
 
-        protected override byte[] minimalByteArray => MinimalLightMapTexture2DByteArray;
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
+        {
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
+        }
 
-        public override int GetSerialSize() => serialSize;
-
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        public LightMapTexture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
             FixNameIndexAtPosition(package, "None", 4);
-            stream.Write(minimalByteArray, 0, serialSize);
         }
     }
 }
-
-

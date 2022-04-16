@@ -15,9 +15,25 @@ namespace UELib.Dummy
 
         public UExportTableItem original;
 
-        public int packageFlag { get; private set; }
+        public int PackageFlag { get; private set; }
+
+        public long GetExportObjectFlag()
+        {
+            switch (original.ClassName)
+            {
+                case "Package":
+                    return 0x7000400000000;
+                //case "Material":
+                //    return 0xF000400000400; // No thumbnail generation for materials
+                default:
+                    return 0xF000400000000;
+            }
+        }
 
 
-        public DummyExportTableItem(UExportTableItem b) => original = b;
+        public DummyExportTableItem(UExportTableItem b)
+        {
+            original = b;
+        }
     }
 }

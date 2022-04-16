@@ -43,7 +43,7 @@ namespace UELib.Core
                 // Should actually resist in UStruct
                 if( this is UStruct )
                 {
-                    Super = GetIndexObject( _Buffer.ReadObjectIndex() ) as UField;
+                    Super = GetIndexObject( _Buffer.ReadObjectIndex() ) as UStruct;
                     Record( "Super", Super );
                 }
             }

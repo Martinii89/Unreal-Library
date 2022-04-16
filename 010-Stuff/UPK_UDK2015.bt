@@ -1,0 +1,362 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int32  stringLength;
+    char  txt[stringLength];
+}FString <read=ReadFString>;
+
+string ReadFString( FString &ustring )
+{
+    if( exists( ustring.txt ) )
+        return ustring.txt;
+    else
+        return "";
+}
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        FString data[arrayLength];
+    }
+
+}FStringArray;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        int32 data[arrayLength];
+    }
+} FIntArray;
+
+typedef struct
+{
+    uint32 A;
+    uint32 B;
+    uint32 C;
+    uint32 D;
+    
+}GUID;
+
+typedef struct
+{
+    int32 generationsCount;
+    struct
+    {
+        int32 ExportCount;
+        int32 NameCount;
+        int32 NetObjectCount;
+    } GenerationsInfo[generationsCount];
+}Generations;
+
+typedef struct
+{
+    int32 length;
+    if (length >0)
+    {
+        struct 
+        {
+            int64 UncompressedOffset;
+            int32 UncompressedSize;
+            int64 CompressedOffset;
+            int32 CompressedSize;
+        }FCompressedChunkInfo[length];
+    }
+
+}CompressedChunks;
+
+typedef struct
+{
+    int32 Unknown1;
+    int32 Unknown2;
+    int32 Unknown3;
+    int32 Unknown4;
+    int32 Unknown5;
+    FIntArray UnknownArray;
+}FUnknownTypeInSummary;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        FUnknownTypeInSummary data[arrayLength]<optimize=false>;
+    }
+
+} FUnknownTypeInSummaryArray;
+
+typedef struct 
+{
+    int32 index;
+    int32 num;
+}FName<read=ReadFName>;
+
+typedef struct
+{
+    int32 index;
+}OIndex<read=ReadObjectIndex>;
+
+string ReadObjectIndex(OIndex &oIndex)
+{
+    int i = oIndex.index;
+    if (i == 0)
+    {
+        return "Null";
+    }
+    if (i <  0)
+    {
+        //Import Table
+        return ReadFName(ImportTable.importItem[-i-1].ObjectName);
+    }else 
+    {
+        //Export Table
+        return ReadFName(ExportTable.exportItem[i-1].ObjectName);
+    }
+}
+
+string intToStr(int a)
+{
+    string s;
+    SPrintf( s, "%d", a );
+    return  s;
+}
+
+string ReadFName(FName &fname)
+{
+    string name = nameTable.names[fname.index].name.txt;
+    string s;
+    SPrintf( s, "%s (%d)", name, fname.index );
+    return s;
+}
+
+typedef struct 
+{
+    uint32 Tag;
+    uint16 FileVersion;
+    uint16 LicenseeVersion;
+    int32  TotalHeaderSize;
+    FString FolderName;
+    uint32 PackageFlags;
+    int32 NameCount;
+    int32 NameOffset;
+    int32 ExportCount;
+    int32 ExportOffset;
+    int32 ImportCount;
+    int32 ImportOffset;
+    int32 DependsOffset;
+    int32 ThumbnailDataOffset;
+    int32 Unknown2;
+    int32 Unknown3;
+    int32 ThumbnailTableOffset;
+    GUID guid;
+    Generations generations;
+    uint32 EngineVersion;
+    uint32 CookerVersion;
+    uint32 CompressionFlags;
+    CompressedChunks compressedChunks;
+    int32 Unknown5;
+    FStringArray UnknownStringArray;
+    FUnknownTypeInSummaryArray UnknownTypeArray;
+
+}Header <fgcolor=cBlack, bgcolor=0x0000FF>;
+
+typedef struct 
+{
+    FString name;
+    uint64 flags;
+}NameTableItem<optimize=false, read=ReadNameTableItem>;
+
+string ReadNameTableItem( NameTableItem &nameTableItem )
+{
+    return nameTableItem.name.txt;
+}
+
+
+typedef struct (int length)
+{
+    NameTableItem names[length];
+    
+}NameTable<fgcolor=cBlack, bgcolor=0xFF0000>;;
+
+typedef struct
+{
+    OIndex ClassIndex;
+    OIndex SuperIndex;
+    OIndex OuterIndex;
+    FName ObjectName;
+    OIndex Archetype;
+    uint64 ObjectFlags<format=hex>;
+    int32 SerialSize;
+    int32 SerialOffset;
+    int32 ExportFlags;
+    FIntArray NetObjects;
+    GUID PackageGuid;
+    int32 PackageFlags;
+    
+}ExportTableItem;
+
+typedef struct
+{
+    FName PackageName;
+    FName ClassName;
+    OIndex OuterIndex;
+    FName ObjectName;
+}ImportTableItem;
+
+typedef struct 
+{
+    int32 netIndex;
+    byte padding[4];
+    int32 super;
+}ExportData;
+
+
+Header header;
+
+FSeek(header.NameOffset);
+NameTable nameTable(header.NameCount);
+FSeek(header.ExportOffset);
+struct{
+    ExportTableItem exportItem[header.ExportCount]<optimize=false>;
+}ExportTable<fgcolor=cBlack, bgcolor=0x00FF00>;
+FSeek(header.ImportOffset);
+struct
+{
+    ImportTableItem importItem[header.ImportCount]<optimize=false>;
+}ImportTable<fgcolor=cBlack, bgcolor=0xF0F000>;
+
+typedef struct
+{
+    OIndex NextField;
+}UField;
+
+typedef struct{
+    UField NextField;
+    FName Super;
+    int32 info; //No clue..
+    int32 info;//No clue..
+    uint64 propertyFlags<format=hex>; //Maybe..
+    FName Outer;
+    int32 a; //no clue.. 
+    FString name;
+} UProperty<read=ReadProperty , optimize=false>;
+
+string ReadProperty(UProperty &uproperty)
+{
+    return ReadFString(uproperty.name);
+}
+
+typedef struct
+{
+    UProperty uproperty;
+    OIndex struct_type;
+}UStructProperty;
+
+typedef struct 
+{
+    UProperty uproperty;
+    OIndex object_type;
+    FName a;
+}UObjectProperty;
+
+typedef struct
+{
+    byte base[54];
+    uint64 ClassFlags;
+    int unknownData[23];
+}UClass;
+
+FSeek(header.DependsOffset);
+struct{
+    byte data[header.ThumbnailDataOffset - header.DependsOffset];
+}depends<fgcolor=cBlack, bgcolor=0x00FFFF>;;
+
+
+
+FSeek(header.ThumbnailTableOffset);
+struct{
+    int num;
+    struct {
+        FString name;
+        FString group;
+        int someOffset;
+    }t[num]<optimize=false>;
+}thumbnailTable<fgcolor=cBlack, bgcolor=0xFFFFF0>;;
+
+
+FSeek(header.ThumbnailDataOffset);
+struct
+{
+    struct{
+    int x;
+    int y;
+    int size;
+    byte data[size];
+    }thumbnail[thumbnailTable.num]<optimize=false>;
+}thumbnails<fgcolor=cBlack, bgcolor=0xFF00FF, optimize=false>;
+
+FSeek(header.TotalHeaderSize);
+
+typedef struct {
+    OIndex a;
+    FName a;
+
+    FName a;
+    FName a;
+    int64 size;
+    int value;
+
+    FName a;
+    int a;
+    int a;
+    int a;
+    int a;
+
+
+} Material;
+
+typedef struct 
+{
+    FName Name;
+    FName Type;
+    int size;
+    int array_index;
+} Property <read=(ReadFName(Name))>;
+
+
+typedef struct
+{
+    float x,y,z;
+}FVector;
+
+typedef struct
+{
+    int element_size;
+    int elements_count;
+    struct
+    {
+        FVector vec;
+    }elemens[elements_count]<optimize=false>;
+}
+TArray_FVector;
+
+#include "StaticMesh.bt"
+
+FSeek(6569);
+StaticMesh data;
+//FSeek(6569+5804);

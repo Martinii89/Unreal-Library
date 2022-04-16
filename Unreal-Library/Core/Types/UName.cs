@@ -42,6 +42,17 @@ namespace UELib
             _Number = num;
         }
 
+        public UName(UnrealPackage package, string name)
+        {
+            foreach (var tableItem in package.Names)
+            {
+                if (tableItem.Name != name) continue;
+                _NameItem = tableItem;
+                _Number = -1;
+                return;
+            }
+        }
+
         public bool IsNone()
         {
             return _NameItem.Name.Equals( None, StringComparison.OrdinalIgnoreCase );
@@ -61,7 +72,7 @@ namespace UELib
             stream.WriteIndex( _Index );
             if( stream.Version >= VNameNumbered )
             {
-                Log.Info( _Number + " " + _Text );
+                //Log.Info($"UName.Deserialize: {_Number} {_Text}");
                 stream.Write( (uint)_Number + 1 );
             }
         }

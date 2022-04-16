@@ -1,18 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RLUPKT.Core.UTypes;
+using UELib.Dummy.Structs;
 
 namespace UELib.Dummy
 {
+    internal class Mip : IUESerializable, IDummySerializable
+    {
+        public FBulkData Data { get; set; } = new FBulkData();
+        public int SizeX { get; set; }
+        public int SizeY { get; set; }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            Data.Deserialize(Reader);
+            SizeX = Reader.ReadInt32();
+            SizeY = Reader.ReadInt32();
+        }
+
+        public void Serialize(IUnrealStream writer)
+        {
+            Data.Serialize(writer);
+            writer.Write(SizeX);
+            writer.Write(SizeY);
+        }
+    }
+
+    internal class GUID : IUESerializable, IDummySerializable
+    {
+        public int A { get; set; }
+        public int B { get; set; }
+        public int C { get; set; }
+        public int D { get; set; }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            A = Reader.ReadInt32();
+            B = Reader.ReadInt32();
+            C = Reader.ReadInt32();
+            D = Reader.ReadInt32();
+        }
+
+        public void Serialize(IUnrealStream writer)
+        {
+            writer.Write(A);
+            writer.Write(B);
+            writer.Write(C);
+            writer.Write(D);
+        }
+    }
 
     internal class Texture2D : MinimalBase
     {
-        public static int serialSize = 402;
 
-        private byte[] minimalTexture2DBytes = new byte[] {
+        protected override byte[] MinimalByteArray { get; } =
+        {
             0xFF, 0xFF, 0xFF, 0xFF, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
             0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -41,10 +83,63 @@ namespace UELib.Dummy
             0x00, 0x00
         };
 
-        protected override byte[] minimalByteArray => minimalTexture2DBytes;
-        public override int GetSerialSize() => serialSize;
 
-        public override void Write(IUnrealStream stream, UnrealPackage package)
+        public FBulkData SourceArt { get; set; } = new FBulkData();
+        public Structs.TArray<Mip> Mips { get; set; } = new Structs.TArray<Mip>();
+        public GUID TextureFileCacheGuid { get; set; } = new GUID();
+        public Structs.TArray<Mip> CachedPVRTCMips { get; set; } = new Structs.TArray<Mip>();
+        public int CachedFlashMipsMaxResolution { get; set; }
+        public Structs.TArray<Mip> CachedATITCMips { get; set; } = new Structs.TArray<Mip>();
+        public FBulkData CachedFlashMips { get; set; } = new FBulkData();
+        public Structs.TArray<Mip> CachedETCMips { get; set; } = new Structs.TArray<Mip>();
+
+        public Texture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
+        {
+            // TODO: Fix this later. focus on mesh data for now.
+            var reader = package.Stream.UR;
+            reader.BaseStream.Position = exportTableItem.SerialOffset;
+            var netIndex = reader.ReadInt32();
+
+            ReadScriptProperties();
+
+            SourceArt.Deserialize(reader);
+            Mips.Deserialize(reader);
+            TextureFileCacheGuid.Deserialize(reader);
+            CachedPVRTCMips.Deserialize(reader);
+            CachedFlashMipsMaxResolution = reader.ReadInt32();
+            CachedATITCMips.Deserialize(reader);
+            CachedFlashMips.Deserialize(reader);
+            CachedETCMips.Deserialize(reader);
+        }
+
+
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
+        {
+            //WriteMinimalBytes(stream, package);
+            //TODO: Fix later. focus on mesh data now!
+            var startPos = stream.Position;
+            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
+            var propertyBuffer = package.Stream.UR.ReadBytes((int)(ScriptPropertiesEnd - ExportTableItem.SerialOffset));
+            stream.Write(propertyBuffer, 0, propertyBuffer.Length);
+
+            //WriteSerialData the mesh data
+
+            SourceArt.Serialize(stream);
+            //CBA to read and decompress stuff form the TFC file
+            Mips.RemoveAll(m => m.Data.StoredInSeparateFile);
+            Mips.Serialize(stream);
+            TextureFileCacheGuid.Serialize(stream);
+            CachedPVRTCMips.Serialize(stream);
+            stream.Write(CachedFlashMipsMaxResolution);
+            CachedATITCMips.Serialize(stream);
+            CachedFlashMips.Serialize(stream);
+            CachedETCMips.Serialize(stream);
+
+            var endPos = stream.Position;
+            //Console.WriteLine($"Written {endPos - startPos} to TextureData");
+        }
+
+        private void WriteMinimalBytes(IUnrealStream stream, UnrealPackage package)
         {
             FixNameIndexAtPosition(package, "SizeX", 4);
             FixNameIndexAtPosition(package, "IntProperty", 12);
@@ -85,7 +180,7 @@ namespace UELib.Dummy
             FixNameIndexAtPosition(package, "Guid", 270);
             FixNameIndexAtPosition(package, "None", 294);
 
-            stream.Write(minimalByteArray, 0, serialSize);
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
 
 
@@ -94,9 +189,9 @@ namespace UELib.Dummy
             var namesToAdd = new List<string>()
             {
                 "SizeX", "IntProperty", "SizeY", "OriginalSizeX",
-                "OriginalSizeY","Format","ByteProperty","EPixelFormat",
-                "PF_A8R8G8B8","bIsSourceArtUncompressed","BoolProperty","CompressionNone",
-                "MipGenSettings","TextureMipGenSettings","TMGS_NoMipmaps",
+                "OriginalSizeY", "Format", "ByteProperty", "EPixelFormat",
+                "PF_A8R8G8B8", "bIsSourceArtUncompressed", "BoolProperty", "CompressionNone",
+                "MipGenSettings", "TextureMipGenSettings", "TMGS_NoMipmaps",
                 "LightingGuid", "StructProperty", "Guid", "None"
             };
             AddNamesToNameTable(package, namesToAdd);

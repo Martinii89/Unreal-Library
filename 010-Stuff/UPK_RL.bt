@@ -1,0 +1,100 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+#include "UPK_UDK2015_Header.bt"
+#include "NameTable.bt"
+#include "ExportTable.bt"
+#include "ImportTable.bt"
+
+
+
+Header header;
+NameTable nameTable(header.NameOffset, header.NameCount);
+ImportTable importTable(header.ImportOffset, header.ImportCount);
+ExportTable exportTable(header.ExportOffset, header.ExportCount);
+
+
+
+typedef struct
+{
+    OIndex NextField;
+}UField;
+
+typedef struct{
+    UField NextField;
+    FName Super;
+    int32 info; //No clue..
+    int32 info;//No clue..
+    uint64 propertyFlags<format=hex>; //Maybe..
+    FName Outer;
+    int32 a; //no clue.. 
+    FString name;
+} UProperty<read=ReadProperty , optimize=false>;
+
+string ReadProperty(UProperty &uproperty)
+{
+    return ReadFString(uproperty.name);
+}
+
+typedef struct
+{
+    UProperty uproperty;
+    OIndex struct_type;
+}UStructProperty;
+
+typedef struct 
+{
+    UProperty uproperty;
+    OIndex object_type;
+    FName a;
+}UObjectProperty;
+
+typedef struct
+{
+    byte base[54];
+    uint64 ClassFlags;
+    int unknownData[23];
+}UClass;
+
+FSeek(header.DependsOffset);
+struct{
+    byte data[header.ThumbnailDataOffset - header.DependsOffset];
+}depends<fgcolor=cBlack, bgcolor=0x00FFFF>;;
+
+
+if (header.ThumbnailTableOffset > 0)
+{
+    FSeek(header.ThumbnailTableOffset);
+    struct{
+        int num;
+        struct {
+            FString name;
+            FString group;
+            int someOffset;
+        }t[num]<optimize=false>;
+    }thumbnailTable<fgcolor=cBlack, bgcolor=0xFFFFF0>;
+
+    FSeek(header.ThumbnailDataOffset);
+    struct
+    {
+        struct{
+        int x;
+        int y;
+        int size;
+        if (size < 0){
+            byte data[size];
+        }
+        }thumbnail[thumbnailTable.num]<optimize=false>;
+    }thumbnails<fgcolor=cBlack, bgcolor=0xFF00FF, optimize=false>;
+}

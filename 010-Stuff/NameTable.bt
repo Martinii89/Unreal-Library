@@ -1,0 +1,39 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#ifndef NAMETABLE_H
+#define NAMETABLE_H
+
+#include "UPK_BaseStructs.bt"
+
+
+typedef struct 
+{
+    FString name;
+    uint64 flags;
+}NameTableItem<optimize=false, read=ReadNameTableItem>;
+
+string ReadNameTableItem( NameTableItem &nameTableItem )
+{
+    return nameTableItem.name.txt;
+}
+
+
+typedef struct (int offset, int count)
+{
+    FSeek(offset);
+    NameTableItem names[count];
+    
+}NameTable<fgcolor=cBlack, bgcolor=0xFF0000>;
+
+#endif 

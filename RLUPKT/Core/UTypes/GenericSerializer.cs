@@ -15,6 +15,8 @@ namespace RLUPKT.Core.UTypes
 					return o;
 				case int i:
 					return Reader.ReadInt32();
+				case ushort _:
+					return Reader.ReadUInt16();
 				default:
 					throw new NotImplementedException();
 			}

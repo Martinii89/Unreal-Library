@@ -1251,7 +1251,7 @@ namespace UELib
             {
                 try
                 {
-                    CreateObjectForTable( exp );
+                    CreateObjectForTable(exp);
                 }
                 catch( Exception exc )
                 {
@@ -1259,7 +1259,19 @@ namespace UELib
                 }
             }
 
-            foreach( var imp in Imports )
+            //TODO: Fix later. focus on mesh data now
+            // Ugly hack, but idk how else to make sure every object has a known class.
+            //if (PackageName == "Core")
+            //{
+            //    UName className = new UName(this, "Class");
+            //    UName objectName = new UName(this, "Package");
+            //    UName classPackage = new UName(this, "Core");
+            //    int outerIndex = -Imports.First(i => i.ObjectName == "Core").Index - 1;
+            //    var fakePackageImport = new FakeImportTableItem(this, classPackage, className, outerIndex, objectName);
+            //    Imports.Add(fakePackageImport);
+            //}
+
+            foreach ( var imp in Imports )
             {
                 try
                 {
@@ -1319,7 +1331,7 @@ namespace UELib
             {
                 try
                 {
-                    if( !(exp.Object is UnknownObject) )
+                    if ( !(exp.Object is UnknownObject) )
                     {
                         exp.Object.PostInitialize();
                     }
@@ -1355,12 +1367,35 @@ namespace UELib
             ).Class;
         }
 
+
         private void CreateObjectForTable( UObjectTableItem table )
         {
             var objectType = GetClassTypeByClassName( table.ClassName );
-            table.Object = objectType == null ? new UnknownObject() : (UObject)Activator.CreateInstance( objectType );
-            AddObject( table.Object, table );
-            OnNotifyPackageEvent( new PackageEventArgs( PackageEventArgs.Id.Object ) );
+            //TODO: Fix later. focus on mesh data for now.
+            /*
+            if (table is UExportTableItem export)
+            {
+                if (export.ClassIndex == UCLASS_INDEX)
+                {
+                    var corePackage = PackageName == "Core" ? this : UnrealLoader.LoadCachedPackage($"{Path.GetDirectoryName(FullPackageName)}\\Core.upk");
+                    if (corePackage != null)
+                    {
+                        var classImport = corePackage.Imports.First(im => im.ClassName == "Class" && im.ObjectName == "Class");
+                        export.ClassTable = classImport;
+                    }
+                }
+                else
+                {
+                    export.ClassTable = export.Owner.GetIndexTable(export.ClassIndex);
+                }
+            }else if (table is UImportTableItem import)
+            {
+                import.LoadImportClass();
+            }
+            */
+            table.Object = objectType == null ? new UnknownObject() : (UObject)Activator.CreateInstance(objectType);
+            AddObject(table.Object, table);
+            OnNotifyPackageEvent(new PackageEventArgs(PackageEventArgs.Id.Object));
         }
 
         private void AddObject( UObject obj, UObjectTableItem T )
@@ -1370,11 +1405,86 @@ namespace UELib
             obj.Table = T;
 
             Objects.Add( obj );
-            if( NotifyObjectAdded != null )
+            if (NotifyObjectAdded != null)
             {
-                NotifyObjectAdded.Invoke( this, new ObjectEventArgs( obj ) );
+                NotifyObjectAdded.Invoke(this, new ObjectEventArgs(obj));
             }
         }
+
+        /*
+
+        private UObject CreateImportExport(int index)
+        {
+            return index >= 0 ? CreateExport(index) : CreateImport(index);
+        }
+
+        const int UCLASS_INDEX = 0;
+
+        private UObjectTableItem GetClassTableItem(int classIndex)
+        {
+            if (classIndex == UCLASS_INDEX)
+            {
+                // UClass
+                return null;
+            }
+
+            if (classIndex > 0)
+            {
+                //ExportItem
+                return CreateExport(classIndex - 1)?.Table;
+            }
+
+            return CreateImport(classIndex)?.Table;
+        }
+
+        private UObject CreateExport(int exportIndex)
+        {
+            Debug.Assert(exportIndex >= 0, "Invalid export");
+            var objectExport = Exports[exportIndex];
+            if (objectExport.Object != null)
+            {
+                return objectExport.Object;
+            }
+
+
+            var classTableItem = GetClassTableItem(objectExport.ClassIndex);
+            if (classTableItem != null)
+            {
+                objectExport.ClassTable = classTableItem;
+            }
+
+            var objectType = GetClassTypeByClassName(objectExport.ClassName);
+            objectExport.Object = objectType == null ? new UnknownObject() : (UObject)Activator.CreateInstance(objectType);
+            AddObject(objectExport.Object, objectExport);
+            OnNotifyPackageEvent(new PackageEventArgs(PackageEventArgs.Id.Object));
+
+            return objectExport.Object;
+        }
+
+        public UObject CreateImport(int importIndex)
+        {
+            Debug.Assert(importIndex < 0, "Invalid import");
+            var objectImport = Imports[-importIndex-1];
+            if (objectImport.Object != null)
+            {
+                return objectImport.Object;
+            }
+
+            //var classTableItem = GetClassTableItem(objectImport.ClassIndex);
+            //if (classTableItem != null)
+            //{
+            //    objectImport.ClassTable = classTableItem;
+            //}
+
+            var objectType = GetClassTypeByClassName(objectImport.ClassName);
+            objectImport.Object = objectType == null ? new UnknownObject() : (UObject)Activator.CreateInstance(objectType);
+            AddObject(objectImport.Object, objectImport);
+            OnNotifyPackageEvent(new PackageEventArgs(PackageEventArgs.Id.Object));
+
+            return objectImport.Object;
+        }
+        */
+
 
         /// <summary>
         /// Writes the present PackageFlags to disk. HardCoded!

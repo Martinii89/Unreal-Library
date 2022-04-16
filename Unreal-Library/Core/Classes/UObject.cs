@@ -35,7 +35,9 @@ namespace UELib.Core
         /// <summary>
         /// The internal represented class in UnrealScript.
         /// </summary>
-        public UObject Class{ get{ return Package.GetIndexObject( Table.ClassIndex ); } }
+        // TODO: fix this at a later point. Focus on mesh data for now.
+        //public UObject Class => Table.ClassTable.Object;
+        public UObject Class { get { return Package.GetIndexObject(Table.ClassIndex); } }
 
         /// <summary>
         /// [Package.Group:Outer].Object
@@ -699,10 +701,13 @@ namespace UELib.Core
             //}
             try
             {
+                
                 base.Deserialize();
             }catch (Exception e)
             {
                 //Console.WriteLine("Deserialize failed. Trying bruteforce");
+                //TODO:  Known offset for UComponent is 4.
+
                 var maxBrutceForce = _Buffer.Length > 200 ? 200 : _Buffer.Length;
                 for (int i = 0; i < 50; i++)
                 {
