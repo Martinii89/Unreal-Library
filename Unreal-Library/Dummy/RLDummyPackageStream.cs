@@ -280,7 +280,7 @@ namespace UELib.Dummy
             var exportsToSerialize = new List<DummyExportTableItem>();
             var classesToSkip = new List<string>()
             {
-                "ObjectReferencer", "World", "ObjectRedirector", "ShadowMapTexture2D", "SoundClass", "TeamColorScriptedTexture_TA"
+                "ObjectReferencer", "World", "ObjectRedirector", "ShadowMapTexture2D", "SoundClass", "TeamColorScriptedTexture_TA", "DecalMaterial"
             };
             int i = 1;
             foreach (var export in _package.Exports)
@@ -326,7 +326,7 @@ namespace UELib.Dummy
                 exportsToSerialize.Add(new DummyExportTableItem(export));
 
 
-                if (i >= 424)
+                if (i >= 200)
                 {
                     //break;
                 }

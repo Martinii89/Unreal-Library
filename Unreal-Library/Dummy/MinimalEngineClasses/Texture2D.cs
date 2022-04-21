@@ -110,12 +110,19 @@ namespace UELib.Dummy
             CachedATITCMips.Deserialize(reader);
             CachedFlashMips.Deserialize(reader);
             CachedETCMips.Deserialize(reader);
+            if (reader.BaseStream.Position > (exportTableItem.SerialOffset + exportTableItem.SerialSize))
+            {
+                var readLength = reader.BaseStream.Position - exportTableItem.SerialOffset + exportTableItem.SerialSize;
+                //var too_far 
+                throw new InvalidDataException("Read too far");
+            }
         }
 
 
         protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
             //WriteMinimalBytes(stream, package);
+            //return;
             //TODO: Fix later. focus on mesh data now!
             var startPos = stream.Position;
             package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);

@@ -147,6 +147,8 @@ namespace UELib.Dummy
 
         protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
+            //WriteMinimalBytes(stream, package);
+            //return;
             package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
             var propertyBuffer = package.Stream.UR.ReadBytes((int) (PropertyEnd - ExportTableItem.SerialOffset));
             stream.Write(propertyBuffer, 0, propertyBuffer.Length);
@@ -212,6 +214,20 @@ namespace UELib.Dummy
 
             stream.Write(MeshData, 0, MeshData.Length);
             //stream.WriteSerialData(MinimalByteArray, bytesWritten, SerialSize - bytesWritten);
+        }
+
+        private void WriteMinimalBytes(IUnrealStream stream, UnrealPackage package)
+        {
+            FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
+            FixNameIndexAtPosition(package, "StrProperty", 12);
+            FixNameIndexAtPosition(package, "SourceFilePath", 52);
+            FixNameIndexAtPosition(package, "StrProperty", 60);
+            FixNameIndexAtPosition(package, "LightMapCoordinateIndex", 86);
+            FixNameIndexAtPosition(package, "IntProperty", 94);
+            FixNameIndexAtPosition(package, "LightMapResolution", 114);
+            FixNameIndexAtPosition(package, "IntProperty", 122);
+            FixNameIndexAtPosition(package, "None", 142);
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
     }
 }

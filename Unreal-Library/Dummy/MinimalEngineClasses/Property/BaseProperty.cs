@@ -43,6 +43,9 @@ namespace UELib.Dummy.Property
                 case "NameProperty":
                     Reader.BaseStream.Seek(Size, SeekOrigin.Current);
                     break;
+                case "ArrayProperty":
+                    Reader.BaseStream.Seek(Size, SeekOrigin.Current);
+                    break;
                 case "BoolProperty":
                     Reader.BaseStream.Seek(1, SeekOrigin.Current);
                     break;
