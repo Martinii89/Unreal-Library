@@ -52,6 +52,17 @@ typedef struct
     int32 index;
 }OIndex<read=ReadObjectIndex>;
 
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        OIndex data[arrayLength];
+    }
+} FObjectArray;
+
+
+
 string ReadObjectIndex(OIndex &oIndex)
 {
     local int i = oIndex.index;
@@ -110,6 +121,8 @@ string ReadFNameNoIndex(FName &fname)
     return s;
 }
 
+struct Property;
+
 typedef struct 
 {
     FName Name;
@@ -123,6 +136,11 @@ typedef struct
         case "IntProperty":
             int value;
             SPrintf( val, "%d", value );
+            break;
+        case "FloatProperty":
+            float value;
+            val = Str("%f", value);
+            //SPrintf( val, "%1.1f", (float)value );
             break;
         case "StrProperty":
             FString value;
@@ -149,6 +167,16 @@ typedef struct
         case "NameProperty":
             FName name;
             val = ReadFNameNoIndex(name);
+            break;
+        case "ArrayProperty":
+            int array_size;
+            FSkip(size-4);
+            //struct{
+            //    Property ParamName;
+            //    Property linear_color;
+            //    Property guid;
+            //    FName none;
+            //} data[array_size];
             break;
         default:
             FSkip(size);

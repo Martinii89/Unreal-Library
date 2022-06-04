@@ -67,6 +67,7 @@ typedef struct
     uint32 Tag;
     uint16 FileVersion;
     uint16 LicenseeVersion;
+    local int rl_header = LicenseeVersion != 0;
     int32  TotalHeaderSize;
     FString FolderName;
     uint32 PackageFlags;
@@ -90,7 +91,13 @@ typedef struct
     int32 Unknown5;
     FStringArray AdditionalPackagesToCook;
     FTextureAllocations TextureAllocations;
-    local int rl_header = LicenseeVersion != 0;
+    if (rl_header)
+    {
+        int GarbageSize;
+        int CompressedChunkInfoOffset;
+        int LastBlockSize;
+    }
+
 
 }Header <fgcolor=cBlack, bgcolor=0x0000FF>;
 

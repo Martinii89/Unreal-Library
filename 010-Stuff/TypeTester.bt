@@ -13,6 +13,7 @@
 
 #include "UPK_RL.bt"
 #include "StaticMesh.bt"
+
 /*
 
 local int i;
@@ -91,7 +92,6 @@ struct {
     Mips CachedETCMips;
 }Texture<open=true>;
 
-*/
 
 FSeek(484);
 struct {
@@ -105,3 +105,235 @@ struct {
     }
     FName none;
 }CameraAttachmentComponent_X<open=true>;
+*/
+
+typedef struct{
+    float	X, Y, Z, W;
+}FQuat;
+
+typedef struct{
+	FQuat			Orientation;
+	FVector			Position;
+}VJointPos;
+
+typedef struct {
+    FName Name;
+    uint Flags;
+    VJointPos BonePos;
+    int NumChildren;
+    int parentIndex;
+    int unk44;
+}FMeshBone;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        FMeshBone data[arrayLength]<optimize=false>;;
+    }
+}FMeshBoneArray;
+
+typedef struct
+{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        struct{
+	        int16				MaterialIndex;
+	        int16				ChunkIndex;
+	        int					FirstIndex;
+	        int					NumTriangles;
+	        byte				unk2;
+        }section[arrayLength];
+    }
+}TArray_FSkelMeshSection3;
+
+typedef struct
+{
+    int a;
+    byte size;
+    int element_size;
+    Tarray_uint32 Indices;
+}FSkelIndexBuffer3;
+
+typedef struct
+{
+    int elements;
+    struct{
+        uint16 value;
+    }Indices[elements]<optimize=false, read=(value)>;
+}Tarray_int16;
+
+
+typedef struct
+{
+    int elements;
+    struct{
+        byte value;
+    }Indices[elements]<optimize=false, read=(value)>;
+}TArray_byte;
+
+typedef struct{
+    float U,V;
+}FMeshUVFloat;
+
+typedef struct{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        struct{
+            FVector Pos;
+            FPackedNormal Normal[3];
+            FMeshUVFloat UV[4];
+            int Color;
+            byte boneIndex;
+        }FRigidVertex3[arrayLength]<optimize=false>;
+    }
+}TArray_FRigidVertex3<optimize=false>;
+
+typedef struct{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        struct{
+            FVector Pos;
+            FPackedNormal Normal[3];
+            FMeshUVFloat UV[4];
+            int Color;
+            byte boneIndex[4];
+            byte BoneWeight[4];
+
+        }FSoftVertex3[arrayLength]<optimize=false>;
+    }
+}TArray_FSoftVertex3<optimize=false>;
+
+typedef struct{
+
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        struct{
+	        int					FirstVertex;
+	        TArray_FRigidVertex3  RigidVerts;
+	        TArray_FSoftVertex3   SoftVerts;
+	        Tarray_int16	Bones;
+	        int	NumRigidVerts;
+	        int	NumSoftVerts;
+	        int					MaxInfluences;
+        }section[arrayLength]<optimize=false>;
+    }
+}TArray_FSkelMeshChunk3<optimize=false>;
+
+typedef struct (int uvsets){
+    int elementSize;
+    int count;
+    struct (int uvsets){
+        FPackedNormal normal[2];
+        unsigned byte BoneIndex[4];
+        unsigned byte BoneWeight[4];
+        FVector Pos;
+        FMeshUVHalf UV[uvsets];
+    }GpuVert(uvsets)[count];
+    
+
+}VertexBuffer;
+
+typedef struct{
+    int32 arrayLength;
+    if (arrayLength >0)
+    {
+        struct{
+            
+        }FSkeletalMeshVertexInfluence[arrayLength]<optimize=false>;
+    }
+}TArray_FSkeletalMeshVertexInfluences;
+
+typedef struct{
+    int mapCount;
+    if (mapCount > 0){
+        struct {
+            FName name;
+            int index;
+        }NameIndex[mapCount];
+    }
+}NameMap;
+
+
+typedef struct{♦
+    int NumUVSets;
+    int	bUseFullPrecisionUVs;
+    int bUsePackedPosition;
+    FVector	MeshExtension;
+    FVector MeshOrigin;
+   
+    VertexBuffer vertexBuffer(NumUVSets);
+    // if mesh->bHasVertexColors there would be a color stream here
+    TArray_FSkeletalMeshVertexInfluences ExtraVertexInfluences;
+    FSkelIndexBuffer3 adjacency_index_buffer;
+}FSkeletalMeshVertexBuffer3;
+
+typedef struct
+{
+    int count;
+    struct{
+        TArray_FSkelMeshSection3 sections;
+        FSkelIndexBuffer3 IndexBuffer;
+        Tarray_int16 UsedBones;
+        TArray_FSkelMeshChunk3 Chunks;
+        int size;
+        int numVerts;
+        TArray_byte RequiredBones;
+        FBulkData fBulkData;
+        int NumUVSets;
+        FSkeletalMeshVertexBuffer3 GPUSkin;
+        //
+    }lod[count]<optimize=false>;
+}TArray_FStaticLODModel3;
+
+
+typedef struct{
+    int count;
+    if (count > 0){
+        struct{
+            
+        }FPerPolyBoneCollisionData[count];
+    }
+}TArray_FPerPolyBoneCollisionData;
+
+
+//FSeek(303737);
+//FSeek(174392); // serial size: 1085142
+FSeek(1259534); // serial size: 1174762
+struct {
+    int NetIndex;
+    local string name2 = nameTable.names[ReadInt()].name.txt;
+    while(name2 != "None")
+    {
+        Property a;
+        name2 = nameTable.names[ReadInt()].name.txt;
+    }
+    FName none;
+
+FBoxSphereBounds fBoxSphereBounds;
+FObjectArray Materials;
+FVector Origin;
+FRotator RotOrigin;
+FMeshBoneArray RefSkeleton;
+int SkeletalDepth;
+TArray_FStaticLODModel3 Lods;
+NameMap nameMap;
+TArray_FPerPolyBoneCollisionData PerPolyBoneKDOPs;
+FStringArray BoneBreakNames;
+TArray_byte BoneBreakOptions;
+FObjectArray ClothingAssets;
+// udk 12 unknown
+int a;
+int a;
+int a;
+// rl has another 12 unkown
+int a;
+int a;
+int a;
+
+}SKM<open=true>;

@@ -20,7 +20,8 @@
 typedef struct 
 {
     FString name;
-    uint64 flags;
+    uint64 flags_LO;
+    //uint32 flags_HO;
 }NameTableItem<optimize=false, read=ReadNameTableItem>;
 
 string ReadNameTableItem( NameTableItem &nameTableItem )

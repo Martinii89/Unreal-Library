@@ -72,7 +72,7 @@ struct{
     byte data[header.ThumbnailDataOffset - header.DependsOffset];
 }depends<fgcolor=cBlack, bgcolor=0x00FFFF>;;
 
-
+/*
 if (header.ThumbnailTableOffset > 0)
 {
     FSeek(header.ThumbnailTableOffset);
@@ -98,3 +98,5 @@ if (header.ThumbnailTableOffset > 0)
         }thumbnail[thumbnailTable.num]<optimize=false>;
     }thumbnails<fgcolor=cBlack, bgcolor=0xFF00FF, optimize=false>;
 }
+
+*/

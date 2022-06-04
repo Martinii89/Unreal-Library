@@ -21,6 +21,11 @@ typedef struct
 
 typedef struct
 {
+    int		Pitch, Yaw, Roll;
+}FRotator;
+
+typedef struct
+{
     int element_size;
     int elements_count;
     struct
@@ -188,8 +193,22 @@ typedef struct
 
 typedef struct
 {
+    int elements;
+    struct{
+        uint32 value;
+    }Indices[elements]<optimize=false, read=(value)>;
+}Tarray_uint32;
+
+typedef struct
+{
     Tarray_uint16 data;
 }Tarray_FIndexBuffer3;
+
+typedef struct {
+   FVector Origin;
+   FVector BoxExtent;
+   float SphereRadius;
+}FBoxSphereBounds;
 
 typedef struct
 {
@@ -216,11 +235,7 @@ typedef struct {
         name = nameTable.names[ReadInt()].name.txt;
     }
     FName none;
-    struct {
-        FVector Origin;
-        FVector BoxExtent;
-        float SphereRadius;
-    }FBoxSphereBounds;
+    FBoxSphereBounds fBoxSphereBounds;
     OIndex BodySetup;
     FkDOPBounds kDOPBounds;
     TArray_FkDOPNode3New nodes;
