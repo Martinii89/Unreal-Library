@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using RLUPKT.Core.UTypes;
 
 namespace UELib.Dummy.Structs
@@ -16,19 +15,6 @@ namespace UELib.Dummy.Structs
         public TArrayWithElemtSize<ushort> Indicies2 { get; set; } = new TArrayWithElemtSize<ushort>();
         public TArrayWithElemtSize<ushort> Indicies3 { get; set; } = new TArrayWithElemtSize<ushort>();
 
-        public void Deserialize(BinaryReader Reader)
-        {
-            FBulkData.Deserialize(Reader);
-            FStaticMeshSections.Deserialize(Reader);
-            VertexStream.Deserialize(Reader);
-            UvStream.Deserialize(Reader);
-            ColorStream.Deserialize(Reader);
-            NumVerts = Reader.ReadInt32();
-            Indicies.Deserialize(Reader);
-            Indicies2.Deserialize(Reader);
-            Indicies3.Deserialize(Reader);
-        }
-
         public void Serialize(IUnrealStream writer)
         {
             FBulkData.Serialize(writer);
@@ -41,6 +27,19 @@ namespace UELib.Dummy.Structs
             Indicies2.Serialize(writer);
             Indicies3.Serialize(writer);
         }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            FBulkData.Deserialize(Reader);
+            FStaticMeshSections.Deserialize(Reader);
+            VertexStream.Deserialize(Reader);
+            UvStream.Deserialize(Reader);
+            ColorStream.Deserialize(Reader);
+            NumVerts = Reader.ReadInt32();
+            Indicies.Deserialize(Reader);
+            Indicies2.Deserialize(Reader);
+            Indicies3.Deserialize(Reader);
+        }
     }
 
     public class ColorStream : IUESerializable, IDummySerializable
@@ -48,6 +47,16 @@ namespace UELib.Dummy.Structs
         public int ItemSize { get; set; }
         public int NumVerts { get; set; }
         public TArrayWithElemtSize<FColor> Colors { get; set; } = new TArrayWithElemtSize<FColor>();
+
+        public void Serialize(IUnrealStream writer)
+        {
+            writer.Write(ItemSize);
+            writer.Write(NumVerts);
+            if (NumVerts > 0)
+            {
+                Colors.Serialize(writer);
+            }
+        }
 
 
         public void Deserialize(BinaryReader Reader)
@@ -60,16 +69,6 @@ namespace UELib.Dummy.Structs
                 Colors.Deserialize(Reader);
             }
         }
-
-        public void Serialize(IUnrealStream writer)
-        {
-            writer.Write(ItemSize);
-            writer.Write(NumVerts);
-            if (NumVerts > 0)
-            {
-                Colors.Serialize(writer);
-            }
-        }
     }
 
     public class FColor : IUESerializable, IDummySerializable
@@ -79,14 +78,6 @@ namespace UELib.Dummy.Structs
         public byte B { get; private set; }
         public byte A { get; private set; }
 
-        public void Deserialize(BinaryReader Reader)
-        {
-            R = Reader.ReadByte();
-            G = Reader.ReadByte();
-            B = Reader.ReadByte();
-            A = Reader.ReadByte();
-        }
-
         public void Serialize(IUnrealStream writer)
         {
             writer.Write(R);
@@ -94,26 +85,34 @@ namespace UELib.Dummy.Structs
             writer.Write(B);
             writer.Write(A);
         }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            R = Reader.ReadByte();
+            G = Reader.ReadByte();
+            B = Reader.ReadByte();
+            A = Reader.ReadByte();
+        }
     }
 
     public class VertexStream : IUESerializable, IDummySerializable
     {
         public int VertexSize { get; set; }
         public int VertexCount { get; set; }
-        private TArrayWithElemtSize<FVector> VertexStreamArray { get; set; } = new TArrayWithElemtSize<FVector>();
-
-        public void Deserialize(BinaryReader Reader)
-        {
-            VertexSize = Reader.ReadInt32();
-            VertexCount = Reader.ReadInt32();
-            VertexStreamArray.Deserialize(Reader);
-        }
+        private TArrayWithElemtSize<FVector> VertexStreamArray { get; } = new TArrayWithElemtSize<FVector>();
 
         public void Serialize(IUnrealStream writer)
         {
             writer.Write(VertexSize);
             writer.Write(VertexCount);
             VertexStreamArray.Serialize(writer);
+        }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            VertexSize = Reader.ReadInt32();
+            VertexCount = Reader.ReadInt32();
+            VertexStreamArray.Deserialize(Reader);
         }
     }
 
@@ -125,16 +124,6 @@ namespace UELib.Dummy.Structs
         public int BUseFullPrecisionUVs { get; set; }
         public TArrayWithElemtSize<UvItem> UvStreamItems { get; set; }
 
-        public void Deserialize(BinaryReader Reader)
-        {
-            NumTexCords = Reader.ReadInt32();
-            ItemSize = Reader.ReadInt32();
-            NumVerts = Reader.ReadInt32();
-            BUseFullPrecisionUVs = Reader.ReadInt32();
-            UvStreamItems = new TArrayWithElemtSize<UvItem>(() => new UvItem(new UvHalf[NumTexCords]));
-            UvStreamItems.Deserialize(Reader);
-        }
-
         public void Serialize(IUnrealStream writer)
         {
             writer.Write(NumTexCords);
@@ -143,41 +132,65 @@ namespace UELib.Dummy.Structs
             writer.Write(BUseFullPrecisionUVs);
             UvStreamItems.Serialize(writer);
         }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            NumTexCords = Reader.ReadInt32();
+            ItemSize = Reader.ReadInt32();
+            NumVerts = Reader.ReadInt32();
+            BUseFullPrecisionUVs = Reader.ReadInt32();
+            var uvData = new IUv[NumTexCords];
+            for (var i = 0; i < NumTexCords; i++)
+            {
+                if (BUseFullPrecisionUVs == 1)
+                {
+                    uvData[i] = new UvFull();
+                }
+                else
+                {
+                    uvData[i] = new UvHalf();
+                }
+            }
+
+            UvStreamItems = new TArrayWithElemtSize<UvItem>(() => new UvItem(uvData));
+            UvStreamItems.Deserialize(Reader);
+        }
     }
 
     public class UvItem : IUESerializable, IDummySerializable
     {
-        public FPackedNormal N0 { get; } = new FPackedNormal();
-        public FPackedNormal N1 { get; } = new FPackedNormal();
-        public UvHalf[] Uv { get; }
-
         public UvItem()
         {
         }
 
-        public UvItem(UvHalf[] uv)
+        public UvItem(IUv[] uvData)
         {
-            Uv = uv;
+            UvData = uvData;
+        }
+
+
+        public FPackedNormal N0 { get; } = new FPackedNormal();
+        public FPackedNormal N1 { get; } = new FPackedNormal();
+        public IUv[] UvData { get; }
+
+        public void Serialize(IUnrealStream writer)
+        {
+            N0.Serialize(writer);
+            N1.Serialize(writer);
+            foreach (var uvHalf in UvData)
+            {
+                uvHalf.Serialize(writer);
+            }
         }
 
         public void Deserialize(BinaryReader Reader)
         {
             N0.Deserialize(Reader);
             N1.Deserialize(Reader);
-            for (var i = 0; i < Uv.Length; i++)
+            for (var i = 0; i < UvData.Length; i++)
             {
-                Uv[i] = new UvHalf();
-                Uv[i].Deserialize(Reader);
-            }
-        }
-
-        public void Serialize(IUnrealStream writer)
-        {
-            N0.Serialize(writer);
-            N1.Serialize(writer);
-            foreach (var uvHalf in Uv)
-            {
-                uvHalf.Serialize(writer);
+                //uvData[i] = new UvHalf();
+                UvData[i].Deserialize(Reader);
             }
         }
     }
@@ -186,32 +199,54 @@ namespace UELib.Dummy.Structs
     {
         public uint Data { get; private set; }
 
-        public void Deserialize(BinaryReader Reader)
-        {
-            Data = Reader.ReadUInt32();
-        }
-
         public void Serialize(IUnrealStream writer)
         {
             writer.Write(Data);
         }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            Data = Reader.ReadUInt32();
+        }
     }
 
-    public class UvHalf : IUESerializable, IDummySerializable
+    public interface IUv : IUESerializable, IDummySerializable
+    {
+    }
+
+    public class UvHalf : IUv
     {
         public ushort A { get; private set; }
         public ushort B { get; private set; }
+
+        public void Serialize(IUnrealStream writer)
+        {
+            writer.Write(A);
+            writer.Write(B);
+        }
 
         public void Deserialize(BinaryReader Reader)
         {
             A = Reader.ReadUInt16();
             B = Reader.ReadUInt16();
         }
+    }
+
+    public class UvFull : IUv
+    {
+        public float A { get; private set; }
+        public float B { get; private set; }
 
         public void Serialize(IUnrealStream writer)
         {
             writer.Write(A);
             writer.Write(B);
+        }
+
+        public void Deserialize(BinaryReader Reader)
+        {
+            A = Reader.ReadSingle();
+            B = Reader.ReadSingle();
         }
     }
 }
