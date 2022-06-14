@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UELib.Dummy
+﻿namespace UELib.Dummy
 {
-    class DummyExportTableItem
+    internal class DummyExportTableItem
     {
-        public int newClassIndex = 0;
-        public int newSuperIndex = 0;
-        public int newOuterIndex = 0;
         public int newArchetypeIndex = 0;
+        public int newClassIndex = 0;
+        public int newOuterIndex = 0;
+        public int newSuperIndex = 0;
 
-        public UExportTableItem original;
+        public IUExportTableItem original;
+
+
+        public DummyExportTableItem(IUExportTableItem b)
+        {
+            original = b;
+        }
 
         public int PackageFlag { get; private set; }
 
@@ -28,12 +28,6 @@ namespace UELib.Dummy
                 default:
                     return 0xF000400000000;
             }
-        }
-
-
-        public DummyExportTableItem(UExportTableItem b)
-        {
-            original = b;
         }
     }
 }

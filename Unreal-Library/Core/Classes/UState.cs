@@ -10,7 +10,7 @@ namespace UELib.Core
     }
 
     /// <summary>
-    /// Represents a unreal state.
+    ///     Represents a unreal state.
     /// </summary>
     [UnrealRegisterClass]
     public partial class UState : UStruct
@@ -18,33 +18,28 @@ namespace UELib.Core
         // TODO: Corrigate version. 61 is the lowest package version I know that supports StateFlags.
         private const uint VStateFlags = 61;
 
-        #region Serialized Members
         /// <summary>
-        /// Mask of current functions being probed by this class.
-        /// </summary>
-        private long _ProbeMask;
-
-        /// <summary>
-        /// Mask of current functions being ignored by the present state node.
+        ///     Mask of current functions being ignored by the present state node.
         /// </summary>
         private long _IgnoreMask;
 
         /// <summary>
-        /// Offset into the ScriptStack where the FLabelEntry persist.
+        ///     Offset into the ScriptStack where the FLabelEntry persist.
         /// </summary>
         private short _LabelTableOffset;
 
         /// <summary>
-        /// This state's flags mask e.g. Auto, Simulated.
+        ///     Mask of current functions being probed by this class.
+        /// </summary>
+        private long _ProbeMask;
+
+        /// <summary>
+        ///     This state's flags mask e.g. Auto, Simulated.
         /// </summary>
         private uint _StateFlags;
-        #endregion
 
-        #region Script Members
-        public IList<UFunction> Functions{ get; private set; }
-        #endregion
+        public IList<UFunction> Functions { get; private set; }
 
-        #region Constructors
         protected override void Deserialize()
         {
             base.Deserialize();
@@ -61,53 +56,52 @@ namespace UELib.Core
 
 
             // UE3
-            if( Package.Version >= 220 )
+            if (Package.Version >= 220)
             {
                 // TODO: Corrigate Version; Somewhere between 690 - 706
-                if( Package.Version < 700 )
+                if (Package.Version < 700)
                 {
                     // TODO: Unknown!
-                    int unknown = _Buffer.ReadInt32();
-                    Record( "???", unknown );
+                    var unknown = _Buffer.ReadInt32();
+                    Record("???", unknown);
                 }
 
                 _ProbeMask = _Buffer.ReadInt32();
-                Record( "_ProbeMask", _ProbeMask );
+                Record("_ProbeMask", _ProbeMask);
             }
-            else  // UE2 and 1
+            else // UE2 and 1
             {
                 _ProbeMask = _Buffer.ReadInt64();
-                Record( "_ProbeMask", _ProbeMask );
+                Record("_ProbeMask", _ProbeMask);
             }
 
             // TODO: Corrigate Version; Somewhere between 690 - 706
-            if( Package.Version < 700 )
+            if (Package.Version < 700)
             {
                 _IgnoreMask = _Buffer.ReadInt64();
-                Record( "_IgnoreMask", _IgnoreMask );
+                Record("_IgnoreMask", _IgnoreMask);
             }
 
-        noMasks:
+            noMasks:
             _LabelTableOffset = _Buffer.ReadInt16();
-            Record( "_LabelTableOffset", _LabelTableOffset );
+            Record("_LabelTableOffset", _LabelTableOffset);
 
-            if( Package.Version >= VStateFlags )
+            if (Package.Version >= VStateFlags)
             {
-
                 _StateFlags = _Buffer.ReadUInt32();
                 skipStateFlags:
-                Record( "StateFlags", (StateFlags)_StateFlags );
+                Record("StateFlags", (StateFlags) _StateFlags);
             }
 
 
-            if( Package.Version >= 220 )
+            if (Package.Version >= 220)
             {
-                int mapCount = _Buffer.ReadIndex();
-                Record( "mapcount", mapCount );
-                if( mapCount > 0 )
+                var mapCount = _Buffer.ReadIndex();
+                Record("mapcount", mapCount);
+                if (mapCount > 0)
                 {
-                    AssertEOS( mapCount * 12, "Maps" );
-                    _Buffer.Skip( mapCount * 12 );
+                    AssertEOS(mapCount * 12, "Maps");
+                    _Buffer.Skip(mapCount * 12);
                     // We don't have to store this.
                     // We don't use it and all that could happen is a OutOfMemory exception!
                     /*_FuncMap = new Dictionary<int,int>( mapCount );
@@ -123,26 +117,23 @@ namespace UELib.Core
         {
             base.FindChildren();
             Functions = new List<UFunction>();
-            for( var child = Children; child != null; child = child.NextField )
+            for (var child = Children; child != null; child = child.NextField)
             {
-                if( child.IsClassType( "Function" ) )
+                if (child.IsClassType("Function"))
                 {
-                    Functions.Insert( 0, (UFunction)child );
+                    Functions.Insert(0, (UFunction) child);
                 }
             }
         }
-        #endregion
 
-        #region Methods
-        public bool HasStateFlag( StateFlags flag )
+        public bool HasStateFlag(StateFlags flag)
         {
-            return (_StateFlags & (uint)flag) != 0;
+            return (_StateFlags & (uint) flag) != 0;
         }
 
-        public bool HasStateFlag( uint flag )
+        public bool HasStateFlag(uint flag)
         {
             return (_StateFlags & flag) != 0;
         }
-        #endregion
     }
 }

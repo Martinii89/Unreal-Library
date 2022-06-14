@@ -1,17 +1,12 @@
-using System;
-
 namespace UELib.Core
 {
     [UnrealRegisterClass]
     public partial class UTextBuffer : UObject
     {
-        #region Serialized Members
-        protected uint _Top;
         protected uint _Pos;
-        public string ScriptText = String.Empty;
-        #endregion
+        protected uint _Top;
+        public string ScriptText = string.Empty;
 
-        #region Constructors
         public UTextBuffer()
         {
             ShouldDeserializeOnDemand = true;
@@ -25,6 +20,5 @@ namespace UELib.Core
 
             ScriptText = _Buffer.ReadText();
         }
-        #endregion
     }
 }

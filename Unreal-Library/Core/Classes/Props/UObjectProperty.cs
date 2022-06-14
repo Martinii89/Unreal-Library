@@ -3,36 +3,30 @@
 namespace UELib.Core
 {
     /// <summary>
-    /// Object Reference Property
+    ///     Object Reference Property
     /// </summary>
     [UnrealRegisterClass]
     public class UObjectProperty : UProperty
     {
-        #region Serialized Members
-        public UObject Object
-        {
-            get;
-            private set;
-        }
-        #endregion
-
         /// <summary>
-        /// Creates a new instance of the UELib.Core.UObjectProperty class.
+        ///     Creates a new instance of the UELib.Core.UObjectProperty class.
         /// </summary>
         public UObjectProperty()
         {
             Type = PropertyType.ObjectProperty;
         }
 
+        public UObject Object { get; private set; }
+
         protected override void Deserialize()
         {
             base.Deserialize();
 
-            int objectIndex = _Buffer.ReadObjectIndex();
-            Object = GetIndexObject( objectIndex );
+            var objectIndex = _Buffer.ReadObjectIndex();
+            Object = GetIndexObject(objectIndex);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string GetFriendlyType()
         {
             return Object != null ? Object.GetFriendlyType() : "@NULL";

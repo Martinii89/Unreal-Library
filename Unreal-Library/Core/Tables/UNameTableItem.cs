@@ -7,7 +7,6 @@ namespace UELib
     /// </summary>
     public sealed class UNameTableItem : UTableItem, IUnrealSerializableClass
     {
-        #region Serialized Members
         /// <summary>
         /// Object Name
         /// </summary>
@@ -21,7 +20,6 @@ namespace UELib
         /// 64bit in UE3
         /// </value>
         public ulong Flags;
-        #endregion
 
         private const int QWORDVersion = 141;
 

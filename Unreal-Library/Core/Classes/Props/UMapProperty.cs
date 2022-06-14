@@ -3,20 +3,17 @@ using UELib.Types;
 namespace UELib.Core
 {
     /// <summary>
-    /// Dynamic Map Property
-    ///
-    /// Obsolete
+    ///     Dynamic Map Property
+    ///     Obsolete
     /// </summary>
     [UnrealRegisterClass]
     public class UMapProperty : UProperty
     {
-        #region Serialized Members
         private int _Key;
         private int _Value;
-        #endregion
 
         /// <summary>
-        /// Creates a new instance of the UELib.Core.UMapProperty class.
+        ///     Creates a new instance of the UELib.Core.UMapProperty class.
         /// </summary>
         public UMapProperty()
         {
@@ -31,7 +28,7 @@ namespace UELib.Core
             _Value = _Buffer.ReadObjectIndex();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string GetFriendlyType()
         {
             return "map<" + _Key + ", " + _Value + ">";

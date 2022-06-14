@@ -1,20 +1,17 @@
-using System;
 using System.Diagnostics.Contracts;
 using UELib.Logging;
 
 namespace UELib
 {
     /// <summary>
-    /// Represents a unreal import table with deserialized data from a unreal package header.
+    ///     Represents a unreal import table with deserialized data from a unreal package header.
     /// </summary>
     public sealed class UImportTableItem : UObjectTableItem, IUnrealSerializableClass
     {
-        #region Serialized Members
-        public UName PackageName;
         public UName _ClassName;
+        public UName PackageName;
 
-        [Pure] public override string ClassName { get { return _ClassName; } }
-        #endregion
+        [Pure] public override string ClassName => _ClassName;
 
         public void Serialize(IUnrealStream stream)
         {
@@ -35,7 +32,6 @@ namespace UELib
             ObjectName = stream.ReadNameReference();
         }
 
-        #region Methods
         public override string ToString()
         {
             return ObjectName + "(" + -(Index + 1) + ")";
@@ -140,6 +136,5 @@ namespace UELib
 
         }
         */
-        #endregion
     }
 }

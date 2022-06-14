@@ -3,20 +3,17 @@
 namespace UELib.Core
 {
     /// <summary>
-    /// Delegate Property
-    ///
-    /// UE2+
+    ///     Delegate Property
+    ///     UE2+
     /// </summary>
     [UnrealRegisterClass]
     public class UDelegateProperty : UProperty
     {
-        #region Serialized Members
-        public UObject FunctionObject;
         public UObject DelegateObject;
-        #endregion
+        public UObject FunctionObject;
 
         /// <summary>
-        /// Creates a new instance of the UELib.Core.UDelegateProperty class.
+        ///     Creates a new instance of the UELib.Core.UDelegateProperty class.
         /// </summary>
         public UDelegateProperty()
         {
@@ -27,14 +24,14 @@ namespace UELib.Core
         {
             base.Deserialize();
 
-            FunctionObject = GetIndexObject( _Buffer.ReadObjectIndex() );
-            if( Package.Version > 184 )
+            FunctionObject = GetIndexObject(_Buffer.ReadObjectIndex());
+            if (Package.Version > 184)
             {
-                DelegateObject = GetIndexObject( _Buffer.ReadObjectIndex() );
+                DelegateObject = GetIndexObject(_Buffer.ReadObjectIndex());
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string GetFriendlyType()
         {
             return "delegate<" + GetFriendlyInnerType() + ">";

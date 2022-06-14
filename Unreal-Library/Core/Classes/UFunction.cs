@@ -5,7 +5,7 @@ using UELib.Flags;
 namespace UELib.Core
 {
     /// <summary>
-    /// Represents a unreal function.
+    ///     Represents a unreal function.
     /// </summary>
     [UnrealRegisterClass]
     public partial class UFunction : UStruct, IUnrealNetObject
@@ -14,82 +14,54 @@ namespace UELib.Core
         private const uint VDeprecatedData = 68;
         private const uint VFriendlyName = 189;
 
-        #region Serialized Members
-        public ushort   NativeToken
-        {
-            get;
-            private set;
-        }
+        public ushort NativeToken { get; private set; }
 
-        public byte     OperPrecedence
-        {
-            get;
-            private set;
-        }
+        public byte OperPrecedence { get; private set; }
 
         /// <value>
-        /// 32bit in UE2
-        /// 64bit in UE3
+        ///     32bit in UE2
+        ///     64bit in UE3
         /// </value>
-        private ulong   FunctionFlags
-        {
-            get; set;
-        }
+        private ulong FunctionFlags { get; set; }
 
-        public ushort   RepOffset
-        {
-            get;
-            private set;
-        }
+        public List<UProperty> Params { get; private set; }
+        public UProperty ReturnProperty { get; private set; }
 
-        public bool     RepReliable
-        {
-            get{ return HasFunctionFlag( Flags.FunctionFlags.NetReliable ); }
-        }
+        public ushort RepOffset { get; private set; }
 
-        public uint     RepKey
-        {
-            get{ return RepOffset | ((uint)Convert.ToByte( RepReliable ) << 16); }
-        }
-        #endregion
+        public bool RepReliable => HasFunctionFlag(Flags.FunctionFlags.NetReliable);
 
-        #region Script Members
-        public List<UProperty>  Params{ get; private set; }
-        public UProperty        ReturnProperty{ get; private set; }
-        #endregion
+        public uint RepKey => RepOffset | ((uint) Convert.ToByte(RepReliable) << 16);
 
-        #region Constructors
         protected override void Deserialize()
         {
-
             base.Deserialize();
 
             NativeToken = _Buffer.ReadUShort();
-            Record( "NativeToken", NativeToken );
+            Record("NativeToken", NativeToken);
             OperPrecedence = _Buffer.ReadByte();
-            Record( "OperPrecedence", OperPrecedence );
-            if( Package.Version < VDeprecatedData )
+            Record("OperPrecedence", OperPrecedence);
+            if (Package.Version < VDeprecatedData)
             {
                 // ParmsSize, NumParms, and ReturnValueOffset
-                _Buffer.Skip( 5 );
+                _Buffer.Skip(5);
             }
 
 
             FunctionFlags = _Buffer.ReadUInt64();
 
-            Record( "FunctionFlags", (FunctionFlags)FunctionFlags );
-            if( HasFunctionFlag( Flags.FunctionFlags.Net ) )
+            Record("FunctionFlags", (FunctionFlags) FunctionFlags);
+            if (HasFunctionFlag(Flags.FunctionFlags.Net))
             {
                 RepOffset = _Buffer.ReadUShort();
-                Record( "RepOffset", RepOffset );
+                Record("RepOffset", RepOffset);
             }
 
 
-
-            if(Package.Version >= VFriendlyName && !Package.IsConsoleCooked())
+            if (Package.Version >= VFriendlyName && !Package.IsConsoleCooked())
             {
                 FriendlyName = _Buffer.ReadNameReference();
-                Record( "FriendlyName", FriendlyName );
+                Record("FriendlyName", FriendlyName);
             }
         }
 
@@ -97,30 +69,28 @@ namespace UELib.Core
         {
             base.FindChildren();
             Params = new List<UProperty>();
-            foreach( var property in Variables )
+            foreach (var property in Variables)
             {
-                if( property.HasPropertyFlag( PropertyFlagsLO.ReturnParm ) )
+                if (property.HasPropertyFlag(PropertyFlagsLO.ReturnParm))
                 {
                     ReturnProperty = property;
                 }
 
-                if( property.IsParm() )
+                if (property.IsParm())
                 {
-                    Params.Add( property );
+                    Params.Add(property);
                 }
             }
         }
-        #endregion
 
-        #region Methods
-        public bool HasFunctionFlag( FunctionFlags flag )
+        public bool HasFunctionFlag(FunctionFlags flag)
         {
-            return ((uint)FunctionFlags & (uint)flag) != 0;
+            return ((uint) FunctionFlags & (uint) flag) != 0;
         }
 
         public bool IsOperator()
         {
-            return HasFunctionFlag( Flags.FunctionFlags.Operator );
+            return HasFunctionFlag(Flags.FunctionFlags.Operator);
         }
 
         public bool IsPost()
@@ -130,8 +100,7 @@ namespace UELib.Core
 
         public bool IsPre()
         {
-            return IsOperator() && HasFunctionFlag( Flags.FunctionFlags.PreOperator );
+            return IsOperator() && HasFunctionFlag(Flags.FunctionFlags.PreOperator);
         }
-        #endregion
     }
 }

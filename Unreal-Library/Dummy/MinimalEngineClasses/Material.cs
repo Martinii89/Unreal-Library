@@ -1,7 +1,12 @@
 ﻿namespace UELib.Dummy
 {
-    class Material : MinimalBase
+    internal class Material : MinimalBase
     {
+        public Material(IUExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
+        {
+            FixNameIndexAtPosition(package, "None", 4);
+        }
+
         protected override byte[] MinimalByteArray { get; } =
         {
             0xFF, 0xFF, 0xFF, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -13,22 +18,17 @@
         };
 
 
-        public Material(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
-        {
-            FixNameIndexAtPosition(package, "None", 4);
-        }
-
-
         protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
             stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
     }
 
-    /* Just use the DefaultDummy for mics for now
-    class MaterialInstanceConstant : MinimalBase
+    internal class MaterialInstanceConstant : MinimalBase
     {
-        private const int SerialSize = 12;
+        public MaterialInstanceConstant(IUExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
+        {
+        }
 
 
         protected override byte[] MinimalByteArray { get; } =
@@ -36,20 +36,10 @@
             0xFF, 0xFF, 0xFF, 0xFF, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        public override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
+        protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
             FixNameIndexAtPosition(package, "None", 4);
-            stream.Write(MinimalByteArray, 0, SerialSize);
-        }
-
-        public override int SerialSize()
-        {
-            return SerialSize;
-        }
-
-        public MaterialInstanceConstant(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
-        {
+            stream.Write(MinimalByteArray, 0, MinimalByteArray.Length);
         }
     }
-    */
 }

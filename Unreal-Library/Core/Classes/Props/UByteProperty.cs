@@ -3,17 +3,15 @@ using UELib.Types;
 namespace UELib.Core
 {
     /// <summary>
-    /// Byte Property
+    ///     Byte Property
     /// </summary>
     [UnrealRegisterClass]
     public class UByteProperty : UProperty
     {
-        #region Serialized Members
         public UEnum EnumObject;
-        #endregion
 
         /// <summary>
-        /// Creates a new instance of the UELib.Core.UByteProperty class.
+        ///     Creates a new instance of the UELib.Core.UByteProperty class.
         /// </summary>
         public UByteProperty()
         {
@@ -24,11 +22,11 @@ namespace UELib.Core
         {
             base.Deserialize();
 
-            int enumIndex = _Buffer.ReadObjectIndex();
-            EnumObject = (UEnum)GetIndexObject( enumIndex );
+            var enumIndex = _Buffer.ReadObjectIndex();
+            EnumObject = (UEnum) GetIndexObject(enumIndex);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override void InitializeImports()
         {
             base.InitializeImports();
@@ -39,37 +37,38 @@ namespace UELib.Core
         private void ImportObject()
         {
             // Already imported...
-            if( EnumObject != null )
+            if (EnumObject != null)
             {
                 return;
             }
 
             var pkg = LoadImportPackage();
-            if( pkg != null )
+            if (pkg != null)
             {
-                if( pkg.Objects == null )
+                if (pkg.Objects == null)
                 {
-                    pkg.RegisterClass( "ByteProperty", typeof(UByteProperty) );
-                    pkg.RegisterClass( "Enum", typeof(UEnum) );
+                    pkg.RegisterClass("ByteProperty", typeof(UByteProperty));
+                    pkg.RegisterClass("Enum", typeof(UEnum));
                     pkg.InitializeExportObjects();
                 }
-                var b = (UByteProperty)pkg.FindObject( Name, typeof(UByteProperty) );
-                if( b != null )
+
+                var b = (UByteProperty) pkg.FindObject(Name, typeof(UByteProperty));
+                if (b != null)
                 {
                     EnumObject = b.EnumObject;
                 }
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string GetFriendlyType()
         {
             if (EnumObject != null)
             {
                 return $"{EnumObject.GetOuterName()}.{EnumObject.Name}";
             }
-            else
-                return "byte";
+
+            return "byte";
         }
     }
 }

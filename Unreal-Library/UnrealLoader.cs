@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
+using RLUPKT.Core;
 using UELib.Core;
 using UELib.Decoding;
 using UELib.Logging;
@@ -10,14 +10,15 @@ using UELib.Logging;
 namespace UELib
 {
     /// <summary>
-    /// Provides static methods for loading unreal packages.
+    ///     Provides static methods for loading unreal packages.
     /// </summary>
     public static class UnrealLoader
     {
         /// <summary>
-        /// Stored packages that were imported by certain objects. Kept here that in case re-use is necessary, that it will be loaded faster.
-        /// The packages and the list is closed and cleared by the main package that loaded them with ImportObjects().
-        /// In any other case the list needs to be cleared manually.
+        ///     Stored packages that were imported by certain objects. Kept here that in case re-use is necessary, that it will be
+        ///     loaded faster.
+        ///     The packages and the list is closed and cleared by the main package that loaded them with ImportObjects().
+        ///     In any other case the list needs to be cleared manually.
         /// </summary>
         private static readonly List<UnrealPackage> _CachedPackages = new List<UnrealPackage>();
 
@@ -25,6 +26,9 @@ namespace UELib
             new Dictionary<string, UnrealPackage>();
 
         private static readonly Dictionary<string, UStruct> _LoadedClasses = new Dictionary<string, UStruct>();
+
+        private static readonly Dictionary<Tuple<string, string>, UStruct> FindClassInPackageCache =
+            new Dictionary<Tuple<string, string>, UStruct>();
 
 
         private static UnrealPackage GetPreloadedPackage(string packageName)
@@ -37,18 +41,13 @@ namespace UELib
             return null;
         }
 
-        private static Dictionary<Tuple<String, String>, UStruct> FindClassInPackageCache =
-            new Dictionary<Tuple<string, string>, UStruct>();
-
         /// <summary>
-        /// Tries to find the given class in a preloaded package
-        /// Caches the results for some better performance
+        ///     Tries to find the given class in a preloaded package
+        ///     Caches the results for some better performance
         /// </summary>
         public static UStruct FindClassInPackage(string packageName, string className)
         {
-            #region memoization
-
-            var argTuple = Tuple.Create<string, string>(packageName, className);
+            var argTuple = Tuple.Create(packageName, className);
             UStruct cachedResults;
             FindClassInPackageCache.TryGetValue(argTuple, out cachedResults);
             if (cachedResults != null)
@@ -56,8 +55,6 @@ namespace UELib
                 Log.Info($"Used cached result for {packageName}:{className}");
                 return cachedResults;
             }
-
-            #endregion
 
             var package = GetPreloadedPackage(packageName);
             if (package == null)
@@ -67,10 +64,8 @@ namespace UELib
             }
 
             var foundClass = package.Objects.Find(o =>
-                String.Compare(o.Name, className, StringComparison.OrdinalIgnoreCase) == 0 && o.Class == null);
+                string.Compare(o.Name, className, StringComparison.OrdinalIgnoreCase) == 0 && o.Class == null);
             var foundStruct = foundClass as UStruct;
-
-            #region memoization
 
             if (foundStruct != null)
             {
@@ -81,14 +76,12 @@ namespace UELib
                 Log.Debug($"Did not find {className} in {packageName}");
             }
 
-            #endregion
-
             return foundStruct;
         }
 
         public static UStruct FindClassInCache(string className)
         {
-            _LoadedClasses.TryGetValue(className, out UStruct classObject);
+            _LoadedClasses.TryGetValue(className, out var classObject);
             if (classObject == null)
             {
                 Log.Debug($"Did not find {className} in cache");
@@ -113,8 +106,7 @@ namespace UELib
                     if (_LoadedClasses.ContainsKey(obj.Name))
                     {
                         _LoadedClasses[obj.Name] = (UStruct) obj;
-                        Log.Debug(
-                            $"{obj.Name} already in class cache. Overwriting with class from {package.FullPackageName} (What could go wrong right?");
+                        Log.Debug($"{obj.Name} already in class cache. Overwriting with class from {package.FullPackageName} (What could go wrong right?");
                     }
                     else
                     {
@@ -125,8 +117,8 @@ namespace UELib
         }
 
         /// <summary>
-        /// Loads the given file specified by PackagePath and
-        /// returns the serialized UnrealPackage.
+        ///     Loads the given file specified by PackagePath and
+        ///     returns the serialized UnrealPackage.
         /// </summary>
         public static UnrealPackage LoadPackage(string packagePath, FileAccess fileAccess = FileAccess.Read)
         {
@@ -143,7 +135,7 @@ namespace UELib
                 try
                 {
                     var rlStream = new RLPackageStream(packagePath);
-                    if (rlStream.decryptionState == RLUPKT.Core.DecryptionState.Success)
+                    if (rlStream.decryptionState == DecryptionState.Success)
                     {
                         stream = rlStream;
                     }
@@ -156,7 +148,7 @@ namespace UELib
                 }
                 catch (InvalidDataException e)
                 {
-                    stream = new UPackageStream(packagePath, FileMode.Open, fileAccess) {Position = 0};
+                    stream = new UPackageStream(packagePath, FileMode.Open, fileAccess) { Position = 0 };
                 }
             }
 
@@ -169,28 +161,30 @@ namespace UELib
         }
 
         /// <summary>
-        /// Loads the given file specified by PackagePath and
-        /// returns the serialized UnrealPackage.
+        ///     Loads the given file specified by PackagePath and
+        ///     returns the serialized UnrealPackage.
         /// </summary>
         public static UnrealPackage LoadPackage(string packagePath, IBufferDecoder decoder,
             FileAccess fileAccess = FileAccess.Read)
         {
             var stream = new UPackageStream(packagePath, FileMode.Open, fileAccess);
-            var package = new UnrealPackage(stream) {Decoder = decoder};
+            var package = new UnrealPackage(stream) { Decoder = decoder };
             package.Deserialize(stream);
 
             return package;
         }
 
         /// <summary>
-        /// Looks if the package is already loaded before by looking into the CachedPackages list first.
-        /// If it is not found then it loads the given file specified by PackagePath and returns the serialized UnrealPackage.
+        ///     Looks if the package is already loaded before by looking into the CachedPackages list first.
+        ///     If it is not found then it loads the given file specified by PackagePath and returns the serialized UnrealPackage.
         /// </summary>
         public static UnrealPackage LoadCachedPackage(string packagePath, FileAccess fileAccess = FileAccess.Read)
         {
             var package = _CachedPackages.Find(pkg => pkg.PackageName == Path.GetFileNameWithoutExtension(packagePath));
             if (package != null)
+            {
                 return package;
+            }
 
             package = LoadPackage(packagePath, fileAccess);
             if (package != null)
@@ -202,8 +196,8 @@ namespace UELib
         }
 
         /// <summary>
-        /// Loads the given file specified by PackagePath and
-        /// returns the serialized UnrealPackage with deserialized objects.
+        ///     Loads the given file specified by PackagePath and
+        ///     returns the serialized UnrealPackage with deserialized objects.
         /// </summary>
         public static UnrealPackage LoadFullPackage(string packagePath, FileAccess fileAccess = FileAccess.Read)
         {
@@ -215,7 +209,10 @@ namespace UELib
             }
 
             var package = LoadPackage(packagePath, fileAccess);
-            if (package == null) return null;
+            if (package == null)
+            {
+                return null;
+            }
 
             Log.Info($"[LoadFullPackage] Loading {packageName}");
             FullyLoadImportPackages(package, Path.GetDirectoryName(packagePath));
@@ -234,11 +231,18 @@ namespace UELib
                     .Select(i => i.ObjectName.ToString()).ToList();
             foreach (var depPackage in packagesToLoad)
             {
-                if (_LoadedPackages.ContainsKey(depPackage)) continue;
+                if (_LoadedPackages.ContainsKey(depPackage))
+                {
+                    continue;
+                }
+
                 var packagePath = Path.Combine(packageFolder, depPackage + ".upk");
-                if (!File.Exists(packagePath)) continue;
-                Log.Info(
-                    $"FullyLoadImportPackages: {package.PackageName} depends on {depPackage} loading it now!");
+                if (!File.Exists(packagePath))
+                {
+                    continue;
+                }
+
+                Log.Info($"FullyLoadImportPackages: {package.PackageName} depends on {depPackage} loading it now!");
                 LoadFullPackage(packagePath);
             }
         }

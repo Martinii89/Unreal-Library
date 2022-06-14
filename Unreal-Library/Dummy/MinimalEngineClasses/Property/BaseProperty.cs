@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Remoting.Messaging;
 using RLUPKT.Core.UTypes;
 
 namespace UELib.Dummy.Property
@@ -12,11 +11,9 @@ namespace UELib.Dummy.Property
         public int Size { get; set; }
         public int ArrayIndex { get; set; }
 
-        public bool IsObjectProperty() => Type.ToString() == "ObjectProperty";
-
-        public void Deserialize(BinaryReader Reader)
+        public void Deserialize(BinaryReader reader)
         {
-            var r = Reader as UnrealReader;
+            var r = reader as UnrealReader;
             if (r == null)
             {
                 throw new InvalidCastException("Reader was not a unrealreader");
@@ -30,8 +27,8 @@ namespace UELib.Dummy.Property
             }
 
             Type = stream.ReadNameReference();
-            Size = Reader.ReadInt32();
-            ArrayIndex = Reader.ReadInt32();
+            Size = reader.ReadInt32();
+            ArrayIndex = reader.ReadInt32();
             // TODO actually read the different values
             var typeName = Type.ToString();
             switch (typeName)
@@ -41,21 +38,26 @@ namespace UELib.Dummy.Property
                 case "StrProperty":
                 case "ObjectProperty":
                 case "NameProperty":
-                    Reader.BaseStream.Seek(Size, SeekOrigin.Current);
+                    reader.BaseStream.Seek(Size, SeekOrigin.Current);
                     break;
                 case "ArrayProperty":
-                    Reader.BaseStream.Seek(Size, SeekOrigin.Current);
+                    reader.BaseStream.Seek(Size, SeekOrigin.Current);
                     break;
                 case "BoolProperty":
-                    Reader.BaseStream.Seek(1, SeekOrigin.Current);
+                    reader.BaseStream.Seek(1, SeekOrigin.Current);
                     break;
                 case "ByteProperty":
                     // Two FNames
-                    Reader.BaseStream.Seek(16, SeekOrigin.Current);
+                    reader.BaseStream.Seek(16, SeekOrigin.Current);
                     break;
                 default:
                     throw new NotImplementedException($"offset for {typeName} is now implemented");
             }
+        }
+
+        public bool IsObjectProperty()
+        {
+            return Type.ToString() == "ObjectProperty";
         }
 
         public bool IsValid()

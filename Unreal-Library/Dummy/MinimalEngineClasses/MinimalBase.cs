@@ -9,21 +9,21 @@ namespace UELib.Dummy
 {
     internal abstract class MinimalBase
     {
-        protected MinimalBase(UExportTableItem exportTableItem, UnrealPackage package)
+        protected MinimalBase(IUExportTableItem exportTableItem, UnrealPackage package)
         {
             ExportTableItem = exportTableItem;
             Package = package;
         }
 
         protected abstract byte[] MinimalByteArray { get; }
-        protected UExportTableItem ExportTableItem { get; }
+        protected IUExportTableItem ExportTableItem { get; }
         protected UnrealPackage Package { get; }
 
         public long ScriptPropertiesEnd { get; private set; }
-
-        protected abstract void WriteSerialData(IUnrealStream stream, UnrealPackage package);
         public int SerialSize { get; private set; }
         public int SerialOffset { get; private set; }
+
+        protected abstract void WriteSerialData(IUnrealStream stream, UnrealPackage package);
 
         protected void ReadScriptProperties()
         {
@@ -83,7 +83,7 @@ namespace UELib.Dummy
             {
                 if (package.Names.All(o => o.Name != name))
                 {
-                    package.Names.Add(new UNameTableItem {Name = name, Flags = 1970393556451328, Index = package.Names.Count});
+                    package.Names.Add(new UNameTableItem { Name = name, Flags = 1970393556451328, Index = package.Names.Count });
                 }
             }
         }

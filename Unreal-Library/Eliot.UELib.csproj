@@ -180,11 +180,14 @@
     <Compile Include="Dummy\DummyExportTableItem.cs" />
     <Compile Include="Dummy\DummyFactory.cs" />
     <Compile Include="Dummy\DummyImportTableItem.cs" />
+    <Compile Include="Dummy\FakeExportItem.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\DefaultDummy.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\MinimalBase.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\LightMapTexture2D.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Material.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Property\BaseProperty.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Property\IntProperty.cs" />
+    <Compile Include="Dummy\MinimalEngineClasses\Property\PropertyListSerializer.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\SkeletalMesh.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\StaticMesh.cs" />
     <Compile Include="Dummy\MinimalEngineClasses\Structs\FBoxSphereBounds.cs" />
@@ -303,7 +306,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.None" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" />
+      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.None" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

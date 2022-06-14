@@ -6,53 +6,59 @@ using UELib.Core;
 namespace UELib
 {
     /// <summary>
-    /// Represents a unreal table with general deserialized data from a unreal package header.
+    ///     Represents a unreal table with general deserialized data from a unreal package header.
     /// </summary>
     public abstract class UObjectTableItem : UTableItem, IBuffered
     {
-        #region PreInitialized Members
         /// <summary>
-        /// Reference to the UnrealPackage this object resists in
+        ///     Reference to the serialized object based on this table.
+        ///     Only valid if Owner != null and Owner is fully serialized or on demand.
+        /// </summary>
+        public UObject Object;
+
+        /// <summary>
+        ///     Reference to the UnrealPackage this object resists in
         /// </summary>
         public UnrealPackage Owner;
 
         /// <summary>
-        /// Reference to the serialized object based on this table.
-        ///
-        /// Only valid if Owner != null and Owner is fully serialized or on demand.
+        ///     Name index to the name of this object
+        ///     -- Fixed
         /// </summary>
-        public UObject Object;
-        #endregion
+        [Pure] public UNameTableItem ObjectTable => Owner.Names[(int) ObjectName];
 
-        #region Serialized Members
-        /// <summary>
-        /// Name index to the name of this object
-        /// -- Fixed
-        /// </summary>
-        [Pure] public UNameTableItem ObjectTable { get { return Owner.Names[(int)ObjectName]; } }
-        public UName ObjectName;
+        public UName ObjectName { get; set; }
 
         /// <summary>
-        /// Import:Name index to the class of this object
-        /// Export:Object index to the class of this object
-        /// -- Not Fixed
+        ///     Import:Name index to the class of this object
+        ///     Export:Object index to the class of this object
+        ///     -- Not Fixed
         /// </summary>
-        ///  TODO: Fix at a later point. Focus on mesh data now!
+        /// TODO: Fix at a later point. Focus on mesh data now!
         public int ClassIndex { get; protected set; }
-        [Pure] public UObjectTableItem ClassTable { get { return Owner.GetIndexTable(ClassIndex); } }
-        [Pure] public virtual string ClassName { get { return ClassIndex != 0 ? Owner.GetIndexTable(ClassIndex).ObjectName : "class"; } }
+
+        [Pure] public UObjectTableItem ClassTable => Owner.GetIndexTable(ClassIndex);
+        [Pure] public virtual string ClassName => ClassIndex != 0 ? Owner.GetIndexTable(ClassIndex).ObjectName : "class";
 
         /// <summary>
-        /// Object index to the outer of this object
-        /// -- Not Fixed
+        ///     Object index to the outer of this object
+        ///     -- Not Fixed
         /// </summary>
-        ///  TODO: Fix at a later point. Focus on mesh data now!
+        /// TODO: Fix at a later point. Focus on mesh data now!
         public int OuterIndex { get; protected set; }
-        [Pure] public UObjectTableItem OuterTable { get { return Owner.GetIndexTable(OuterIndex); } }
-        [Pure] public string OuterName { get { var table = OuterTable; return table != null ? table.ObjectName : String.Empty; } }
-        #endregion
 
-        #region IBuffered
+
+        [Pure] public UObjectTableItem OuterTable => Owner.GetIndexTable(OuterIndex);
+
+        [Pure] public string OuterName
+        {
+            get
+            {
+                var table = OuterTable;
+                return table != null ? table.ObjectName : string.Empty;
+            }
+        }
+
         public virtual byte[] CopyBuffer()
         {
             var buff = new byte[Size];
@@ -62,6 +68,7 @@ namespace UELib
             {
                 Array.Reverse(buff);
             }
+
             return buff;
         }
 
@@ -88,6 +95,5 @@ namespace UELib
         {
             return fullName ? Owner.PackageName + "." + ObjectName + ".table" : ObjectName + ".table";
         }
-        #endregion
     }
 }
