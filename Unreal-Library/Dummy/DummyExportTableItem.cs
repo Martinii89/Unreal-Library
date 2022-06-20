@@ -23,6 +23,9 @@
             {
                 case "Package":
                     return 0x7000400000000;
+                case "AkSoundCue":
+                case "AkBank":
+                    return 0xF000400000400;
                 //case "Material":
                 //    return 0xF000400000400; // No thumbnail generation for materials
                 default:
