@@ -74,6 +74,8 @@ namespace UELib.Dummy
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
+        public static bool UseRealMeshData { get; set; } = true;
+
 
         public StaticMesh(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
@@ -147,8 +149,12 @@ namespace UELib.Dummy
 
         protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
-            //WriteMinimalBytes(stream, package);
-            //return;
+            if (!UseRealMeshData)
+            {
+                WriteMinimalBytes(stream, package);
+                return;
+            }
+
             package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
             var propertyBuffer = package.Stream.UR.ReadBytes((int) (PropertyEnd - ExportTableItem.SerialOffset));
             stream.Write(propertyBuffer, 0, propertyBuffer.Length);
@@ -168,52 +174,6 @@ namespace UELib.Dummy
             Lods.Serialize(stream);
 
             stream.Write(UnknownBytes, 0, UnknownBytes.Length);
-            return;
-
-            package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
-            var buffer = package.Stream.UR.ReadBytes(ExportTableItem.SerialSize);
-            stream.Write(buffer, 0, buffer.Length);
-            return;
-
-            //var startPos = stream.Position;
-            //_strProperty = new UName(package, "StrProperty");
-            //_intProperty = new UName(package, "IntProperty");
-
-            //var sourceFileTimestamp = new UName(package, "SourceFileTimestamp");
-            //var sourceFilePath = new UName(package, "SourceFilePath");
-            //var lightMapCoordinateIndex = new UName(package, "LightMapCoordinateIndex");
-            //var lightMapResolution = new UName(package, "LightMapResolution");
-
-
-            //stream.WriteSerialData(-1); //NetIndex
-            //WriteStrProperty(stream, sourceFileTimestamp, "2019-06-13 21:34:21");
-            //WriteStrProperty(stream, sourceFilePath, "d.fbx");
-            //WriteIntProperty(stream, lightMapCoordinateIndex, 1);
-            //WriteIntProperty(stream, lightMapResolution, 32);
-
-            //var none = new UName(package, "None");
-            //none.Serialize(stream);
-
-
-            //var bytesWritten = (int) (stream.Position - startPos);
-
-            //FixNameIndexAtPosition(package, "SourceFileTimestamp", 4);
-            //FixNameIndexAtPosition(package, "StrProperty", 12);
-
-            //FixNameIndexAtPosition(package, "SourceFilePath", 52);
-            //FixNameIndexAtPosition(package, "StrProperty", 60);
-
-            //FixNameIndexAtPosition(package, "LightMapCoordinateIndex", 86);
-            //FixNameIndexAtPosition(package, "IntProperty", 94);
-
-            //FixNameIndexAtPosition(package, "LightMapResolution", 114);
-            //FixNameIndexAtPosition(package, "IntProperty", 122);
-
-            //FixNameIndexAtPosition(package, "None", 142);
-
-
-            stream.Write(MeshData, 0, MeshData.Length);
-            //stream.WriteSerialData(MinimalByteArray, bytesWritten, SerialSize - bytesWritten);
         }
 
         private void WriteMinimalBytes(IUnrealStream stream, UnrealPackage package)

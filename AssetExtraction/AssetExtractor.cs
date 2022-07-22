@@ -174,11 +174,18 @@ namespace AssetExtraction
             return 0;
         }
 
-        public void ExportDummyAssets(string outputPath)
+        public void ExportDummyAssets(string outputPath, Options options)
         {
             var outputFile = Path.Combine(outputPath, package.PackageName + ".upk");
             var filePath = CreateFolderAndGetFullPath(outputFile);
-            RlDummyPackageStream packageSerializer = new RlDummyPackageStream(package, filePath);
+            var dummyOptions = new DummyOptions
+            {
+                LogObjectSizes = options.LogObjectSizes, 
+                RealMeshDataInDummy = options.RealMeshDataInDummy,
+                RealTextureDataInDummy = options.RealTextureDataInDummy, 
+                RealTextureDataMaxResInDummy = options.RealTextureDataMaxResInDummy
+            };
+            RlDummyPackageStream packageSerializer = new RlDummyPackageStream(package, filePath, dummyOptions);
             packageSerializer.Serialize();
         }
 

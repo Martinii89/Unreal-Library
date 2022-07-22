@@ -5,6 +5,15 @@ using System.Linq;
 
 namespace UELib.Dummy
 {
+
+    public class DummyOptions
+    {
+        public bool RealTextureDataInDummy { get; set; } = true;
+        public bool RealMeshDataInDummy { get; set; } = true;
+        public int RealTextureDataMaxResInDummy { get; set; } = 256;
+        public bool LogObjectSizes { get; set; } = false;
+    }
+
     public class RlDummyPackageStream : UPackageStream
     {
         private const int DummyPackageFlag = 1;
@@ -30,11 +39,19 @@ namespace UELib.Dummy
         private readonly DummyFactory _dummyFactory;
 
         private readonly UnrealPackage _package;
+        private readonly bool _logObjectSizes;
 
         //public uint Version { get; set; }
 
-        public RlDummyPackageStream(UnrealPackage package, string filePath)
+        public RlDummyPackageStream(UnrealPackage package, string filePath, DummyOptions options)
         {
+            Console.WriteLine($"Using real mesh data: {options.RealMeshDataInDummy}");
+            Console.WriteLine($"Using real texture data: {options.RealTextureDataInDummy}");
+            Console.WriteLine($"Using texture max res: {options.RealTextureDataMaxResInDummy}");
+            StaticMesh.UseRealMeshData = options.RealMeshDataInDummy;
+            Texture2D.UseRealTextureData = options.RealTextureDataInDummy;
+            Texture2D.RealTextureDataMaxRes = options.RealTextureDataMaxResInDummy;
+            _logObjectSizes = options.LogObjectSizes;
             _package = package;
             var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write);
             _stream = fileStream;
@@ -102,6 +119,14 @@ namespace UELib.Dummy
             WriteIntAtPosition((int) UW.BaseStream.Position, TotalHeaderSizePosition);
 
             SerializeExportSerialData(dummyExports);
+            if (_logObjectSizes)
+            {
+                for (var i = 0; i < exportsToSerialize.Count; i++)
+                {
+                    var export = exportsToSerialize[i].original;
+                    Console.WriteLine($"Object: {export.ClassName}.{export.ObjectName}\t\tSize:{dummyExports[i].SerialSize}");
+                }
+            }
 
             // Serialize export table again now that serial offsets and sizes are known
             UW.BaseStream.Seek(exportOffset, SeekOrigin.Begin);

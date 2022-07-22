@@ -93,6 +93,9 @@ namespace UELib.Dummy
         public FBulkData CachedFlashMips { get; set; } = new FBulkData();
         public Structs.TArray<Mip> CachedETCMips { get; set; } = new Structs.TArray<Mip>();
 
+        public static bool UseRealTextureData { get; set; } = true;
+        public static float RealTextureDataMaxRes { get; set; } = 256;
+
         public Texture2D(UExportTableItem exportTableItem, UnrealPackage package) : base(exportTableItem, package)
         {
             // TODO: Fix this later. focus on mesh data for now.
@@ -121,19 +124,19 @@ namespace UELib.Dummy
 
         protected override void WriteSerialData(IUnrealStream stream, UnrealPackage package)
         {
-            //WriteMinimalBytes(stream, package);
-            //return;
-            //TODO: Fix later. focus on mesh data now!
-            var startPos = stream.Position;
+            if (!UseRealTextureData)
+            {
+                WriteMinimalBytes(stream, package);
+                return;
+            }
+
             package.Stream.UR.BaseStream.Seek(ExportTableItem.SerialOffset, SeekOrigin.Begin);
             var propertyBuffer = package.Stream.UR.ReadBytes((int)(ScriptPropertiesEnd - ExportTableItem.SerialOffset));
             stream.Write(propertyBuffer, 0, propertyBuffer.Length);
 
-            //WriteSerialData the mesh data
-
             SourceArt.Serialize(stream);
             //CBA to read and decompress stuff form the TFC file
-            Mips.RemoveAll(m => m.Data.StoredInSeparateFile);
+            Mips.RemoveAll(m => m.Data.StoredInSeparateFile || m.SizeX > RealTextureDataMaxRes || m.SizeY > RealTextureDataMaxRes);
             Mips.Serialize(stream);
             TextureFileCacheGuid.Serialize(stream);
             CachedPVRTCMips.Serialize(stream);
@@ -142,8 +145,6 @@ namespace UELib.Dummy
             CachedFlashMips.Serialize(stream);
             CachedETCMips.Serialize(stream);
 
-            var endPos = stream.Position;
-            //Console.WriteLine($"Written {endPos - startPos} to TextureData");
         }
 
         private void WriteMinimalBytes(IUnrealStream stream, UnrealPackage package)

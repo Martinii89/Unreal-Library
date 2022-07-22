@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UELib;
+using UELib.Dummy;
 using UELib.Logging;
 
 namespace AssetExtraction
@@ -25,6 +26,18 @@ namespace AssetExtraction
 
         [Option("dummy", Default = false, Required = false, HelpText = "Should dummy package be outputted?")]
         public bool ExtractDummy { get; set; }
+
+        [Option("objectsizelog", Default = false, Required = false, HelpText = "Log out the size contribution for all objects")]
+        public bool LogObjectSizes { get; set; }
+
+        [Option("realmesh", Default = true, Required = false, HelpText = "Should dummy package contain real mesh data")]
+        public bool RealMeshDataInDummy { get; set; }
+
+        [Option("realtexture", Default = true, Required = false, HelpText = "Should dummy package contain real texture data")]
+        public bool RealTextureDataInDummy { get; set; }
+       
+        [Option("realtexturemaxres", Default = 256, Required = false, HelpText = "Max texture resolution to include in dummy packages")]
+        public int RealTextureDataMaxResInDummy { get; set; }
 
         [Option("dummyFolder", Required = false, HelpText = "Path to DUMMY output package folder. If not specified current working folder  + .dummy will be used")]
         public string dummyPackageFolder { get; set; }
@@ -77,6 +90,7 @@ namespace AssetExtraction
             {
                 return;
             }
+
             using (var logger = new MyFileLogger())
             {
                 Log.SetLogger(logger);
@@ -129,7 +143,7 @@ namespace AssetExtraction
                 {
                     outputDummyFolder = options.dummyPackageFolder;
                 }
-                assetExtractor.ExportDummyAssets(outputDummyFolder);
+                assetExtractor.ExportDummyAssets(outputDummyFolder, options);
             }
 
             string deserializationErrors = $"Total deserialization errors: {Log.DeserializationErrors}";
