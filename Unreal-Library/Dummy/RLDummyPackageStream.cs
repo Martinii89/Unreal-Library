@@ -121,10 +121,15 @@ namespace UELib.Dummy
             SerializeExportSerialData(dummyExports);
             if (_logObjectSizes)
             {
-                for (var i = 0; i < exportsToSerialize.Count; i++)
+                var pairs = exportsToSerialize.Select((t, i) => new Tuple<DummyExportTableItem, MinimalBase>(t, dummyExports[i])).ToList();
+                pairs.Sort((a,b) => a.Item2.SerialSize.CompareTo(b.Item2.SerialSize));
+                foreach (var pair in pairs)
                 {
-                    var export = exportsToSerialize[i].original;
-                    Console.WriteLine($"Object: {export.ClassName}.{export.ObjectName}\t\tSize:{dummyExports[i].SerialSize}");
+                    var export = pair.Item1.original;
+                    var dummyBase = pair.Item2;
+                    var name = $"{export.ClassName}.{export.ObjectName}";
+                    var right = $"{dummyBase.SerialSize} bytes";
+                    Console.WriteLine($"{name, -50}{right, 25}");
                 }
             }
 
